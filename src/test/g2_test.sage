@@ -68,24 +68,6 @@ def psi(P):
     y = onei * qi_y(iwsc * P[1])
     return Ell2(x, y)
 
-# psi for Jacobian coordinates
-def psi_z(P):
-    z = F2.random_element()
-    z2 = z^2
-    z3 = z^3
-    x = P[0] * z2
-    y = P[1] * z3
-    px = k_cx * qi_x(iwsc * x)
-    pz2 = qi_x(iwsc * z2)
-    py = k_cy * qi_y(iwsc * y)
-    pz3 = qi_y(iwsc * z3)
-    assert px / pz2 == onei * qi_x(iwsc * P[0])
-    assert py / pz3 == onei * qi_y(iwsc * P[1])
-    Z = pz2 * pz3
-    X = px * pz3 * Z
-    Y = py * pz2 * Z^2
-    return Ell2(X / Z^2, Y / Z^3)
-
 def clear_h2(P):
     pP = psi(P)
     pp2P = psi(psi(2 * P))
@@ -98,87 +80,17 @@ def init_iso2():
     if iso2 is None:
         iso2 = EllipticCurveIsogeny(Ell2p, [6 * (1 - X), 1], codomain=Ell2)
 
-def show_iso2_params():
-    # r, for converting iso parameters to Montgomery form
-    r = 0x577a659fcfa012ca7c515d98f1297bb09b09b42da0f73e037669f83a2090c7212e00cde6d2002b119d800000347fcb8
-    init_iso2()
-    for (coord, cmap) in zip(("x", "y"), iso2.rational_maps()):
-        for (name, val) in zip(("num", "den"), (cmap.numerator(), cmap.denominator())):
-            map_len = len(val.dict())
-            map_name = "ELLP2_%sMAP_%s_LEN" % (coord.upper(), name.upper())
-            print "#define %s %d" % (map_name, map_len)
-            print "const bint2_ty iso2_%s%s[%s] = {" % (coord, name, map_name)
-            for (idx, vec) in enumerate( e._vector_() for (_, e) in sorted(val.dict().items()) ):
-                print "    { ",
-                second_line = False
-                for tt in ( int(vv) for vv in vec ):
-                    tt = (tt * r) % p
-                    for _ in range(0, 7):
-                        h = (tt & ((1 << 56) - 1)).hex()
-                        h = ("0" * (14 - len(h))) + h
-                        print "0x%sLL, " % h,
-                        tt = tt >> 56
-                    if not second_line:
-                        print "\n      ",
-                        second_line = True
-                    else:
-                        print "},"
-            print "};\n"
-
 def JEll2(x1s, x1t, y1s, y1t, z1s, z1t, curve=Ell2):
     x = F2(x1s + X * x1t)
     y = F2(y1s + X * y1t)
     z = F2(z1s + X * z1t)
     return curve(x / z^2, y / z^3)
 
-def f2(x):
-    return F2(x ** 3 + 4 * (1 + X))
-
 def f2p(x):
     return F2(x ** 3 + Ell2p_a * x + Ell2p_b)
 
 def neg2(x):
     return half * (x + x.conjugate()) > (p-1)//2
-
-def sqrt_f2(x):
-    tmp = F2(x) ** ((p ** 2 + 7) // 16)
-
-    for fac in roots1:
-        t2 = fac * tmp
-        if t2 ** 2 == x:
-            return t2
-
-    return None
-
-def svdw2(t):
-    if t == 0:
-        x12val = 0
-    else:
-        x12val = F2(t ** 2) * sqrt(F2(-3 * u0_2 ** 2)) / F2(t ** 2 + f2(u0_2))
-
-    x1 = F2(cx1_2 - x12val)
-    x2 = F2(x12val - cx2_2)
-
-    if t == 0:
-        x3 = 0
-    else:
-        x3 = F2(u0_2) - F2((t ** 2 + f2(u0_2)) ** 2) / F2(3 * u0_2 ** 2 * t ** 2)
-
-    fx1 = f2(x1)
-    fx2 = f2(x2)
-    fx3 = f2(x3)
-
-    negate = -1 if neg2(t) else 1
-    if fx1.is_square():
-        y = sqrt_f2(fx1)
-        return Ell2(x1, y * negate)
-
-    if fx2.is_square():
-        y = sqrt_f2(fx2)
-        return Ell2(x2, y * negate)
-
-    y = sqrt_f2(fx3)
-    return Ell2(x3, y * negate)
 
 def swu2(t):
     NDcom = xi_2 ** 2 * t ** 4 + xi_2 * t ** 2
@@ -218,36 +130,10 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         usage()
 
-    if sys.argv[1] == "hac":
-        for (xs, xt, ys, yt, zs, zt) in ( eval(l) for l in sys.stdin.readlines() ):
-            JEll2(xs, xt, ys, yt, zs, zt)
-
-    elif sys.argv[1] == "1":
-        assert all( JEll2(xs, xt, ys, yt, zs, zt) == clear_h2(svdw2(F2(ts + X * tt)))
-                    for (ts, tt, xs, xt, ys, yt, zs, zt) in ( eval(l) for l in sys.stdin.readlines() ) )
-
-    elif sys.argv[1] == "2":
-        assert all( JEll2(x1s, x1t, y1s, y1t, z1s, z1t) == clear_h2(svdw2(F2(t1s + X * t1t)) + svdw2(F2(t2s + X * t2t)))
-                    for (t1s, t1t, t2s, t2t, x1s, x1t, y1s, y1t, z1s, z1t) in ( eval(l) for l in sys.stdin.readlines() ) )
-
-    elif sys.argv[1] == "rG":
-        assert all( JEll2(xs, xt, ys, yt, zs, zt) == clear_h2(svdw2(F2(ts + X * tt))) + r * g2Prime
-                    for (ts, tt, r, xs, xt, ys, yt, zs, zt) in ( eval(l) for l in sys.stdin.readlines() ) )
-
-    elif sys.argv[1] == "u1":
-        init_iso2()
-        assert all( JEll2(xs, xt, ys, yt, zs, zt) == clear_h2(iso2(swu2(F2(ts + X * tt))))
-                    for (xs, xt, ys, yt, zs, zt, ts, tt) in ( eval(l) for l in sys.stdin.readlines() ) )
-
     elif sys.argv[1] == "u2":
         init_iso2()
         assert all( JEll2(xs, xt, ys, yt, zs, zt) == clear_h2(iso2(swu2(F2(t1s + X * t1t)) + swu2(F2(t2s + X * t2t))))
                     for (xs, xt, ys, yt, zs, zt, t1s, t1t, t2s, t2t) in ( eval(l) for l in sys.stdin.readlines() ) )
-
-    elif sys.argv[1] == "urG":
-        init_iso2()
-        assert all( JEll2(xs, xt, ys, yt, zs, zt) == clear_h2(iso2(swu2(F2(ts + X * tt)))) + r * g2Prime
-                    for (xs, xt, ys, yt, zs, zt, ts, tt, r) in ( eval(l) for l in sys.stdin.readlines() ) )
 
     else:
         usage()

@@ -5,10 +5,10 @@
 set -e
 set -o pipefail
 
-if [ ! -z "$3" ]; then
-    NRUNS=$3
+if [ ! -z "$2" ]; then
+    NRUNS=$2
 else
     NRUNS=8192
 fi
 
-exec dd if=/dev/urandom bs=1M count=1 status=none | "$1" -n ${NRUNS} "-Tq$2"
+exec dd if=/dev/urandom bs=1M count=1 status=none | "$1" -n ${NRUNS} "-Tq"
