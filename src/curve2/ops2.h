@@ -7,7 +7,6 @@
 #include "bint2_consts.h"
 #include "fp2.h"
 
-#include <gmp.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -25,10 +24,6 @@ typedef struct jac_point2_s {
 // temp points for intermediate computations
 #define NUM_TMP_JP2 5
 extern jac_point2 jp2_tmp[NUM_TMP_JP2];
-
-// precomputation and multiexp
-void precomp2_finish(const jac_point2 *in);
-void addrG2_psi(const uint8_t *r, const bool constant_time);
 
 // curve ops
 void point2_add(jac_point2 *out, const jac_point2 *in1, const jac_point2 *in2);

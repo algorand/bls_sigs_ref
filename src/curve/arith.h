@@ -5,13 +5,9 @@
 #ifndef __bls_hash__src__curve__arith_h__
 
 #include <gmp.h>
-#include <stdbool.h>
 
 // forward declarations so we don't include globals.h here
 extern mpz_t fld_p;
-
-// sqrt(U/V) ; return whether we actually found a sqrt
-bool divsqrt(mpz_t out, mpz_t tmp, const mpz_t u, const mpz_t v, bool force);
 
 // in ^ 2 mod p
 static inline void sqr_modp(mpz_t out, const mpz_t in) {

@@ -4,72 +4,54 @@
 
 #include "arith2.h"
 
-#include "bint2.h"
+#include "curve2.h"
 #include "globals2.h"
 
-// inverse in Fp2
-void invert_modp2(mpz_t2 out, const mpz_t2 in) {
-    sqr_modp(mpz2_tmp[10]->s, in->s);                            // in->s ^ 2
-    sqr_modp(mpz2_tmp[10]->t, in->t);                            // in->t ^ 2
-    mpz_add(mpz2_tmp[10]->s, mpz2_tmp[10]->s, mpz2_tmp[10]->t);  // in->s ^ 2 + in->t ^ 2
+// square in fp2
+// out == in is OK
+static inline void sqr_modp2(mpz_t2 out, const mpz_t2 in) {
+    sqr_modp(mpz2mul[0]->s, in->s);  // square into tmp so that out==in is OK
+    sqr_modp(mpz2mul[0]->t, in->t);  // "
 
-    mpz_invert(mpz2_tmp[10]->t, mpz2_tmp[10]->s, fld_p);  // 1 / (in->s ^ 2 + in->t ^ 2)
+    mul_modp(out->t, in->s, in->t);
+    mpz_mul_2exp(out->t, out->t, 1);  // 2 * inS * inT
+    condsub_p(out->t);                // reduce mod p
 
-    mul_modp(out->s, in->s, mpz2_tmp[10]->t);  // in->s / (in->s ^ 2 + in->t ^ 2)
-    mul_modp(out->t, in->t, mpz2_tmp[10]->t);  // in->t / (in->s ^ 2 + in->t ^ 2)
-    mpz_sub(out->t, fld_p, out->t);            // -in->t / (in->s ^ 2 + in->t ^ 2)
+    mpz_sub(out->s, mpz2mul[0]->s, mpz2mul[0]->t);  // inS^2 - inT^2
+    condadd_p(out->s);                              // reduce mod p
 }
 
-bool sqrt_modp2(mpz_t2 out, const mpz_t2 in) {
-    bint2_ty tmp1, tmp2;
+// multiply in fp2
+// out == in1 or out == in2 is OK
+static inline void mul_modp2(mpz_t2 out, const mpz_t2 in1, const mpz_t2 in2) {
+    mul_modp(mpz2mul[0]->s, in1->s, in2->s);  // left- and right-mults
+    mul_modp(mpz2mul[0]->t, in1->t, in2->t);  // "
 
-    bint2_import_mpz2(tmp1, in);
-    const bool found = bint2_sqrt(tmp2, tmp1);
-    bint2_export_mpz2(out, tmp2);
+    mul_modp(mpz2mul[1]->s, in1->s, in2->t);  // cross1
+    mul_modp(mpz2mul[1]->t, in1->t, in2->s);  // cross2
 
-    return found;
+    mpz_sub(out->s, mpz2mul[0]->s, mpz2mul[0]->t);  // in1S in2S - in1T in2T
+    condadd_p(out->s);                              // reduce mod p
+
+    mpz_add(out->t, mpz2mul[1]->s, mpz2mul[1]->t);  // in1S in2T + in1T in2S
+    condsub_p(out->t);                              // reduce mod p
 }
 
-bool divsqrt_modp2(mpz_t2 out, const mpz_t2 u, const mpz_t2 v) {
-    bint2_ty tmp_out, tmp_u, tmp_v;
-
-    bint2_import_mpz2(tmp_u, u);
-    bint2_import_mpz2(tmp_v, v);
-    const bool found = bint2_divsqrt(tmp_out, tmp_u, tmp_v);
-    bint2_export_mpz2(out, tmp_out);
-
-    return found;
+// add in fp2
+static inline void mpz2_add(mpz_t2 out, const mpz_t2 in1, const mpz_t2 in2) {
+    mpz_add(out->s, in1->s, in2->s);
+    mpz_add(out->t, in1->t, in2->t);
 }
 
-int mpz2_legendre(const mpz_t2 in) {
-    mpz2_norm(mpz2mul[1], in);
-    return mpz_legendre(mpz2mul[1]->s, fld_p);
+// sub in fp2
+static inline void mpz2_sub(mpz_t2 out, const mpz_t2 in1, const mpz_t2 in2) {
+    mpz_sub(out->s, in1->s, in2->s);
+    mpz_sub(out->t, in1->t, in2->t);
 }
 
-bool check_fx2(mpz_t2 y, const mpz_t2 x, const bool negate, const bool force, const bool field_only) {
-    sqr_modp2(mpz2_tmp[10], x);                       // x^2
-    mul_modp2(mpz2_tmp[10], mpz2_tmp[10], x);         // x^3
-    mpz_add_ui(mpz2_tmp[10]->s, mpz2_tmp[10]->s, 4);  // x^3 + 4
-    mpz_add_ui(mpz2_tmp[10]->t, mpz2_tmp[10]->t, 4);  // x^3 + 4 * (1 + sqrt(-1))
-
-    // non-field-only case: if not forcing, check Legendre symbol
-    if (!field_only && !force && mpz2_legendre(mpz2_tmp[10]) != 1) {
-        // f(x) is not a residue
-        return false;
-    }
-
-    if (!sqrt_modp2(y, mpz2_tmp[10])) {
-        // did not find a sqrt
-        return false;
-    }
-
-    // fix up sign
-    if (negate) {
-        mpz_sub(y->s, fld_p, y->s);
-        mpz_sub(y->t, fld_p, y->t);
-    }
-
-    return true;
+// predicate: equals zero in fp2
+static inline bool mpz2_zero_p(const mpz_t2 in) {
+    return mpz_divisible_p(in->s, fld_p) && mpz_divisible_p(in->t, fld_p);
 }
 
 // returns true just if (x,y,z) is a point on Ell2

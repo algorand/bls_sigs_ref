@@ -11,48 +11,7 @@ const uint8_t BLS12_381_p[] = {
     0x1e, 0xab, 0xff, 0xfe, 0xb1, 0x53, 0xff, 0xff, 0xb9, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xaa, 0xab,
 };
 
-// 1 - z, parameter of BLS curve
-const uint8_t BLS12_381_zm1[] = {
-    0xd2, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01,
-};
-// z, parameter of BLS curve
+// -z, parameter of BLS curve
 const uint8_t BLS12_381_z[] = {
     0xd2, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
-};
-
-// base point G'
-// NOTE this is in Montgomery repr suitable for use with bint.
-const bint_ty g_prime_x = {
-    0x2a30064e34c56dLL, 0x3aa6a55dfeb22dLL, 0x450d6874c1a102LL, 0x83d18a9f4ac8c2LL,
-    0x0c3bb918f2486eLL, 0x806dbe57c6fc11LL, 0x00091321f4828aLL,
-};
-const bint_ty g_prime_y = {
-    0xd4765ae8b96829LL, 0x63f371895612abLL, 0xf2c99cf9caa880LL, 0xe72319c3567913LL,
-    0x2ddfc71c8ebc2fLL, 0x5a909fdcdc5999LL, 0x000a4f73e2948bLL,
-};
-const bint_ty g_prime_ll64_x = {
-    0x53798281bff04cLL, 0x3660d5b51eb468LL, 0x9f6d37711018d3LL, 0x9ae32b681f98bfLL,
-    0xaa40142d803622LL, 0x5a01295ccaff04LL, 0x00191c284cded1LL,
-};
-const bint_ty g_prime_ll64_y = {
-    0x47cca4e0d7c9bfLL, 0x5aeb6da3baa1e4LL, 0xb7de79122df25eLL, 0xf345aa1ddf8085LL,
-    0x5c0dd1a8ba473cLL, 0x9af24bc4063dd4LL, 0x0010e4edce0cb8LL,
-};
-
-// constants for the Shallue and van de Woestijne mapping
-const uint64_t Icx1[] = {
-    0x8a05fffffffcfffdLL, 0x9a47883a261e0006LL, 0x991afbb3b4e9c39aLL,
-    0x2f3d52163e2e67c0LL, 0x1d4c358f9e646af5LL, 0x0000000000000001LL,
-};
-const uint64_t Icx2[] = {
-    0x2ff900000002aab1LL, 0x846477c48b35fff9LL, 0xce15d6ed41c73289LL,
-    0x3539f96eb556aafeLL, 0x2dcf7226a4e741e2LL, 0x1a0111ea397fe699LL,
-};
-const uint64_t IsqrtM27[] = {
-    0x140bfffffff9fff7LL, 0x348f10744c3c000dLL, 0x3235f76769d38735LL,
-    0x5e7aa42c7c5ccf81LL, 0x3a986b1f3cc8d5eaLL, 0x0000000000000002LL,
-};
-const uint64_t IinvM27[] = {
-    0xe1b371c71c718b10LL, 0x4e79097a56dc4bd9LL, 0xb0e977c69aa27452LL,
-    0x761b0f37a1e26286LL, 0xfbf7043de3811ad0LL, 0x124c9ad43b6cf79bLL,
 };

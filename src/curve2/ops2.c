@@ -5,13 +5,8 @@
 #include "ops2.h"
 
 #include "bint2.h"
-#include "consts.h"
-#include "consts2.h"
 #include "globals2.h"
-#include "multiexp.h"
 #include "psi2.h"
-
-#include <string.h>
 
 void bint_set1(bint_ty out);  // from bint.h
 
@@ -185,47 +180,4 @@ void clear_h2_help(void) {
     psi2(jp2_tmp + 2, jp2_tmp + 4);                     // t2 = psi(2P)
     psi2(jp2_tmp + 2, jp2_tmp + 2);                     // t2 = psi(psi(2P))
     point2_add(jp2_tmp + 1, jp2_tmp + 1, jp2_tmp + 2);  // t1 = (x^2 - x - 1) P + (x - 1) psi(P) + psi(psi(2P))
-}
-
-// add two points together, clear cofactor, return result
-void add2_clear_h2(mpz_t2 X1, mpz_t2 Y1, mpz_t2 Z1, const mpz_t2 X2, const mpz_t2 Y2, const mpz_t2 Z2) {
-    to_jac_point2(jp2_tmp, X1, Y1, Z1);
-    to_jac_point2(jp2_tmp + 1, X2, Y2, Z2);
-    point2_add(jp2_tmp + 1, jp2_tmp + 1, jp2_tmp);
-    clear_h2_help();
-    from_jac_point2(X1, Y1, Z1, jp2_tmp + 1);
-}
-
-// just clear cofactor
-void clear_h2(mpz_t2 x, mpz_t2 y, mpz_t2 z) {
-    to_jac_point2(jp2_tmp + 1, x, y, z);
-    clear_h2_help();
-    from_jac_point2(x, y, z, jp2_tmp + 1);
-}
-
-// this macro defines the multiexp helper functions (see multiexp.h)
-BINT_MEXP(2, z, static inline, 3)
-
-// actual work of computing psi(P) + r G2
-void addrG2_psi(const uint8_t *r, const bool constant_time) {
-    point2_double(jp2_tmp + 4, jp2_tmp + 1);    // t4 = 2 P
-    clear_h2_chain(jp2_tmp, jp2_tmp + 1);       // t0 = -x P
-    point2_add(jp2_tmp, jp2_tmp, jp2_tmp + 1);  // t0 = (-x + 1) P
-    bint2_neg(jp2_tmp[1].Y, jp2_tmp[1].Y, 3);   // t1 = -P (NOTE: bup=3 because point2_add leaves Y unredc'd)
-    psi2(jp2_tmp + 2, jp2_tmp + 1);             // t2 = - psi(P)
-    point2_add(&bint2_precomp[1][0][0], jp2_tmp, jp2_tmp + 2);  // pc[1][0] = (-x + 1) P - psi(P)
-    precomp2_finish(NULL);                                      // multi-point table values
-    addrG2_clear_h2_help(r, constant_time);                     // t0 = (x^2 - x) P + x psi(P) + r G2
-    point2_add(jp2_tmp, jp2_tmp, jp2_tmp + 2);                  // t0 = (x^2 - x) P + (x - 1) psi(P) + r G2
-    point2_add(jp2_tmp + 1, jp2_tmp, jp2_tmp + 1);              // t1 = (x^2 - x - 1) P + (x - 1) psi(P) + r G2
-    psi2(jp2_tmp + 2, jp2_tmp + 4);                             // psi(2P)
-    psi2(jp2_tmp + 2, jp2_tmp + 2);                             // psi(psi(2P))
-    point2_add(jp2_tmp + 1, jp2_tmp + 1, jp2_tmp + 2);  // t1 = (x^2 - x - 1) P + (x - 1) psi(P) + psi(psi(2P)) + r G2
-}
-
-// compute Psi(inX, inY) + r * g2Prime
-void addrG2_clear_h2(mpz_t2 X, mpz_t2 Y, mpz_t2 Z, const uint8_t *r, const bool constant_time) {
-    to_jac_point2(jp2_tmp + 1, X, Y, Z);    // t1 = input
-    addrG2_psi(r, constant_time);           // psi(P) + r G2
-    from_jac_point2(X, Y, Z, jp2_tmp + 1);  // result
 }

@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
             next_modp(prng_ctx, u1);
         }
         next_modp(prng_ctx, u2);
-        swu_map2(x, y, z, u1, u2, opts.constant_time);
+        swu_map2(x, y, z, u1, u2);
 
         // show results
         //   test:              (xO, yO, zO, u1, u2)

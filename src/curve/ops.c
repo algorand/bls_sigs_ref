@@ -5,12 +5,7 @@
 #include "ops.h"
 
 #include "bint.h"
-#include "consts.h"
-#include "curve.h"
 #include "globals.h"
-#include "multiexp.h"
-
-#include <string.h>
 
 // **************************
 // BLS12-381 curve operations
@@ -102,7 +97,7 @@ jac_point jp_tmp[NUM_TMP_JP];
 
 // addition chain: Bos-Coster (win=2) : 70 links, 2 variables
 //
-// Mike Scott pointed out that, rather than multiplying by h = (u-1)^2/3,
+// Michael Scott pointed out that, rather than multiplying by h = (u-1)^2/3,
 // one can clear the cofactor simply by multiplying by (u-1).
 void clear_h_chain(jac_point *restrict out, const jac_point *restrict in) {
     point_double(out, in);
@@ -127,39 +122,4 @@ void clear_h_chain(jac_point *restrict out, const jac_point *restrict in) {
         point_double(out, out);
     }
     point_add(out, out, in);
-}
-
-// clear BLS12-381 cofactor
-void clear_h(mpz_t X, mpz_t Y, mpz_t Z) {
-    to_jac_point(jp_tmp + 1, X, Y, Z);
-    clear_h_chain(jp_tmp, jp_tmp + 1);
-    from_jac_point(X, Y, Z, jp_tmp);
-}
-
-// add 2 points together, then clear cofactor
-void add2_clear_h(mpz_t X1, mpz_t Y1, mpz_t Z1, const mpz_t X2, const mpz_t Y2, const mpz_t Z2) {
-    to_jac_point(jp_tmp, X1, Y1, Z1);
-    to_jac_point(jp_tmp + 1, X2, Y2, Z2);
-    point_add(jp_tmp + 1, jp_tmp + 1, jp_tmp);
-    clear_h_chain(jp_tmp, jp_tmp + 1);
-    from_jac_point(X1, Y1, Z1, jp_tmp);
-}
-
-// the below macro defines two functions:
-//   - precompute the fixed part of the table (based on G') for addrG
-//   - precompute the part of the addrG table that involves the input point
-//   - 2-point multiplication
-//     point 1 is (1 - z) * (X, Y)
-//     point 2 is r * G'
-// where (1 - z) is the BLS parameter for BLS12-381 and G' is an element of the order-q subgroup
-//
-// TODO(rsw): signed exponent recoding?
-BINT_MEXP(, zm1, , 1)
-
-// compute h*(inX, inY) + r*gPrime via multi-point multiplication
-void addrG_clear_h(mpz_t X, mpz_t Y, mpz_t Z, const uint8_t *r, const bool constant_time) {
-    to_jac_point(&bint_precomp[1][0][0], X, Y, Z);  // convert input point
-    precomp_finish(NULL);                           // precompute the values for the multi-point mult table
-    addrG_clear_h_help(r, constant_time);           // do the multi-point multiplication
-    from_jac_point(X, Y, Z, jp_tmp);                // convert result
 }

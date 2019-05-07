@@ -131,47 +131,6 @@ void bint2_export_mpz2(mpz_t2 out, const bint2_ty in) {
     bint_export_mpz(out->t, BINT_HI(in));
 }
 
-// helper --- check if tmp^2 == in, if so copy tmp to out and return true, else return false
-static inline bool _bint2_sqrt_help(bint2_ty out, const bint2_ty tmp, const bint2_ty in) {
-    bint2_ty work;
-
-    bint2_sqr(work, tmp);          // tmp^2
-    bint2_sub(work, in, work, 2);  // in - tmp^2
-
-    bint2_redc(work, work);  // partial reduction before checking equality with 0
-    const bool eq = bint2_eq0(work);
-    bint2_condassign(out, eq, tmp, out);
-
-    return eq;
-}
-
-// square root
-// compute in^((p+7)/16) and then check the four possibilities
-bool bint2_sqrt(bint2_ty_R out, bint2_ty_Rc in) {
-    bint2_ty tmp, tmp2;
-
-    // exponentiate
-    divsqrt_chain(tmp, in);   // in^((p-9)//16)
-    bint2_mul(tmp, tmp, in);  // in^((p+7)//16)
-
-    // test sqrtCand
-    bool found = _bint2_sqrt_help(out, tmp, in);
-
-    // test sqrt(-1) * sqrtCand
-    bint2_mul_i(tmp2, tmp, 2);
-    found = _bint2_sqrt_help(out, tmp2, in) | found;
-
-    // test sqrt(sqrt(-1)) * sqrtCand
-    bint2_mul(tmp2, tmp, sqrtConsts);
-    found = _bint2_sqrt_help(out, tmp2, in) | found;
-
-    // test sqrt(-sqrt(-1)) * sqrtCand
-    bint2_mul(tmp2, tmp, sqrtConsts + BINT_NWORDS);
-    found = _bint2_sqrt_help(out, tmp2, in) | found;
-
-    return found;
-}
-
 // helper --- check if tmp^2 * v == u, if so copy tmp to out and return true, else return false
 static inline bool _bint2_divsqrt_help(bint2_ty out, const bint2_ty tmp, const bint2_ty u, const bint2_ty v,
                                        const bool skip_assign) {

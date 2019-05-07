@@ -13,12 +13,6 @@
 #include <string.h>
 #include <unistd.h>
 
-// set supplied mpz_t to p-1, i.e., -1 mod p
-void mpz_set_pm1(mpz_t out) {
-    mpz_set(out, fld_p);
-    mpz_sub_ui(out, out, 1);
-}
-
 // hash stdin into an OpenSSL SHA256_CTX
 #define RDBUF_SIZE 4096
 void hash_stdin(SHA256_CTX *ctx) {
@@ -78,24 +72,9 @@ bool next_modp(EVP_CIPHER_CTX *cctx, mpz_t ret) {
     return b;
 }
 
-// return the next value with 128 bits from the PRNG represented by the supplied cipher context
-//
-// return value is pointer to static buffer containing bytes of value
-// (this is because the multiexp routine in curve/curve.c expects this format)
-//
-// Also, if out is not NULL, convert byte buffer to mpz_t (used for testing)
-uint8_t *next_128b(EVP_CIPHER_CTX *cctx, mpz_t *out) {
-    static uint8_t ret[2 * ZM1_LEN];
-    next_com(cctx, ret, 2 * ZM1_LEN);
-    if (out != NULL) {
-        mpz_import(*out, 2 * ZM1_LEN, 1, 1, 1, 0, ret);
-    }
-    return ret;
-}
-
 // process commandline options into a struct cmdline_opts
 struct cmdline_opts get_cmdline_opts(int argc, char **argv) {
-    struct cmdline_opts ret = {0, false, false, false, false, false};
+    struct cmdline_opts ret = {0, false, false, false};
     int opt_ret;
     bool found_err = false;
     while ((opt_ret = getopt(argc, argv, "n:qtTfc")) >= 0) {
@@ -116,14 +95,6 @@ struct cmdline_opts get_cmdline_opts(int argc, char **argv) {
                 ret.test2 = true;
                 break;
 
-            case 'f':
-                ret.field_only = true;
-                break;
-
-            case 'c':
-                ret.constant_time = true;
-                break;
-
             default:
                 found_err = true;
         }
@@ -132,7 +103,7 @@ struct cmdline_opts get_cmdline_opts(int argc, char **argv) {
         }
     }
     if (found_err || optind != argc) {
-        printf("Usage: %s [-n <npoints>] [-q] [-C] [-t] [-f] [-c]\n", argv[0]);
+        printf("Usage: %s [-n <npoints>] [-q] [-T] [-t]\n", argv[0]);
         exit(1);
     }
     if (ret.nreps == 0) {
