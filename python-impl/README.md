@@ -1,6 +1,6 @@
 # hash-to-curve pure Python implementation
 
-This directory contains an implementation of the optimized simplfied SWU map to G2 of BLS12-381, in pure python.
+This directory contains implementations of the optimized simplfied SWU maps to G1 and G2 of BLS12-381, in pure python.
 
 # license
 

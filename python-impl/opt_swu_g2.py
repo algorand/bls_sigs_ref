@@ -8,8 +8,8 @@ import sys
 if sys.version_info[0] < 3:
     raise RuntimeError("this script requires Python 3")
 
-from fields import Fq2, p
-from curve_ops import clear_h2, from_jacobian, point_add, to_jacobian
+from fields import Fq2, p                                                        # pylint: disable=wrong-import-position
+from curve_ops import clear_h2, eval_iso, from_jacobian, point_add, to_jacobian  # pylint: disable=wrong-import-position
 
 # distinguished non-square in Fp2 for SWU map
 xi_2 = Fq2(p, 1, 1)
@@ -121,15 +121,7 @@ yden = ( Fq2(p, 0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6
                 0x0) )
 # compute 3-isogeny map from Ell2' to Ell2
 def iso3(P):
-    (x, y) = P
-    mapvals = [None] * 4
-    # compute the numerator and denominator of the X and Y maps via Horner's rule
-    for (idx, coeffs) in enumerate((xnum, xden, ynum, yden)):
-        mapvals[idx] = coeffs[-1]
-        for coeff in reversed(coeffs[:-1]):
-            mapvals[idx] *= x
-            mapvals[idx] += coeff
-    return (mapvals[0] / mapvals[1], y * mapvals[2] / mapvals[3])
+    return eval_iso(P, (xnum, xden, ynum, yden))
 
 ###
 ## map from Fq2 element to point in G2 subgroup of Ell2

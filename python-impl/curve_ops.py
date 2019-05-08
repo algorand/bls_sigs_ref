@@ -64,6 +64,29 @@ def x_chain(P):
     return Q
 
 ###
+## Fast cofactor clearing for Ell1
+###
+def clear_h(P):
+    jP = to_jacobian(P)
+    xP = x_chain(jP)
+    return from_jacobian(point_add(xP, jP))
+
+###
+## Isogeny map evaluation specified by map_coeffs
+###
+# map_coeffs should be specified as (xnum, xden, ynum, yden)
+def eval_iso(P, map_coeffs):
+    (x, y) = P
+    mapvals = [None] * 4
+    # compute the numerator and denominator of the X and Y maps via Horner's rule
+    for (idx, coeffs) in enumerate(map_coeffs):
+        mapvals[idx] = coeffs[-1]
+        for coeff in reversed(coeffs[:-1]):
+            mapvals[idx] *= x
+            mapvals[idx] += coeff
+    return (mapvals[0] / mapvals[1], y * mapvals[2] / mapvals[3])
+
+###
 ## Fast cofactor clearing using the untwist-Frobenius-twist Endomorphism
 ###
 # We use the version given in section 4.1 of
