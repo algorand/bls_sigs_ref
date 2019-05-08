@@ -15,7 +15,16 @@ The main differences are:
 
 3. This implementation chooses the sign of the output points differently than in
    WB19, which eases interoperability by relaxing constraints on sqrt implementations.
-   TODO: add more details here.
+
+   In particular, WB19 Section 4 defines maps Map1: Fp -> Ell1 and Map2: Fp^2 -> Ell2.
+   Taking Map1 as an example (Map2 is analogous), the process is
+
+   1. map from Fp to Ell1', a curve isogenous to Ell1
+   2. evaluate the isogeny map to get a point on Ell1
+
+   The change is in step 1: the sign of the y-coordinate of the point on Ell1' should
+   match the sign of `u`, the argument to Map1. Here, a number `x` is regarded as "negative"
+   if `x` is lexically greater than `-1 * x`, otherwise it is positive.
 
 # License
 
