@@ -29,6 +29,18 @@ ev2 = 0x85fa8cd9105715e641892a0f9a4bb2912b58b8d32f26594c60679cc7973076dc6638358d
 etas = (Fq2(p, ev1, 0), Fq2(p, 0, ev1), Fq2(p, ev2, ev2), Fq2(p, ev2, p - ev2))
 del ev1, ev2
 
+# "sign" of x: returns -1 if x is the lexically larger of x and -1 * x, else returns 1
+def sgn0(x):
+    thresh = (p - 1) // 2
+    sign = 0
+    for xi in x:
+        if xi > thresh:
+            sign = -1 if sign == 0 else sign
+        elif xi > 0:
+            sign = 1 if sign == 0 else sign
+    sign = 1 if sign == 0 else sign
+    return sign
+
 ###
 ## Simplified SWU map, optimized and adapted to Ell2'
 ###
@@ -53,9 +65,10 @@ def osswu2_help(t):
     for root in roots_of_unity:
         y0 = sqrt_candidate * root
         if y0 ** 2 == gx0:
-            # found sqrt(g(X0(t))). Choose sign of y based on sign of t.
-            negate = -1 if t[0] > (p-1)//2 else 1
-            return (x0, negate * y0)
+            # found sqrt(g(X0(t))). force sign of y to equal sign of t
+            y0 = sgn0(y0) * sgn0(t) * y0
+            assert sgn0(y0) == sgn0(t)
+            return (x0, y0)
 
     # if we've gotten here, then g(X0(t)) is not square. convert srqt_candidate to sqrt(g(X1(t)))
     x1 = xi_2 * t ** 2 * x0
@@ -64,7 +77,9 @@ def osswu2_help(t):
     for eta in etas:
         y1 = eta * sqrt_candidate
         if y1 ** 2 == gx1:
-            # found sqrt(g(X1(t))). Sign of y is already correct, since we multiplied by t ** 3
+            # found sqrt(g(X1(t))). force sign of y to equal sign of t
+            y1 = sgn0(y1) * sgn0(t) * y1
+            assert sgn0(y1) == sgn0(t)
             return (x1, y1)
 
     # if we got here, something is wrong
