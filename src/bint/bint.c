@@ -8,7 +8,7 @@
 static inline int _bint_compare(const bint_ty ina, const bint_ty inb) {
     bool gt = false;
     bool eq = true;
-    for (int i = BINT_NWORDS - 1; i >= 0; i--) {
+    for (int i = BINT_NWORDS - 1; i >= 0; --i) {
         gt |= eq & (ina[i] > inb[i]);
         eq &= ina[i] == inb[i];
     }
@@ -44,6 +44,24 @@ static inline bool _bint_condsub_p_eq(bint_ty io, const bint_ty cmpval) {
 }
 
 bool bint_eq0(bint_ty io) { return _bint_condsub_p_eq(io, zero); }
+
+// returns 0 if zero, else returns 1 if positive, else returns -1
+int bint_cmp0(const bint_ty in) {
+    bint_ty tmp;
+    _bint_from_monty(tmp, in);
+
+    // simultaneously compare to pOver2 and zero
+    bool gt = false;
+    bool eq = true;
+    bool is_zero = true;
+    for (int i = BINT_NWORDS - 1; i >= 0; --i) {
+        gt |= eq & (tmp[i] > pOver2[i]);
+        eq &= tmp[i] == pOver2[i];
+        is_zero &= tmp[i] == 0;
+    }
+
+    return gt ? -1 : is_zero ? 0 : 1;
+}
 
 bool bint_is_neg(const bint_ty in) {
     bint_ty tmp;

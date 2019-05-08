@@ -10,6 +10,16 @@ bool bint2_eq0(bint2_ty io) {
     return bint_eq0(BINT_LO(io)) & bint_eq0(BINT_HI(io));
 }
 
+// is this value negative, i.e., is it lexically greater than -1 * in? (0 is not negative)
+bool bint2_is_neg(const bint2_ty in) {
+    const int absc_cmp0 = bint_cmp0(BINT_LO(in));       // first coord <=> 0
+    const bool ordn_is_neg = bint_is_neg(BINT_HI(in));  // is second coord neg?
+
+    // if abscissa is zero, in is negative just if the ordinate is negative
+    // otherwise, the sign is given by the abscissa
+    return (absc_cmp0 == 0) ? ordn_is_neg : (absc_cmp0 < 0);
+}
+
 // add
 void bint2_add(bint2_ty out, const bint2_ty ina, const bint2_ty inb) {
     bint_add(BINT_LO(out), BINT_LO(ina), BINT_LO(inb));

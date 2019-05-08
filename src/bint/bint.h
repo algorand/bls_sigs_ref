@@ -12,6 +12,7 @@
 
 bool bint_eq0(bint_ty io);
 void bint_set1(bint_ty out);
+int bint_cmp0(const bint_ty in);
 bool bint_is_neg(const bint_ty in);
 
 void bint_add(bint_ty out, const bint_ty ina, const bint_ty inb);
