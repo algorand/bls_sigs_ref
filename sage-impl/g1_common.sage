@@ -17,5 +17,5 @@ q = Ell.order() // h
 assert q == (ell_u**4 - ell_u**2 + 1)
 
 # the lexically larger of x and p-x is negative
-def is_negative(x):
-    return x > (p-1)//2
+def sgn0(x):
+    return -1 if x > (p - 1) // 2 else 1

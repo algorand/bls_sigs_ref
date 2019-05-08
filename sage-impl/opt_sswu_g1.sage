@@ -3,8 +3,9 @@
 #
 # (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
 
-from hash_to_base import *
-from utils import *
+import sys
+
+from hash_to_field import hash_to_field
 
 load("g1_common.sage")
 
@@ -22,8 +23,6 @@ EllP = EllipticCurve(F, [EllP_a, EllP_b])
 # the isogeny map
 iso = EllipticCurveIsogeny(EllP, kpoly, codomain=Ell, degree=11)
 iso.switch_sign()  # we use the isogeny with the opposite sign for y; the choice is arbitrary
-
-h2c_suite = "H2C-BLS12_381_1-SHA512-OSSWU-"
 
 # xi is the distinguished non-square for the SWU map
 xi_1 = F(-1)
@@ -49,48 +48,33 @@ def osswu_help(t):
 
     if sqrt_candidate ** 2 == gx0:
         # gx0 is square, and we found the square root
-        # negate y if t is negative
-        negate = -1 if is_negative(t) else 1
-        y0 = negate * sqrt_candidate
-        # (x0,y0) is a point on EllP; apply the 11-isogeny map to get back to Ell
-        return iso(EllP(x0, y0))
+        (x, y) = (x0, sqrt_candidate)
 
-    # if we got here, the g(X0(t)) was not square
-    # X1(t) == xi t^2 X0(t)
-    x1 = F(xi_1 * t ** 2 * x0)
+    else:
+        # g(X0(t)) is not square
+        # X1(t) == xi t^2 X0(t)
+        x1 = F(xi_1 * t ** 2 * x0)
+        # if g(X0(t)) is not square, then sqrt(g(X1(t))) == t^3 * g(X0(t)) ^ ((p+1)/4)
+        y1 = sqrt_candidate * t ** 3
+        (x, y) = (x1, y1)
 
-    # if g(X0(t)) is not square, then sqrt(g(X1(t))) == t^3 * g(X0(t)) ^ ((p+1)/4)
-    # don't need to negate y1 because t^3 preserves the sign of t
-    y1 = sqrt_candidate * t ** 3
-    assert y1 ** 2 == g1p(x1)
-    return iso(EllP(x1, y1))
+    # set sign of y equal to sign of t
+    y = sgn0(y) * sgn0(t) * y
+    assert y ** 2 == g1p(x)
+    assert sgn0(y) == sgn0(t)
+    return EllP(x, y)
 
-# map from a string, optionally clearing the cofactor
-def map2curve_osswu(alpha, clear=False):
-    t = F(h2b_from_label(h2c_suite, alpha))
-    P = osswu_help(t)
-    if clear:
-        tv("t ", t, 48)
-        return (ell_u - 1) * P
-    return P
+# map from a string
+def map2curve_osswu(alpha):
+    t1 = F(hash_to_field(alpha, 1, p, 1)[0])
+    t2 = F(hash_to_field(alpha, 2, p, 1)[0])
+    P = osswu_help(t1)
+    P2 = osswu_help(t2)
+    return (1 - ell_u) * iso(P + P2)
 
 if __name__ == "__main__":
-    enable_debug()
-    print "## Optimized Simplified SWU to BLS12-381 G1"
-    for alpha in map2curve_alphas:
-        tv_text("alpha", pprint_hex(alpha))
-    for alpha in map2curve_alphas:
-        print "\n~~~"
-        print("Input:")
-        print("")
-        tv_text("alpha", pprint_hex(alpha))
-        print("")
-        P = map2curve_osswu(alpha, False)
-        Pc = map2curve_osswu(alpha, True)
-        assert P * (ell_u - 1) == Pc  # make sure that Pc is correct relative to P
-        assert Pc * q == Ell(0,1,0)   # make sure that Pc is of the correct order
-        print("Output:")
-        print("")
-        tv("x", Pc[0], 48)
-        tv("y", Pc[1], 48)
-        print "~~~"
+    for arg in sys.argv[1:]:
+        msg_to_hash = chr(1) + arg
+        P = map2curve_osswu(msg_to_hash)
+        assert P * q == Ell(0, 1, 0)  # make sure P is of the correct order
+        print "(%s, %s)" % (hex(int(P[0])), hex(int(P[1])))

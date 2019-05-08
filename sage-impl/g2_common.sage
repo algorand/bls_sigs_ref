@@ -7,10 +7,18 @@
 
 load("g1_common.sage")
 
-del is_negative
-# we define an element to be negative if its first coordinate in the canonical power basis is negative
-def is_negative(x):
-    return x._vector_()[0] > (p-1) // 2
+del sgn0
+# an element x is negative just when it is lexically larger than -1 * x
+def sgn0(x):
+    sign = 0
+    thresh = (p - 1) // 2
+    for v in x._vector_():
+        if v > thresh:
+            sign = -1 if sign == 0 else sign
+        elif v > 0:
+            sign = 1 if sign == 0 else sign
+    sign = 1 if sign == 0 else sign
+    return sign
 
 # BLS12-381 G2 curve
 F2.<X> = GF(p^2, modulus=[1, 0, 1])

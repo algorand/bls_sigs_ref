@@ -3,8 +3,9 @@
 #
 # (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
 
-from hash_to_base import *
-from utils import *
+import sys
+
+from hash_to_field import hash_to_field
 
 load("g2_common.sage")
 
@@ -14,8 +15,6 @@ Ell2p_b = F2(1012 * (1 + X))
 Ell2p = EllipticCurve(F2, [Ell2p_a, Ell2p_b])
 # isogeny map back to Ell2
 iso2 = EllipticCurveIsogeny(Ell2p, [6 * (1 - X), 1], codomain=Ell2)
-
-h2c_suite = "H2C-BLS12_381_2-SHA512-OSSWU-"
 
 # xi is the distinguished non-square for the SWU map
 xi_2 = F2(1 + X)
@@ -51,10 +50,9 @@ def osswu2_help(t):
     for root_of_unity in roots1:
         y0_candidate = sqrt_candidate * root_of_unity
         if y0_candidate ** 2 == gx0:
-            # found y0
-            negate = -1 if is_negative(t) else 1
-            y0 = y0_candidate * negate
-            return iso2(Ell2p(x0, y0))
+            y0 = sgn0(t) * sgn0(y0_candidate) * y0_candidate
+            assert sgn0(y0) == sgn0(t)
+            return Ell2p(x0, y0)
 
     # if we got here, the g(X0(t)) was not square
     # X1(t) == xi t^2 X0(t), g(X1(t)) = xi^2 t^6 X0(t)
@@ -66,48 +64,29 @@ def osswu2_help(t):
     for eta_value in etas:
         y1_candidate = sqrt_candidate * eta_value * t ** 3
         if y1_candidate ** 2 == gx1:
-            # found y1
-            # don't need to negate because t^3 preserves the sign of t
-            y1 = y1_candidate
-            return iso2(Ell2p(x1, y1))
+            y1 = sgn0(t) * sgn0(y1_candidate) * y1_candidate
+            return Ell2p(x1, y1)
 
     # if we got here, something went very wrong
     assert False, "osswu2_help failed"
 
-# map from a string, optionally clearing the cofactor
-def map2curve_osswu2(alpha, clear=False):
-    # XXX how do we actually want to handle hashing to an element of Fp2?
-    t1 = h2b_from_label(h2c_suite + "coord1", alpha)
-    t2 = h2b_from_label(h2c_suite + "coord2", alpha)
-    t = F2(t1 + X * t2)
-    P = osswu2_help(t)
-    if clear:
-        tv("t1 ", t1, 48)
-        tv("t2 ", t2, 48)
-        return clear_h2(P)
-    return P
+# F2 elm from vector of F elms
+def from_vec(v):
+    return F2(v[0] + X * v[1])
+
+# map from a string
+def map2curve_osswu2(alpha):
+    t1 = from_vec(hash_to_field(alpha, 1, p, 2))
+    t2 = from_vec(hash_to_field(alpha, 2, p, 2))
+    P = osswu2_help(t1)
+    P2 = osswu2_help(t2)
+    return clear_h2(iso2(P + P2))
 
 if __name__ == "__main__":
-    enable_debug()
-    print "## Optimized Simplified SWU to BLS12-381 G2"
-    for alpha in map2curve_alphas:
-        tv_text("alpha", pprint_hex(alpha))
-    for alpha in map2curve_alphas:
-        print "\n~~~"
-        print("Input:")
-        print("")
-        tv_text("alpha", pprint_hex(alpha))
-        print("")
-        P = map2curve_osswu2(alpha, False)
-        Pc = map2curve_osswu2(alpha, True)
-        assert P * h2 * (3 * ell_u ** 2 - 3) == Pc  # make sure fast cofactor clear method worked
-        assert Pc * q == Ell2(0,1,0)                # make sure that Pc is of the correct order
-        print("Output:")
-        print("")
-        vec = Pc[0]._vector_()
-        tv("x1 ", vec[0], 48)
-        tv("x2 ", vec[1], 48)
-        vec = Pc[1]._vector_()
-        tv("y1 ", vec[0], 48)
-        tv("y2 ", vec[1], 48)
-        print "~~~"
+    for arg in sys.argv[1:]:
+        msg_to_hash = chr(2) + arg
+        P = map2curve_osswu2(msg_to_hash)
+        assert P * q == Ell2(0, 1, 0)  # make sure P is of the correct order
+        p0v = P[0]._vector_()
+        p1v = P[1]._vector_()
+        print "(%s + X * %s, %s + X * %s)" % (hex(int(p0v[0])), hex(int(p0v[1])), hex(int(p1v[0])), hex(int(p1v[1])))
