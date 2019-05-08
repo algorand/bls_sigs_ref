@@ -47,6 +47,7 @@
 static inline void swu_help_ct(const unsigned jp_num, const mpz_t u) {
     // mpz to bint
     bint_import_mpz(bint_tmp[10], u);
+    const bool u_neg = bint_is_neg(bint_tmp[10]);  // save off sign of u
 
     // compute numerator and denominator of X0(u)
     bint_sqr(bint_tmp[0], bint_tmp[10]);                 // u^2                                 v = 2   w = 1
@@ -78,10 +79,6 @@ static inline void swu_help_ct(const unsigned jp_num, const mpz_t u) {
     // compute sqrt(bint_tmp[4] / bint_tmp[3])
     const bool x0_good = bint_divsqrt(bint_tmp[5], bint_tmp[4], bint_tmp[3], false);  //        v = 2   w = 1
 
-    // compute value for the case that x0 was good, y needs to be negative
-    const bool u_neg = bint_is_neg(bint_tmp[10]);
-    bint_neg(bint_tmp[8], bint_tmp[5], 1);  // -sqrtCand                                        v = 2   w = 2
-
     // compute values for the case that x0 was bad
     bint_mul(bint_tmp[6], bint_tmp[5], bint_tmp[0]);   // u^2 * sqrtCand                        v = 2   w = 1
     bint_mul(bint_tmp[6], bint_tmp[6], bint_tmp[10]);  // u^3 * sqrtCand                        v = 2   w = 1
@@ -89,9 +86,13 @@ static inline void swu_help_ct(const unsigned jp_num, const mpz_t u) {
     bint_neg(bint_tmp[7], bint_tmp[7], 1);             // -b u^2 (u^4 - u^2 + 1)                v = 2   w = 2
 
     // now choose the right values for x and y
-    bint_condassign(bint_tmp[5], u_neg, bint_tmp[8], bint_tmp[5]);    // Sgn0(u) * sqrtCand     v = 2   w = 2
-    bint_condassign(bint_tmp[5], x0_good, bint_tmp[5], bint_tmp[6]);  // y =  yu^3 if !x0_good  v = 2   w = 2
+    bint_condassign(bint_tmp[5], x0_good, bint_tmp[5], bint_tmp[6]);  // y =  yu^3 if !x0_good  v = 2   w = 1
     bint_condassign(bint_tmp[2], x0_good, bint_tmp[2], bint_tmp[7]);  // x = -xu^2 if !x0_good  v = 2   w = 2
+
+    // fix sign of y
+    const bool y_neg = bint_is_neg(bint_tmp[5]);                            // sign of y
+    bint_neg(bint_tmp[8], bint_tmp[5], 1);                                  // -y               v = 2   w = 2
+    bint_condassign(bint_tmp[5], y_neg ^ u_neg, bint_tmp[8], bint_tmp[5]);  // -y if sign of u and y disagree
 
     // compute X, Y, Z
     bint_mul(jp_tmp[jp_num].X, bint_tmp[2], bint_tmp[1]);  // x = X / Z^2                       v = 2   w = 1

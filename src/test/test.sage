@@ -40,6 +40,9 @@ def JEll(x, y, z):
     else:
         return Ell(F(x)/F(z^2), F(y)/F(z^3))
 
+def sgn0(x):
+    return -1 if x > (p - 1) // 2 else 1
+
 def swu(u):
     if u in (p-1, 0, 1):
         x0 = -EllP_b / EllP_a
@@ -49,10 +52,13 @@ def swu(u):
     sqrtCand = pow(gx0, (p+1)//4, p)
 
     if F(sqrtCand^2) == gx0:
-        negate = 1 if u < (p + 1) // 2 else -1
-        return EllP(x0, sqrtCand * negate)
+        (x, y) = (x0, sqrtCand)
+    else:
+        (x, y) = (F(-u^2 * x0), F(u^3 * sqrtCand))
 
-    return EllP(F(-u^2 * x0), F(u^3 * sqrtCand))
+    y = sgn0(y) * sgn0(u) * y
+    assert sgn0(y) == sgn0(u)
+    return EllP(x, y)
 
 def usage():
     print("Usage: %s <type>\n<type> is one of 'hac', '1', '2', 'rG', 'u1', 'u2', 'urG'\n")
