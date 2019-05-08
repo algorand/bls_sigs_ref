@@ -9,6 +9,7 @@
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #define CHECK_CRYPTO(C)                                                                        \
     do {                                                                                       \
@@ -28,9 +29,8 @@ struct cmdline_opts {
 struct cmdline_opts get_cmdline_opts(int argc, char **argv);
 
 // hashing to Fp
-void hash_stdin(SHA256_CTX *ctx);
-void next_prng(EVP_CIPHER_CTX *cctx, const SHA256_CTX *hctx, uint32_t idx);
-bool next_modp(EVP_CIPHER_CTX *cctx, mpz_t ret);
+void hash_stdin(uint8_t *digest, uint8_t csuite_val);
+void hash_to_field_idx(uint8_t *digest, size_t digest_len, uint8_t ctr, uint8_t vec_idx, mpz_t ret);
 
 #define __bls_hash__src__util__util_h__
 #endif  // __bls_hash__src__util__util_h__
