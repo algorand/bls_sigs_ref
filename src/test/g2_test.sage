@@ -89,8 +89,16 @@ def JEll2(x1s, x1t, y1s, y1t, z1s, z1t, curve=Ell2):
 def f2p(x):
     return F2(x ** 3 + Ell2p_a * x + Ell2p_b)
 
-def neg2(x):
-    return half * (x + x.conjugate()) > (p-1)//2
+def sgn0(x):
+    sign = 0
+    thresh = (p - 1) // 2
+    for v in x._vector_():
+        if v > thresh:
+            sign = -1 if sign == 0 else sign
+        elif v > 0:
+            sign = 1 if sign == 0 else sign
+    sign = 1 if sign == 0 else sign
+    return sign
 
 def swu2(t):
     NDcom = xi_2 ** 2 * t ** 4 + xi_2 * t ** 2
@@ -98,7 +106,6 @@ def swu2(t):
         x0 = Ell2p_b / (xi_2 * Ell2p_a)
     else:
         x0 = -Ell2p_b * (NDcom + 1) / (Ell2p_a * NDcom)
-    negate = -1 if neg2(t) else 1
 
     fx0 = f2p(x0)
     x1 = xi_2 * t ** 2 * x0
@@ -107,19 +114,19 @@ def swu2(t):
     xval = None
     yval = None
     sqrtCand = fx0 ** ((p ** 2 + 7) // 16)
-    for (facs, targ, xv, tv, tneg) in ((roots1, fx0, x0, 1, negate), (eta, fx1, x1, t ** 3, 1)):
+    for (facs, targ, xv, tv) in ((roots1, fx0, x0, 1), (eta, fx1, x1, t ** 3)):
         for fac in facs:
             t2 = fac * sqrtCand * tv
             if t2 ** 2 == targ:
-                yval = t2 * tneg
+                yval = sgn0(t2) * sgn0(t) * t2
                 xval = xv
                 break
 
         if yval is not None:
             break
 
-    assert yval is not None and xval is not None, "qwer"
-
+    assert yval is not None and xval is not None, "ERROR: did not find value in swu2"
+    assert sgn0(yval) == sgn0(t)
     return Ell2p(xval, yval)
 
 def usage():

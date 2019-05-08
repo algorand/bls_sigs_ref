@@ -15,7 +15,8 @@ extern bint_ty bint_one;
 // S-vdW-Ulas simplified map
 // see ../curve/swu.c and ../../paper/ for more info
 static inline void swu2_help_ct(const unsigned jp_num, const mpz_t2 u) {
-    bint2_import_mpz2(bint2_tmp[10], u);  // import u                                                   v2,w1,i2/1
+    bint2_import_mpz2(bint2_tmp[10], u);             // import u                                        v2,w1,i2/1
+    const bool u_neg = bint2_is_neg(bint2_tmp[10]);  // save off sign of u
 
     // numerator and denominator of X0(u)
     bint2_sqr(bint2_tmp[11], bint2_tmp[10]);                // u^2                                      v4,w3,i16/9
@@ -49,10 +50,6 @@ static inline void swu2_help_ct(const unsigned jp_num, const mpz_t2 u) {
     // compute sqrtCand ?= sqrt(bint2_tmp[4] / bint2_tmp[3])
     const bool x0_good = bint2_divsqrt(bint2_tmp[5], bint2_tmp[4], bint2_tmp[3]);  // sqrtCand          v4,w3,i144/81
 
-    // compute value for the case that x0 was good and y needs to be negative
-    const bool u_neg = bint_is_neg(bint2_tmp[10]);
-    bint2_neg(bint2_tmp[8], bint2_tmp[5], 2);  // -sqrtCand                                             v4,w4,i4/4
-
     // compute value for the case that x0 was bad
     bint2_mul(bint2_tmp[13], bint2_tmp[2], bint2_tmp[0]);    // xi u^2 num                              v4,w3,i16/9
     bint2_mul(bint2_tmp[7], bint2_tmp[7], bint2_tmp[4]);     // xi^2 u^4 U                              v4,w3,i48/27
@@ -77,9 +74,13 @@ static inline void swu2_help_ct(const unsigned jp_num, const mpz_t2 u) {
 #undef try_eta
 
     // choose correct values for X and Y
-    bint2_condassign(bint2_tmp[5], u_neg, bint2_tmp[8], bint2_tmp[5]);     // Sgn0(u) * sqrtCand            v4,w4,i4/4
     bint2_condassign(bint2_tmp[5], x0_good, bint2_tmp[5], bint2_tmp[10]);  // y = u^3 eta sqCand if !x0g    v4,w3,i4/3
     bint2_condassign(bint2_tmp[2], x0_good, bint2_tmp[2], bint2_tmp[13]);  // x = xi u^2 x if !x0g          v4,w3,i4/3
+
+    // fix sign of y
+    const bool y_neg = bint2_is_neg(bint2_tmp[5]);                              // sgn0(y)
+    bint2_neg(bint2_tmp[8], bint2_tmp[5], 2);                                   // -y                       v4,w4,i4/4
+    bint2_condassign(bint2_tmp[5], y_neg ^ u_neg, bint2_tmp[8], bint2_tmp[5]);  // -y if sign of u and y disagree
 
     // compute X, Y, Z
     bint2_mul(jp2_tmp[jp_num].X, bint2_tmp[2], jp2_tmp[jp_num].Z);  // X = num * den => X/den^2 = num/den   v4,w3,i16/9
