@@ -8,8 +8,9 @@ import sys
 if sys.version_info[0] < 3:
     raise RuntimeError("this script requires Python 3")
 
-from fields import Fq2, p                                                        # pylint: disable=wrong-import-position
 from curve_ops import clear_h2, eval_iso, from_jacobian, point_add, to_jacobian  # pylint: disable=wrong-import-position
+from fields import Fq2, p                                                        # pylint: disable=wrong-import-position
+from hash_to_field import Hp2                                                    # pylint: disable=wrong-import-position
 
 # distinguished non-square in Fp2 for SWU map
 xi_2 = Fq2(p, 1, 1)
@@ -158,4 +159,12 @@ def run_tests():
         assert P[0] ** 3 + Fq2(p, 4, 4) == P[1] ** 2
 
 if __name__ == "__main__":
-    run_tests()
+    if len(sys.argv) == 1:
+        run_tests()
+    else:
+        ciphersuite = bytes([2])
+        msg_to_hash = ciphersuite + sys.argv[1].encode('utf-8')
+        t1 = Fq2(p, *Hp2(msg_to_hash, 1))
+        t2 = Fq2(p, *Hp2(msg_to_hash, 2))
+        P = opt_swu2_map(t1, t2)
+        print(P)
