@@ -45,13 +45,3 @@ def hash_to_field(msg, ctr, modulus, m, hash_fn=sha256, hash_reps=2):
             t = t + hash_fn(msg_prime + I2OSP(i + 1, 1) + I2OSP(j + 1, 1)).digest()
         rets[i] = OS2IP(t) % modulus
     return rets
-
-def Hp(msg, ctr):
-    if not isinstance(msg, str):
-        raise ValueError("Hp can't hash anything but strings")
-    return hash_to_field(msg, ctr, p, 1)
-
-def Hp2(msg, ctr):
-    if not isinstance(msg, str):
-        raise ValueError("Hp2 can't hash anything but strings")
-    return hash_to_field(msg, ctr, p, 2)

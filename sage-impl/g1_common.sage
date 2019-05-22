@@ -5,6 +5,8 @@
 #
 # common routines and definitions for G1
 
+from util import print_iv
+
 # BLS12-381 G1 curve
 ell_u = -0xd201000000010000
 p = 0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab
@@ -34,3 +36,13 @@ def sgn0(x):
     for xi in xi_values:
         sign = select_sign(-2 * (xi > thresh) + (xi > 0))
     return select_sign(1)
+
+# print out a point on g1
+def print_g1_hex(P, margin=8):
+    print " " * margin + " x = 0x%x" % int(P[0])
+    print " " * margin + " y = 0x%x" % int(P[1])
+
+# print an intermediate value comprising a point on g1
+def print_iv_g1(P, name, fn):
+    print_iv(None, name, fn, False)
+    print_g1_hex(P)

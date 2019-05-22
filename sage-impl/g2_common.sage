@@ -5,6 +5,9 @@
 #
 # common routines and definitions for G2
 
+from util import print_iv
+
+# BLS12-381 G1 curve
 load("g1_common.sage")
 
 # BLS12-381 G2 curve
@@ -65,3 +68,18 @@ def clear_h2(P):
     ret += _BP_ClearH_G2.psi(_BP_ClearH_G2.psi(2 * P))
     assert ret == P * h2 * (3 * ell_u ** 2 - 3)
     return ret
+
+# print out a point on g2
+def print_g2_hex(P, margin=8):
+    xx = ZZR(P[0])
+    print " " * margin + "x0 = 0x%x" % int(xx[0])
+    print " " * margin + "x1 = 0x%x" % int(xx[1])
+
+    yy = ZZR(P[1])
+    print " " * margin + "y0 = 0x%x" % int(yy[0])
+    print " " * margin + "y1 = 0x%x" % int(yy[1])
+
+# print an intermediate value comprising a point on g2
+def print_iv_g2(P, name, fn):
+    print_iv(None, name, fn, False)
+    print_g2_hex(P)
