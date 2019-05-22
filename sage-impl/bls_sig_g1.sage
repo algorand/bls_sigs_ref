@@ -28,9 +28,6 @@ def sign(x_prime, msg, ciphersuite):
 
     # hash the concatenation of the (one-byte) ciphersuite and the message
     msg_to_hash = "%c%s" % (ciphersuite, msg)
-    print_iv(msg_to_hash, "msg to hash", "sign", False)
-
-    # hash to the curve
     P = map2curve_osswu(msg_to_hash)
     print_iv_g1(P, "hash to E1", "sign")
 

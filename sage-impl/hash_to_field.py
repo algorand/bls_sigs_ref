@@ -39,6 +39,8 @@ def OS2IP(octets, skip_assert=False):
 
 # hash_to_field generates an unbiased element of GF(p^m)
 def hash_to_field(msg, ctr, modulus, m, hash_fn=sha256, hash_reps=2):
+    print_iv(msg, "msg to hash", "hash_to_field", False)
+
     msg_prime = hash_fn(msg).digest() + I2OSP(ctr, 1)
     print_iv(msg_prime, "m'", "hash_to_field", False)
 
