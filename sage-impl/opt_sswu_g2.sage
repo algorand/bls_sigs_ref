@@ -14,7 +14,12 @@ Ell2p_a = F2(240 * X)
 Ell2p_b = F2(1012 * (1 + X))
 Ell2p = EllipticCurve(F2, [Ell2p_a, Ell2p_b])
 # isogeny map back to Ell2
-iso2 = EllipticCurveIsogeny(Ell2p, [6 * (1 - X), 1], codomain=Ell2)
+# since this takes a while to compute, save it in a file and reload it from disk
+try:
+    iso2 = load("iso_g2")
+except:
+    iso2 = EllipticCurveIsogeny(Ell2p, [6 * (1 - X), 1], codomain=Ell2)
+    iso2.dump("iso_g2", True)
 
 # xi is the distinguished non-square for the SWU map
 xi_2 = F2(1 + X)

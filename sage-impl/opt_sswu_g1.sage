@@ -21,8 +21,13 @@ kpoly = [ 0x133341fb0962a34cb0504a9c4fada0a5090d38679b4c040d5d1c3afb023a3409fcc0
         ]
 EllP = EllipticCurve(F, [EllP_a, EllP_b])
 # the isogeny map
-iso = EllipticCurveIsogeny(EllP, kpoly, codomain=Ell, degree=11)
-iso.switch_sign()  # we use the isogeny with the opposite sign for y; the choice is arbitrary
+# since this takes a while to compute, save it in a file and reload it from disk
+try:
+    iso = load("iso_g1")
+except:
+    iso = EllipticCurveIsogeny(EllP, kpoly, codomain=Ell, degree=11)
+    iso.switch_sign()  # we use the isogeny with the opposite sign for y; the choice is arbitrary
+    iso.dump("iso_g1", True)
 
 # xi is the distinguished non-square for the SWU map
 xi_1 = F(-1)
