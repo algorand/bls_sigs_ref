@@ -21,8 +21,8 @@ del g_x, g_y
 
 def print_test_vector(sk, msg, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig_fn):
     # generate the keys and the signature
-    (_, pk) = keygen_fn(sk, True)
-    sig = sign_fn(sk, msg, ciphersuite)
+    (x_prime, pk) = keygen_fn(sk, True)
+    sig = sign_fn(x_prime, msg, ciphersuite)
 
     # output the test vector
     print "\n================== begin test vector ===================="
@@ -52,4 +52,4 @@ def print_test_vector(sk, msg, ciphersuite, sign_fn, keygen_fn, print_pk_fn, pri
     print "signature:   "
     print_sig_fn(sig)
 
-    print "==================  end test vector  ====================\n"
+    print "==================  end test vector  ===================="

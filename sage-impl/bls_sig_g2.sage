@@ -21,13 +21,10 @@ def keygen(sk, output_pk=True):
 
 # signing algorithm as in
 #     https://github.com/pairingwg/bls_standard/blob/master/minutes/spec-v1.md#basic-signature-in-g2
-# sign takes in sk as byte[32], a message, and a ciphersuite id
+# sign takes in x_prime (the output of keygen), a message, and a ciphersuite id
 # returns a signature in G2
-def sign(sk, msg, ciphersuite):
+def sign(x_prime, msg, ciphersuite):
     print_iv(msg, "input msg", "sign", True)
-
-    # get the secret value x' by running keygen
-    (x_prime, _) = keygen(sk, False)
 
     # hash the concatenation of the (one-byte) ciphersuite and the message
     msg_to_hash = "%c%s" % (ciphersuite, msg)
