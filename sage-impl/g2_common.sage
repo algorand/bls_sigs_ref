@@ -43,13 +43,13 @@ class _BP_ClearH_G2(object):
     # shortcut for evaluating untwist without resorting to Fp12 arithmetic --- X coordinate
     @classmethod
     def qi_x(cls, x):
-        vec = x._vector_()
+        vec = ZZR(x)
         return F2(cls.k_qi_x * (vec[0] - X * vec[1]))
 
     # shortcut for evaluating untwist without resorting to Fp12 arithmetic --- Y coordinate
     @classmethod
     def qi_y(cls, y):
-        vec = y._vector_()
+        vec = ZZR(y)
         return cls.k_qi_y * F2(vec[0] + vec[1] + X * (vec[0] - vec[1]))
 
     # shortcut untwist-Frobenius-twist

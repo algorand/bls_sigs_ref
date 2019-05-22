@@ -92,6 +92,6 @@ if __name__ == "__main__":
         msg_to_hash = chr(2) + arg
         P = map2curve_osswu2(msg_to_hash)
         assert P * q == Ell2(0, 1, 0)  # make sure P is of the correct order
-        p0v = P[0]._vector_()
-        p1v = P[1]._vector_()
+        p0v = ZZR(P[0])
+        p1v = ZZR(P[1])
         print "(%s + X * %s, %s + X * %s)" % (hex(int(p0v[0])), hex(int(p0v[1])), hex(int(p1v[0])), hex(int(p1v[1])))
