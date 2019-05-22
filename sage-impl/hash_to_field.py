@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 #
 # (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
 #

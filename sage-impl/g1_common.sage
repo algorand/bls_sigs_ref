@@ -16,13 +16,12 @@ assert Ell.order() % h == 0
 q = Ell.order() // h
 assert q == (ell_u**4 - ell_u**2 + 1)
 
+# convenient and fast way of converting field elements to vectors
+ZZR.<XX> = PolynomialRing(ZZ)
+
 # the lexically greater of x and p-x is negative
 def sgn0(x):
-    # is this the base field or the field extension?
-    if x.parent().degree() == 1:
-        xi_values = (x,)
-    else:
-        xi_values = x._vector_()
+    xi_values = ZZR(x)
 
     # return sign if sign is nonzero, else return sign_i
     sign = 0
