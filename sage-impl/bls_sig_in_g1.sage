@@ -10,7 +10,7 @@ from hash_to_field import hash_to_field
 from util import print_iv, print_value
 
 load("opt_sswu_g1.sage")
-load("bls_sig_consts.sage")
+load("bls_sig_common.sage")
 
 # keygen takes in sk as byte[32] and outputs the secrete exponent and the public key in G2
 def keygen(sk, output_pk=True):
@@ -45,38 +45,4 @@ if __name__ == "__main__":
     ciphersuite = 1  # ciphersuite is 1 for BLS sig in G1
     msg = "the message to be signed"
     sk =  "11223344556677889900112233445566"
-
-    # generate the keys and the signature
-    (_, pk) = keygen(sk, True)
-    sig = sign(sk, msg, ciphersuite)
-
-    # output the test vectors
-    print "\n" * 3,
-    print "================== start of test vectors ===================="
-    print "==================    signature in G1    ===================="
-
-    print "g1 generator:"
-    print_g1_hex(g1gen)
-
-    print "g2 generator:"
-    print_g2_hex(g2gen)
-
-    # XXX(rsw) do we need this?
-    #print "g2 generator, IETF encoding:"
-    #print_g2_hex_ieft(g2gen)
-
-    print "group order: 0x%x" % q
-    print "ciphersuite: 0x%x" % ciphersuite
-    print "message:    ",
-    print_value(msg, True)
-
-    print "sk:         ",
-    print_value(sk, True)
-
-    print "public key:  "
-    print_g2_hex(pk)
-
-    print "signature:   "
-    print_g1_hex(sig)
-
-    print "==================  end of test vectors  ===================="
+    print_test_vector(sk, msg, ciphersuite, sign, keygen, print_g2_hex, print_g1_hex)

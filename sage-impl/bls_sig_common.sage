@@ -18,3 +18,38 @@ g_y = F2(0x0ce5d527727d6e118cc9cdc6da2e351aadfd9baa8cbdd3a76d429a695160d12c923ac
          0x0606c4a02ea734cc32acd2b02bc28b99cb3e287e85a763af267492ab572e99ab3f370d275cec1da1aaa9075ff05f79be * X)
 g2gen = Ell2(g_x, g_y)
 del g_x, g_y
+
+def print_test_vector(sk, msg, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig_fn):
+    # generate the keys and the signature
+    (_, pk) = keygen_fn(sk, True)
+    sig = sign_fn(sk, msg, ciphersuite)
+
+    # output the test vector
+    print "\n================== begin test vector ===================="
+    print "==================  signature in G2  ===================="
+
+    print "g1 generator:"
+    print_g1_hex(g1gen)
+
+    print "g2 generator:"
+    print_g2_hex(g2gen)
+
+    # XXX(rsw) do we need this?
+    #print "g2 generator, IETF encoding:"
+    #print_g2_hex_ieft(g2gen)
+
+    print "group order: 0x%x" % q
+    print "ciphersuite: 0x%x" % ciphersuite
+    print "message:    ",
+    print_value(msg, True)
+
+    print "sk:         ",
+    print_value(sk, True)
+
+    print "public key:  "
+    print_pk_fn(pk)
+
+    print "signature:   "
+    print_sig_fn(sig)
+
+    print "==================  end test vector  ====================\n"
