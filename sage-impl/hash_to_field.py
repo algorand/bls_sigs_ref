@@ -11,6 +11,8 @@ import sys
 if sys.version_info[0] != 2:
     raise RuntimeError("this code is geared toward Python2/Sage, not Python3")
 
+from util import print_iv
+
 # defined in RFC 3447, section 4.1
 def I2OSP(val, length):
     val = int(val)
@@ -37,11 +39,20 @@ def OS2IP(octets, skip_assert=False):
 
 # hash_to_field generates an unbiased element of GF(p^m)
 def hash_to_field(msg, ctr, modulus, m, hash_fn=sha256, hash_reps=2):
-    rets = [None] * m
     msg_prime = hash_fn(msg).digest() + I2OSP(ctr, 1)
+    print_iv(msg_prime, "m'", "hash_to_field", False)
+
+    rets = [None] * m
     for i in range(0, m):
         t = ""
         for j in range(0, hash_reps):
-            t = t + hash_fn(msg_prime + I2OSP(i + 1, 1) + I2OSP(j + 1, 1)).digest()
+            hash_input = msg_prime + I2OSP(i + 1, 1) + I2OSP(j + 1, 1)
+            print_iv(hash_input, "hash_input (%d, %d)" % (i + 1, j + 1), "hash_to_field", False)
+            t += hash_fn(hash_input).digest()
+
+        print_iv(t, "t", "hash_to_field", False)
+
         rets[i] = OS2IP(t) % modulus
+        print_iv(rets[i], "rets[%d]" % i, "hash_to_field", False)
+
     return rets

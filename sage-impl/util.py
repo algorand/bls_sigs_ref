@@ -10,7 +10,7 @@ if sys.version_info[0] != 2:
     raise RuntimeError("this code is geared toward Python2/Sage, not Python3")
 
 def print_iv(iv, name, fn, show_ascii, indent=8):
-    sys.stdout.write("[intermed. value: %6s()] %12s =\n" % (fn, name))
+    sys.stdout.write("[intermed. value: %s()] %s =\n" % (fn, name))
     if iv is not None:
         print_value(iv, show_ascii, indent, False)
 
