@@ -5,6 +5,8 @@
 #
 # consts for BLS signatures, adapted from Zhenfei Zhang's 'poc_v1' implementation
 
+import sys
+
 load("g2_common.sage")
 
 # generator of G1
@@ -26,7 +28,6 @@ def print_test_vector(sk, msg, ciphersuite, sign_fn, keygen_fn, print_pk_fn, pri
 
     # output the test vector
     print "\n================== begin test vector ===================="
-    print "==================  signature in G2  ===================="
 
     print "g1 generator:"
     print_g1_hex(g1gen)
@@ -40,11 +41,12 @@ def print_test_vector(sk, msg, ciphersuite, sign_fn, keygen_fn, print_pk_fn, pri
 
     print "group order: 0x%x" % q
     print "ciphersuite: 0x%x" % ciphersuite
-    print "message:    ",
-    print_value(msg, True)
 
-    print "sk:         ",
-    print_value(sk, True)
+    sys.stdout.write("message:     ")
+    print_value(msg, True, 13, True)
+
+    sys.stdout.write("sk:          ")
+    print_value(sk, True, 13, True)
 
     print "public key:  "
     print_pk_fn(pk)
