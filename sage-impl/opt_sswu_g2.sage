@@ -47,7 +47,7 @@ def osswu2_help(t):
     # check whether gx0 is square by computing gx0 ^ ((p+1)/4)
     sqrt_candidate = gx0 ** ((p**2 + 7) // 16)
     # the square root will be given by sqrt_candidate times a root of unity; check them all
-    for root_of_unity in roots1:
+    for root_of_unity in roots_of_unity:
         y0_candidate = sqrt_candidate * root_of_unity
         if y0_candidate ** 2 == gx0:
             y0 = sgn0(t) * sgn0(y0_candidate) * y0_candidate

@@ -16,6 +16,22 @@ assert Ell.order() % h == 0
 q = Ell.order() // h
 assert q == (ell_u**4 - ell_u**2 + 1)
 
-# the lexically larger of x and p-x is negative
+# the lexically greater of x and p-x is negative
 def sgn0(x):
-    return -1 if x > (p - 1) // 2 else 1
+    # is this the base field or the field extension?
+    if x.parent().degree() == 1:
+        xi_values = (x,)
+    else:
+        xi_values = x._vector_()
+
+    # return sign if sign is nonzero, else return sign_i
+    sign = 0
+    def select_sign(sign_i):
+        sign_sq = sign * sign  # 1 if sign is nonzero, else 0
+        return (1 - sign_sq) * sign_i + sign_sq * sign
+
+    # walk through each element of the vector repr of x to find the sign
+    thresh = (x.base_ring().order() - 1) // 2
+    for xi in xi_values:
+        sign = select_sign(-2 * (xi > thresh) + (xi > 0))
+    return select_sign(1)
