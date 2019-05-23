@@ -1,8 +1,8 @@
 #!/usr/bin/env sage
 # vim: syntax=python
 #
-# (C) Zhenfei Zhang <zhenfei@algorand.com>
-# some modification and tidying by Riad S. Wahby <rsw@cs.stanford.edu>
+# (C) Riad S. Wahby <rsw@cs.stanford.edu>
+# based on an implementation by Zhenfei Zhang <zhenfei@algorand.com>
 
 from hashlib import sha256
 import sys

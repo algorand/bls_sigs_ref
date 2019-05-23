@@ -32,8 +32,6 @@ after which you can execute any of the four programs.
 
 # license
 
-Except as noted at the top of individual files, this code is
-
 (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
 
 See the license in the toplevel directory of this repository.
