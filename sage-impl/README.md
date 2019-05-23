@@ -16,17 +16,19 @@ To get started, you must precompile the .sage files:
 
 after which you can execute any of the four programs.
 
-`opt_sswu_g1.sage` and `opt_sswu_g2.sage` are used as follows:
+`opt_sswu_g1.sage` and `opt_sswu_g2.sage` hash messages to G1 and G2, respectively.
 
     sage opt_sswu_g1.sage [-d] [msg ...]
 
-`-d` enables verbose debug output. All other parameters are hashed to a point, and the results are displayed.
-
-`bls_sig_g1.sage` and `bls_sig_g2.sage` are used as follows:
+`bls_sig_g1.sage` and `bls_sig_g2.sage` sign messages in G1 and G2, respectively.
 
     sage bls_sig_g1.sage [-d] [-k secret_key] [msg ...]
 
-`-d` enables verbose debug output. `-k` sets the secret key to use for signing. All other parameters are signed, and the results displayed.
+- `-d` enables verbose debug output.
+
+- `-k` sets the secret key (used only when signing).
+
+- All other arguments are interpreted as messages to be hashed or signed.
 
 # license
 
