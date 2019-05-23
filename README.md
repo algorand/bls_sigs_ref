@@ -1,20 +1,22 @@
 # BLS signatures hash to BLS12-381 reference impls
 
-This repository contains reference implementations of the BLS12-381 hashes to G1 and G2.
+This repository contains reference implementations of hash functions to BLS12-381 G1 and G2.
+
+Full BLS signatures implementations are WIP.
 
 **Note: this code is WIP.**
 
-This code is based on [bls12-381_hash](https://github.com/kwantam/bls12-381_hash).
+This code started as a fork of [bls12-381_hash](https://github.com/kwantam/bls12-381_hash).
 The main differences are:
 
-1. This implementation hashes to base field elements using hash_to_field specified
+1. This implementation hashes to base field elements using `hash_to_field` specified
    in the [BLS standards WG v1 spec](https://github.com/pairingwg/bls_standard/blob/master/minutes/spec-v1.md)
 
 2. This implementation includes *only* constant-time, indifferentiable hashes to
    G1 and G2 based on Constructions #2 and #5 of [WB19](https://bls-hash.crypto.fyi).
 
 3. This implementation chooses the sign of the output points differently than in
-   WB19, which eases interoperability by relaxing constraints on sqrt implementations.
+   WB19, with the goal of easing interoperability by relaxing constraints on sqrt implementations.
 
    In particular, WB19 Section 4 defines maps Map1: Fp -> Ell1 and Map2: Fp^2 -> Ell2.
    Taking Map1 as an example (Map2 is analogous), the process is
