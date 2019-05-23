@@ -4,12 +4,24 @@
 #
 # Utilities for BLS signatures Sage reference impl
 
+import getopt
 import struct
 import sys
 if sys.version_info[0] != 2:
     raise RuntimeError("this code is geared toward Python2/Sage, not Python3")
 
+DEBUG = False
+
+def is_debug():
+    return DEBUG
+
+def enable_debug():
+    global DEBUG
+    DEBUG = True
+
 def print_iv(iv, name, fn, show_ascii, indent=8):
+    if not DEBUG:
+        return
     sys.stdout.write("[%s() intermediate value] %s =\n" % (fn, name))
     if iv is not None:
         print_value(iv, show_ascii, indent, False)
@@ -39,3 +51,29 @@ def print_value(iv, show_ascii, indent=8, skip_first=False):
         sys.stdout.write("\n%s[ascii: '%s']\n" % (indent_string, iv))
     else:
         sys.stdout.write("\n")
+
+def get_cmdline_options():
+    sk = "11223344556677889900112233445566"
+    msgs = ["the message to be signed"]
+
+    try:
+        (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:d")
+    except getopt.GetoptError as err:
+        print "Usage: %s [-k key] [msg ...]"
+        print str(err)
+        sys.exit(1)
+
+    for (opt, arg) in opts:
+        if opt == "-k":
+            sk = arg
+
+        elif opt == "-d":
+            enable_debug()
+
+        else:
+            raise RuntimeError("got unexpected option %s from getopt" % opt)
+
+    if args:
+        msgs = args
+
+    return (sk, msgs)

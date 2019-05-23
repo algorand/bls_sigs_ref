@@ -7,7 +7,9 @@
 
 import sys
 
-load("g2_common.sage")
+from util import print_value
+from __sage__g1_common import Ell, q, print_g1_hex
+from __sage__g2_common import Ell2, F2, X, print_g2_hex
 
 # generator of G1
 g_x = 0x17f1d3a73197d7942695638c4fa9ac0fc3688c4f9774b905a14e3a3f171bac586c55e83ff97a1aeffb3af00adb22c6bb
@@ -27,7 +29,7 @@ def print_test_vector(sk, msg, ciphersuite, sign_fn, keygen_fn, print_pk_fn, pri
     sig = sign_fn(x_prime, msg, ciphersuite)
 
     # output the test vector
-    print "\n================== begin test vector ===================="
+    print "================== begin test vector ===================="
 
     print "g1 generator:"
     print_g1_hex(g1gen)

@@ -5,10 +5,8 @@
 #
 # common routines and definitions for G2
 
-from util import print_iv
-
-# BLS12-381 G1 curve
-load("g1_common.sage")
+from util import print_iv, is_debug
+from __sage__g1_common import ZZR, ell_u, p, q
 
 # BLS12-381 G2 curve
 F2.<X> = GF(p^2, modulus=[1, 0, 1])
@@ -81,5 +79,7 @@ def print_g2_hex(P, margin=8):
 
 # print an intermediate value comprising a point on g2
 def print_iv_g2(P, name, fn):
+    if not is_debug():
+        return
     print_iv(None, name, fn, False)
     print_g2_hex(P)

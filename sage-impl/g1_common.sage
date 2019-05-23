@@ -5,7 +5,7 @@
 #
 # common routines and definitions for G1
 
-from util import print_iv
+from util import print_iv, is_debug
 
 # BLS12-381 G1 curve
 ell_u = -0xd201000000010000
@@ -44,5 +44,7 @@ def print_g1_hex(P, margin=8):
 
 # print an intermediate value comprising a point on g1
 def print_iv_g1(P, name, fn):
+    if not is_debug():
+        return
     print_iv(None, name, fn, False)
     print_g1_hex(P)

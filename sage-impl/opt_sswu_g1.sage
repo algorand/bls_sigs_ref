@@ -6,8 +6,10 @@
 import sys
 
 from hash_to_field import hash_to_field
-
-load("g1_common.sage")
+try:
+    from __sage__g1_common import Ell, F, ell_u, p, q, sgn0
+except ImportError:
+    sys.exit("Can't find preprocessed sage files. Try running `make pyfiles`")
 
 # 11-isogenous curve Ell'
 EllP_a = F(0x144698a3b8e9433d693a02c96d4982b0ea985383ee66a8d8e8981aefd881ac98936f8da0e0f97f5cf428082d584c1d)
@@ -78,7 +80,8 @@ def map2curve_osswu(alpha):
     return (1 - ell_u) * iso(P + P2)
 
 if __name__ == "__main__":
-    for arg in sys.argv[1:]:
+    args = sys.argv[1:] if len(sys.argv) > 1 else ["asdf"]
+    for arg in args:
         msg_to_hash = chr(1) + arg
         P = map2curve_osswu(msg_to_hash)
         assert P * q == Ell(0, 1, 0)  # make sure P is of the correct order

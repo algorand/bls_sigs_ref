@@ -2,3 +2,5 @@
 hash_to_base.py
 *.pyc
 *.sobj
+__sage__*.py
+*.sage.log
