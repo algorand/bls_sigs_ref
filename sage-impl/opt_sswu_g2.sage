@@ -6,11 +6,13 @@
 import sys
 
 from hash_to_field import hash_to_field
+from util import get_cmdline_options
 try:
     from __sage__g1_common import ZZR, p, q, sgn0
-    from __sage__g2_common import Ell2, F2, X, roots_of_unity, clear_h2
+    from __sage__g2_common import Ell2, F2, X, roots_of_unity, clear_h2, print_g2_hex
+    from __sage__bls_sig_common import print_hash_test_vector, g2suite
 except ImportError:
-    sys.exit("Can't find preprocessed sage files. Try running `make pyfiles`")
+    sys.exit("Error loading preprocessed sage files. Try running `make clean pyfiles`")
 
 # 3-isogenous curve to Ell2
 Ell2p_a = F2(240 * X)
@@ -91,11 +93,6 @@ def map2curve_osswu2(alpha):
     return clear_h2(iso2(P + P2))
 
 if __name__ == "__main__":
-    args = sys.argv[1:] if len(sys.argv) > 1 else ["asdf"]
+    (_, args) = get_cmdline_options()
     for arg in args:
-        msg_to_hash = chr(2) + arg
-        P = map2curve_osswu2(msg_to_hash)
-        assert P * q == Ell2(0, 1, 0)  # make sure P is of the correct order
-        p0v = ZZR(P[0])
-        p1v = ZZR(P[1])
-        print "(%s + X * %s, %s + X * %s)" % (hex(int(p0v[0])), hex(int(p0v[1])), hex(int(p1v[0])), hex(int(p1v[1])))
+        print_hash_test_vector(arg, g2suite, map2curve_osswu2, print_g2_hex)

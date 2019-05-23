@@ -18,15 +18,15 @@ after which you can execute any of the four programs.
 
 `opt_sswu_g1.sage` and `opt_sswu_g2.sage` are used as follows:
 
-    sage opt_sswu_g1.sage [msg ...]
+    sage opt_sswu_g1.sage [-d] [msg ...]
 
-Each parameter passed on the commandline is hashed to a point in the respective subgroup, and the result is displayed.
+`-d` enables verbose debug output. All other parameters are hashed to a point, and the results are displayed.
 
 `bls_sig_g1.sage` and `bls_sig_g2.sage` are used as follows:
 
-    sage bls_sig_g1.sage [-k secret_key] [msg ...]
+    sage bls_sig_g1.sage [-d] [-k secret_key] [msg ...]
 
-`-k` sets the secret key to use instead of the default. All other parameters are signed, and the results displayed.
+`-d` enables verbose debug output. `-k` sets the secret key to use for signing. All other parameters are signed, and the results displayed.
 
 # license
 

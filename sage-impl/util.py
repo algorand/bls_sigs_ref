@@ -59,7 +59,7 @@ def get_cmdline_options():
     try:
         (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:d")
     except getopt.GetoptError as err:
-        print "Usage: %s [-k key] [msg ...]"
+        print "Usage: %s [-d] [-k key] [msg ...]"
         print str(err)
         sys.exit(1)
 

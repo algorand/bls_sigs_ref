@@ -6,10 +6,12 @@
 import sys
 
 from hash_to_field import hash_to_field
+from util import get_cmdline_options
 try:
-    from __sage__g1_common import Ell, F, ell_u, p, q, sgn0
+    from __sage__g1_common import Ell, F, ell_u, p, q, sgn0, print_g1_hex
+    from __sage__bls_sig_common import print_hash_test_vector, g1suite
 except ImportError:
-    sys.exit("Can't find preprocessed sage files. Try running `make pyfiles`")
+    sys.exit("Error loading preprocessed sage files. Try running `make clean pyfiles`")
 
 # 11-isogenous curve Ell'
 EllP_a = F(0x144698a3b8e9433d693a02c96d4982b0ea985383ee66a8d8e8981aefd881ac98936f8da0e0f97f5cf428082d584c1d)
@@ -77,12 +79,11 @@ def map2curve_osswu(alpha):
     t2 = F(hash_to_field(alpha, 2, p, 1)[0])
     P = osswu_help(t1)
     P2 = osswu_help(t2)
-    return (1 - ell_u) * iso(P + P2)
+    ret = (1 - ell_u) * iso(P + P2)
+    assert ret * q == Ell(0, 1, 0)
+    return ret
 
 if __name__ == "__main__":
-    args = sys.argv[1:] if len(sys.argv) > 1 else ["asdf"]
+    (_, args) = get_cmdline_options()
     for arg in args:
-        msg_to_hash = chr(1) + arg
-        P = map2curve_osswu(msg_to_hash)
-        assert P * q == Ell(0, 1, 0)  # make sure P is of the correct order
-        print "(%s, %s)" % (hex(int(P[0])), hex(int(P[1])))
+        print_hash_test_vector(arg, g1suite, map2curve_osswu, print_g1_hex)

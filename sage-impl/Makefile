@@ -16,4 +16,4 @@ vec_%: bls_sig_%.sage pyfiles
 	sage $< -d | tee $<.log
 
 clean:
-	rm __sage__*.py *.pyc *.sage.py
+	rm -f __sage__*.py *.pyc *.sage.py

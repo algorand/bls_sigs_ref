@@ -10,12 +10,12 @@ import sys
 from hash_to_field import hash_to_field
 from util import enable_debug, print_iv, print_value, get_cmdline_options
 try:
-    from __sage__bls_sig_common import g2gen, print_test_vector
+    from __sage__bls_sig_common import g1suite, g2gen, print_test_vector, prepare_msg
     from __sage__g1_common import q, print_g1_hex, print_iv_g1
     from __sage__g2_common import print_g2_hex
     from __sage__opt_sswu_g1 import map2curve_osswu
 except ImportError:
-    sys.exit("Can't find preprocessed sage files. Try running `make pyfiles`")
+    sys.exit("Error loading preprocessed sage files. Try running `make clean pyfiles`")
 
 # keygen takes in sk as byte[32] and outputs the secrete exponent and the public key in G2
 def keygen(sk, output_pk=True):
@@ -32,16 +32,13 @@ def sign(x_prime, msg, ciphersuite):
     print_iv(msg, "input msg", "sign", True)
 
     # hash the concatenation of the (one-byte) ciphersuite and the message
-    msg_to_hash = "%c%s" % (ciphersuite, msg)
-    P = map2curve_osswu(msg_to_hash)
+    P = map2curve_osswu(prepare_msg(msg, ciphersuite))
     print_iv_g1(P, "hash to E1", "sign")
 
     # output the signature x' * P
     return x_prime * P
 
 if __name__ == "__main__":
-    # parameters for this signature
-    ciphersuite = 1  # ciphersuite is 1 for BLS sig in G1
     (sk, msgs) = get_cmdline_options()
     for msg in msgs:
-        print_test_vector(sk, msg, ciphersuite, sign, keygen, print_g2_hex, print_g1_hex)
+        print_test_vector(sk, msg, g1suite, sign, keygen, print_g2_hex, print_g1_hex)
