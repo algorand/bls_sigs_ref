@@ -1,4 +1,4 @@
-The file in this directory comprises test inputs, one per line.
+The files in this directory comprises test inputs, one per line.
 
 Each line is a space-separated tuple (msg, key).
 
@@ -18,3 +18,7 @@ with open("fips_186_3", "r") as vec_file:
                   for line in vec_file.readlines()     \
                 ]
 ~~~
+
+These files are extracted from the NIST CAVP ECDSA test vectors, available from
+    https://csrc.nist.gov/Projects/Cryptographic-Algorithm-Validation-Program/Digital-Signatures
+    https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/dss/186-3ecdsatestvectors.zip
