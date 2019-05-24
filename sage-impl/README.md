@@ -18,15 +18,17 @@ after which you can execute any of the four programs.
 
 `opt_sswu_g1.sage` and `opt_sswu_g2.sage` hash messages to G1 and G2, respectively.
 
-    sage opt_sswu_g1.sage [-d] [msg ...]
+    sage opt_sswu_g1.sage [-d] [-T test_input_file] [msg ...]
 
 `bls_sig_g1.sage` and `bls_sig_g2.sage` sign messages in G1 and G2, respectively.
 
-    sage bls_sig_g1.sage [-d] [-k secret_key] [msg ...]
+    sage bls_sig_g1.sage [-d] [-T test_input_file] [-k secret_key] [msg ...]
 
 - `-d` enables verbose debug output.
 
-- `-k` sets the secret key (used only when signing).
+- `-T` can be used multiple times to specify test input files (see `../test_vectors`).
+
+- `-k` sets the secret key to be used when signing messages from the commandline.
 
 - All other arguments are interpreted as messages to be hashed or signed.
 
