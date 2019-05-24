@@ -11,7 +11,7 @@ import sys
 if sys.version_info[0] != 2:
     raise RuntimeError("this code is geared toward Python2/Sage, not Python3")
 
-from util import print_iv
+from util import print_iv # pylint: disable=wrong-import-position
 
 # defined in RFC 3447, section 4.1
 def I2OSP(val, length):

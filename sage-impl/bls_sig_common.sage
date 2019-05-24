@@ -50,10 +50,10 @@ def print_test_vector(sk, msg, ciphersuite, sign_fn, keygen_fn, print_pk_fn, pri
     print "ciphersuite: 0x%x" % ciphersuite
 
     sys.stdout.write("message:     ")
-    print_value(msg, True, 13, True)
+    print_value(msg, 13, True)
 
     sys.stdout.write("sk:          ")
-    print_value(sk, True, 13, True)
+    print_value(sk, 13, True)
 
     print "public key:"
     print_pk_fn(pk)
@@ -71,7 +71,7 @@ def print_hash_test_vector(msg, ciphersuite, hash_fn, print_pt_fn):
     print "ciphersuite: 0x%x" % ciphersuite
 
     sys.stdout.write("message:     ")
-    print_value(msg, True, 13, True)
+    print_value(msg, 13, True)
 
     print "result:"
     print_pt_fn(P)

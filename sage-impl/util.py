@@ -17,17 +17,17 @@ def is_debug():
     return DEBUG
 
 def enable_debug():
-    global DEBUG
+    global DEBUG # pylint: disable=global-statement
     DEBUG = True
 
-def print_iv(iv, name, fn, show_ascii, indent=8):
+def print_iv(iv, name, fn, indent=8):
     if not DEBUG:
         return
     sys.stdout.write("[%s() intermediate value] %s =\n" % (fn, name))
     if iv is not None:
-        print_value(iv, show_ascii, indent, False)
+        print_value(iv, indent, False)
 
-def print_value(iv, show_ascii, indent=8, skip_first=False):
+def print_value(iv, indent=8, skip_first=False):
     max_line_length = 111
     if isinstance(iv, str):
         cs = struct.unpack("=" + "B" * len(iv), iv)
@@ -47,11 +47,7 @@ def print_value(iv, show_ascii, indent=8, skip_first=False):
             line_length = indent
         sys.stdout.write(out_str + " ")
         line_length += len(out_str) + 1
-
-    if show_ascii:
-        sys.stdout.write("\n%s[ascii: '%s']\n" % (indent_string, iv))
-    else:
-        sys.stdout.write("\n")
+    sys.stdout.write("\n")
 
 def get_cmdline_options():
     sk = "11223344556677889900112233445566"

@@ -46,5 +46,5 @@ def print_g1_hex(P, margin=8):
 def print_iv_g1(P, name, fn):
     if not is_debug():
         return
-    print_iv(None, name, fn, False)
+    print_iv(None, name, fn)
     print_g1_hex(P)
