@@ -84,6 +84,5 @@ def map2curve_osswu(alpha):
     return ret
 
 if __name__ == "__main__":
-    (_, args) = get_cmdline_options()
-    for arg in args:
-        print_hash_test_vector(arg, g1suite, map2curve_osswu, print_g1_hex)
+    for (msg, _) in get_cmdline_options():
+        print_hash_test_vector(msg, g1suite, map2curve_osswu, print_g1_hex)

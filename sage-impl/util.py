@@ -4,6 +4,7 @@
 #
 # Utilities for BLS signatures Sage reference impl
 
+import binascii
 import getopt
 import struct
 import sys
@@ -54,12 +55,15 @@ def print_value(iv, show_ascii, indent=8, skip_first=False):
 
 def get_cmdline_options():
     sk = "11223344556677889900112233445566"
-    msgs = ["the message to be signed"]
+    msg_dflt = "the message to be signed"
+    test_inputs = []
 
+    # go through the commandline arguments
     try:
-        (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:d")
+        (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:dT:")
+
     except getopt.GetoptError as err:
-        print "Usage: %s [-d] [-k key] [msg ...]"
+        print "Usage: %s [-d] [-k key] [-T test_file] [msg ...]"
         print str(err)
         sys.exit(1)
 
@@ -70,10 +74,20 @@ def get_cmdline_options():
         elif opt == "-d":
             enable_debug()
 
+        elif opt == "-T":
+            with open(arg, "r") as test_file:
+                test_inputs += [ tuple( binascii.unhexlify(val) \
+                                        for val in line.strip().split(' ') ) \
+                                 for line in test_file.readlines() ]
+
         else:
             raise RuntimeError("got unexpected option %s from getopt" % opt)
 
-    if args:
-        msgs = args
+    # build up return value: (msg, sk) tuples from cmdline and any test files
+    ret = [ (arg, sk) for arg in args ] + test_inputs
 
-    return (sk, msgs)
+    # default if nothing was specified
+    if not ret:
+        ret = [ (msg_dflt, sk) ]
+
+    return ret

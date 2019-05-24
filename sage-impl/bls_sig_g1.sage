@@ -39,6 +39,5 @@ def sign(x_prime, msg, ciphersuite):
     return x_prime * P
 
 if __name__ == "__main__":
-    (sk, msgs) = get_cmdline_options()
-    for msg in msgs:
+    for (msg, sk) in get_cmdline_options():
         print_test_vector(sk, msg, g1suite, sign, keygen, print_g2_hex, print_g1_hex)
