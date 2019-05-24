@@ -32,6 +32,18 @@ after which you can execute any of the four programs.
 
 - All other arguments are interpreted as messages to be hashed or signed.
 
+You can also use the `sig_g1`, `sig_g2`, `hash_g1`, and `hash_g2` Makefile targets, e.g.,
+
+    make hash_g2
+    make sig_g1 TEST_INPUTS=fips_186_3_P256 DEBUG=1
+
+These targets invoke the appropriate script and save the results to a log
+file. There are two relevant commandline flags for these targets:
+
+- `TEST_INPUTS=` defaults to rfc6979. No supplied path is necessary.
+
+- `DEBUG=` defaults to 0; 1 enables the `-d` switch.
+
 # license
 
 (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
