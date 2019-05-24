@@ -9,7 +9,7 @@ from hash_to_field import hash_to_field
 from util import get_cmdline_options
 try:
     from __sage__g1_common import ZZR, p, q, sgn0
-    from __sage__g2_common import Ell2, F2, X, roots_of_unity, clear_h2, print_g2_hex
+    from __sage__g2_common import Ell2, F2, X, roots_of_unity, clear_h2, print_g2_hex, print_iv_F2
     from __sage__bls_sig_common import print_hash_test_vector, g2suite
 except ImportError:
     sys.exit("Error loading preprocessed sage files. Try running `make clean pyfiles`")
@@ -50,6 +50,7 @@ def osswu2_help(t):
         x0 = F2(Ell2p_b) / F2(xi_2 * Ell2p_a)
     else:
         x0 = F2(-Ell2p_b * (num_den_common + 1)) / F2(Ell2p_a * num_den_common)
+    print_iv_F2(x0, "x0", "osswu2_help")
 
     # g(X0), where y^2 = g(x) is the curve 3-isogenous to BLS12-381 Ell2
     gx0 = g2p(x0)

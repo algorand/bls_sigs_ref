@@ -6,7 +6,7 @@
 import sys
 
 from hash_to_field import hash_to_field
-from util import get_cmdline_options
+from util import get_cmdline_options, print_iv
 try:
     from __sage__g1_common import Ell, F, ell_u, p, q, sgn0, print_g1_hex
     from __sage__bls_sig_common import print_hash_test_vector, g1suite
@@ -48,6 +48,7 @@ def osswu_help(t):
         x0 = F(EllP_b) / F(xi_1 * EllP_a)
     else:
         x0 = F(-EllP_b * (num_den_common + 1)) / F(EllP_a * num_den_common)
+    print_iv(x0, "x0", "osswu_help")
 
     # g(X0), where y^2 = g(x) is the curve 11-isogenous to BLS12-381
     gx0 = g1p(x0)

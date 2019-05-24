@@ -67,15 +67,24 @@ def clear_h2(P):
     assert ret == P * h2 * (3 * ell_u ** 2 - 3)
     return ret
 
+# print out an element of F2
+def print_F2_hex(vv, name, margin=8):
+    vv = ZZR(vv)
+    indent_str = " " * margin
+    print indent_str + name + "0 = 0x%x" % int(vv[0])
+    print indent_str + name + "1 = 0x%x" % int(vv[1])
+
 # print out a point on g2
 def print_g2_hex(P, margin=8):
-    xx = ZZR(P[0])
-    print " " * margin + "x0 = 0x%x" % int(xx[0])
-    print " " * margin + "x1 = 0x%x" % int(xx[1])
+    print_F2_hex(P[0], 'x', margin)
+    print_F2_hex(P[1], 'y', margin)
 
-    yy = ZZR(P[1])
-    print " " * margin + "y0 = 0x%x" % int(yy[0])
-    print " " * margin + "y1 = 0x%x" % int(yy[1])
+# print an intermediate value comprising an element of F2
+def print_iv_F2(vv, name, fn):
+    if not is_debug():
+        return
+    print_iv(None, name, fn)
+    print_F2_hex(vv, '.')
 
 # print an intermediate value comprising a point on g2
 def print_iv_g2(P, name, fn):
