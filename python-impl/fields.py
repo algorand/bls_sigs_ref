@@ -2,7 +2,13 @@
 #
 # implementation of Fp and Fp^2 operations
 #
-# (C) 2018 Chia Network Inc. See copyright notice at end of file.
+# This file is derived from `fields.py` in the Chia BLS signatures Python implementation,
+#     https://github.com/Chia-Network/bls-signatures/
+# which is (C) 2018 Chia Network Inc. and licensed under the Apache 2.0 license.
+# See copyright notice at the end of this file.
+#
+# Changes from the original version:
+# * Some unneeded functionality was removed and some pylint errors were fixed.
 
 from copy import deepcopy
 

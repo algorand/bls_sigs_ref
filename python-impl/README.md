@@ -10,7 +10,5 @@ All files in the subdirectory other than `fields.py` are
 
 See the license in the toplevel directory of this repository.
 
-`fields.py` is from the
-[Chia bls-signatures](https://github.com/Chia-Network/bls-signatures/) pure Python implementation,
-and subject to that project's
-[license](https://github.com/Chia-Network/bls-signatures/blob/master/LICENSE).
+`fields.py` is derived from the
+[Chia bls-signatures](https://github.com/Chia-Network/bls-signatures/) pure Python implementation.
