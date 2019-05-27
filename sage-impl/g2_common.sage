@@ -23,6 +23,15 @@ roots_of_unity = (F2(1)
       + 1028732146235106349975324479215795277384839936929757896155643118032610843298655225875571310552543014690878354869257)
   )
 
+# compute square root in F2 (used in deserialization)
+def sqrt_F2(val):
+    sqrt_cand = val ** ((p**2 + 7) // 16)
+    ret = None
+    for root in roots_of_unity:
+        tmp = sqrt_cand * root
+        ret = tmp if tmp ** 2 == val else ret
+    return ret
+
 ##
 ## clear cofactor via untwist-Frobenius-twist endomorphism
 ##
