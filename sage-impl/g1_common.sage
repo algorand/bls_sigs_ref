@@ -33,7 +33,7 @@ def sgn0(x):
 
     # walk through each element of the vector repr of x to find the sign
     thresh = (x.base_ring().order() - 1) // 2
-    for xi in xi_values:
+    for xi in reversed(list(xi_values)):
         sign = select_sign(-2 * (xi > thresh) + (xi > 0))
     return select_sign(1)
 

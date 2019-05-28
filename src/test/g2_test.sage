@@ -55,12 +55,14 @@ onei = F2(1 + X)
 
 ell_u = - 0xd201000000010000
 
+ZZR.<XX> = PolynomialRing(ZZ)
+
 def qi_x(x):
-    vec = x._vector_()
+    vec = ZZR(x)
     return F2(k_qi_x * (vec[0] - X * vec[1]))
 
 def qi_y(y):
-    vec = y._vector_()
+    vec = ZZR(y)
     return k_qi_y * F2(vec[0] + vec[1] + X * (vec[0] - vec[1]))
 
 def psi(P):
@@ -77,8 +79,11 @@ def clear_h2(P):
 
 def init_iso2():
     global iso2
-    if iso2 is None:
+    try:
+        iso2 = load("iso_g2")
+    except:
         iso2 = EllipticCurveIsogeny(Ell2p, [6 * (1 - X), 1], codomain=Ell2)
+        iso2.dump("iso_g2", True)
 
 def JEll2(x1s, x1t, y1s, y1t, z1s, z1t, curve=Ell2):
     x = F2(x1s + X * x1t)
@@ -92,7 +97,7 @@ def f2p(x):
 def sgn0(x):
     sign = 0
     thresh = (p - 1) // 2
-    for v in x._vector_():
+    for v in reversed(list(ZZR(x))):
         if v > thresh:
             sign = -1 if sign == 0 else sign
         elif v > 0:

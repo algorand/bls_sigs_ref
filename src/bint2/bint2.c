@@ -12,12 +12,12 @@ bool bint2_eq0(bint2_ty io) {
 
 // is this value negative, i.e., is it lexically greater than -1 * in? (0 is not negative)
 bool bint2_is_neg(const bint2_ty in) {
-    const int absc_cmp0 = bint_cmp0(BINT_LO(in));       // first coord <=> 0
-    const bool ordn_is_neg = bint_is_neg(BINT_HI(in));  // is second coord neg?
+    const int ordn_cmp0 = bint_cmp0(BINT_HI(in));       // second coord <=> 0
+    const bool absc_is_neg = bint_is_neg(BINT_LO(in));  // is first coord neg?
 
-    // if abscissa is zero, in is negative just if the ordinate is negative
-    // otherwise, the sign is given by the abscissa
-    return (absc_cmp0 == 0) ? ordn_is_neg : (absc_cmp0 < 0);
+    // if ordinate is zero, `in` is negative just if the abscissa is negative
+    // otherwise, the sign is given by the ordinate
+    return (ordn_cmp0 == 0) ? absc_is_neg : (ordn_cmp0 < 0);
 }
 
 // add

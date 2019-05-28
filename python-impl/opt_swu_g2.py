@@ -34,7 +34,7 @@ del ev1, ev2
 def sgn0(x):
     thresh = (p - 1) // 2
     sign = 0
-    for xi in x:
+    for xi in reversed(x):
         if xi > thresh:
             sign = -1 if sign == 0 else sign
         elif xi > 0:

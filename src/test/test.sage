@@ -30,9 +30,12 @@ cx2 = F((F(3) - sqrt(F(-27))) / F(2))
 
 def init_iso():
     global iso
-    if iso is None:
+    try:
+        iso = load("iso_g1")
+    except:
         iso = EllipticCurveIsogeny(EllP, kpoly, codomain=Ell, degree=11)
         iso.switch_sign()  # this is the isogeny, but with the opposite sign for y
+        iso.dump("iso_g1", True)
 
 def JEll(x, y, z):
     if z == 0:
