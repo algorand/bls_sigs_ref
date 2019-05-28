@@ -5,6 +5,59 @@
 # using the "enhanced ZCash" format proposed in
 #     https://github.com/pairingwg/bls_standard/issues/16
 # (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
+#
+# - Elements of Fp are serialized into 48 bytes, MSB to LSB. The 3 most significant bits MUST be 0.
+#   The serialized value must be strictly less than p.
+#
+# - Elements of Fp2 = Fp[j] are serialized into 96 bytes. Given an Fp2 element c0 + c1 * j where
+#   c0,c1 are elements of Fp, the first 48 bytes is the serialization of c1, and the second 48 bytes
+#   is the serialization of c0.
+#
+# - Elliptic curve points can be serialized either compressed or uncompressed.
+#   . An uncompressed point is serialized as x followed by y.
+#   . A compressed point is just the serialization of x; metadata (described below) gives the sign of y.
+#
+# - For a point on G1, whose x and y coordinates are elements of Fp, three bits of metadata are stored
+#   in the most significant bits of the x-coordinate's serialization (i.e., byte 0).
+#
+# - For points on G2, whose x and y coordinates are elements of Fp2, three bits of metadata are stored
+#   in the most significant bytes of the serialization of x.c1 (i.e., byte 0), and three more are stored
+#   in the three most significant bits of x.c0 (i.e., byte 48).
+#
+# - The three MSBs of byte 0 of a serialized point are used as follows:
+#
+#  3 MSBs of byte 0   |  meaning                                | size
+#  -------------------------------------------------------------------------
+#       0 0 0         |  uncompressed point on G1               | 96 bytes
+#       0 0 1         |  *invalid* -- must reject               | n/a
+#       0 1 0         |  uncompressed point at infinity on G1   | 96 bytes
+#       0 1 1         |  uncompressed point on G2               | 192 bytes
+#       1 0 0         |  compressed point on G1, sgn0(y) = +1   | 48 bytes
+#       1 0 1         |  compressed point on G1, sgn0(y) = -1   | 48 bytes
+#       1 1 1         |  compressed point at infinity on G1     | 48 bytes
+#       1 1 1         |  compressed point on G2                 | 96 bytes
+#
+# - For points on G2 only, the 3 MSBs of byte 48 of a serialized point are used as follows:
+#
+#  3 MSBs of byte 48  |  meaning
+#  ---------------------------------------------------------------------------------
+#       0 0 0         |  *invalid* -- must reject
+#       0 0 1         |  *invalid* -- must reject
+#       0 1 0         |  *invalid* -- must reject
+#       0 1 1         |  *invalid* -- must reject
+#       1 0 0         |  uncompressed point, or compressed point where sgn0(y) = +1
+#       1 0 1         |  compressed point where sgn0(y) = -1
+#       1 1 0         |  point at infinity
+#       1 1 1         |  *invalid* -- must reject
+#
+#   Uncompressed points MUST use the value `100`; `101` is only valid for compressed points.
+#
+# - Points at infinity have the same length as other points of the same type: uncompressed points
+#   at infinity are 96 bytes on G1 and 192 bytes on G2, and compressed points at infinity are
+#   48 bytes on G1 and 96 bytes on G2.
+#
+# - All bits of all points at infinity other than the 3 MSBs of byte 0 (and, for G2, byte 48)
+#   MUST be 0.
 
 import struct
 import sys
