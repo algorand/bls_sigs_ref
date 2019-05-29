@@ -137,29 +137,29 @@ def opt_swu_map(t, t2=None):
     P = iso11(Pp)
     return clear_h(P)
 
-def run_tests():
-    import random
-    for _ in range(0, 100):
-        t1 = Fq(p, random.getrandbits(380))
-        t2 = Fq(p, random.getrandbits(380))
-
-    # test helpers individually
-    for t in (t1, t2):
-        P = osswu_help(t)
-        Pp = from_jacobian(P)
-        assert Pp[0] ** 3 + EllP_a * Pp[0] + EllP_b == Pp[1] ** 2
-        P = iso11(P)
-        Pp = from_jacobian(P)
-        assert Pp[0] ** 3 + 4 == Pp[1] ** 2
-        P = clear_h(P)
-        Pp = from_jacobian(P)
-        assert Pp[0] ** 3 + 4 == Pp[1] ** 2
-
-    # now test end-to-end
-    P = from_jacobian(opt_swu_map(t1, t2))
-    assert P[0] ** 3 + 4 == P[1] ** 2
-
 if __name__ == "__main__":
+    def run_tests():
+        import random
+        for _ in range(0, 100):
+            t1 = Fq(p, random.getrandbits(380))
+            t2 = Fq(p, random.getrandbits(380))
+
+        # test helpers individually
+        for t in (t1, t2):
+            P = osswu_help(t)
+            Pp = from_jacobian(P)
+            assert Pp[0] ** 3 + EllP_a * Pp[0] + EllP_b == Pp[1] ** 2
+            P = iso11(P)
+            Pp = from_jacobian(P)
+            assert Pp[0] ** 3 + 4 == Pp[1] ** 2
+            P = clear_h(P)
+            Pp = from_jacobian(P)
+            assert Pp[0] ** 3 + 4 == Pp[1] ** 2
+
+        # now test end-to-end
+        P = from_jacobian(opt_swu_map(t1, t2))
+        assert P[0] ** 3 + 4 == P[1] ** 2
+
     def main():
         if len(sys.argv) == 1:
             run_tests()
@@ -171,4 +171,5 @@ if __name__ == "__main__":
                 t2 = Fq(p, *Hp(msg_to_hash, 1))
                 P = from_jacobian(opt_swu_map(t1, t2))
                 print(P)
+
     main()

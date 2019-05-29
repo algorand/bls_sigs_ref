@@ -144,34 +144,34 @@ def opt_swu2_map(t, t2=None):
     P = iso3(Pp)
     return clear_h2(P)
 
-def run_tests():
-    import random
-    from curve_ops import psi
-    for _ in range(0, 100):
-        t1 = Fq2(p, random.getrandbits(380), random.getrandbits(380))
-        t2 = Fq2(p, random.getrandbits(380), random.getrandbits(380))
-
-        # make sure each helper function actually returns a point on the curve
-        for t in (t1, t2):
-            P = osswu2_help(t)
-            Pp = from_jacobian(P)
-            assert Pp[0] ** 3 + Ell2p_a * Pp[0] + Ell2p_b == Pp[1] ** 2
-            P = iso3(P)
-            Pp = from_jacobian(P)
-            assert Pp[0] ** 3 + Fq2(p, 4, 4) == Pp[1] ** 2
-            P = psi(P)
-            Pp = from_jacobian(P)
-            assert Pp[0] ** 3 + Fq2(p, 4, 4) == Pp[1] ** 2
-            P = clear_h2(P)
-            Pp = from_jacobian(P)
-            assert Pp[0] ** 3 + Fq2(p, 4, 4) == Pp[1] ** 2
-
-        # now test end-to-end
-        P = opt_swu2_map(t1, t2)
-        Pp = from_jacobian(P)
-        assert Pp[0] ** 3 + Fq2(p, 4, 4) == Pp[1] ** 2
-
 if __name__ == "__main__":
+    def run_tests():
+        import random
+        from curve_ops import psi
+        for _ in range(0, 100):
+            t1 = Fq2(p, random.getrandbits(380), random.getrandbits(380))
+            t2 = Fq2(p, random.getrandbits(380), random.getrandbits(380))
+
+            # make sure each helper function actually returns a point on the curve
+            for t in (t1, t2):
+                P = osswu2_help(t)
+                Pp = from_jacobian(P)
+                assert Pp[0] ** 3 + Ell2p_a * Pp[0] + Ell2p_b == Pp[1] ** 2
+                P = iso3(P)
+                Pp = from_jacobian(P)
+                assert Pp[0] ** 3 + Fq2(p, 4, 4) == Pp[1] ** 2
+                P = psi(P)
+                Pp = from_jacobian(P)
+                assert Pp[0] ** 3 + Fq2(p, 4, 4) == Pp[1] ** 2
+                P = clear_h2(P)
+                Pp = from_jacobian(P)
+                assert Pp[0] ** 3 + Fq2(p, 4, 4) == Pp[1] ** 2
+
+            # now test end-to-end
+            P = opt_swu2_map(t1, t2)
+            Pp = from_jacobian(P)
+            assert Pp[0] ** 3 + Fq2(p, 4, 4) == Pp[1] ** 2
+
     def main():
         if len(sys.argv) == 1:
             run_tests()
@@ -183,4 +183,5 @@ if __name__ == "__main__":
                 t2 = Fq2(p, *Hp2(msg_to_hash, 1))
                 P = from_jacobian(opt_swu2_map(t1, t2))
                 print(P)
+
     main()
