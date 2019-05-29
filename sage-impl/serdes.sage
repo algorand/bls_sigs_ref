@@ -81,7 +81,7 @@ def serialize(P, compressed=True):
         return _serialize_ell2(P, compressed)
     raise SerError("cannot serialize a point not on E1 or E2")
 
-def to_bytes_F1(elm):
+def _to_bytes_F1(elm):
     if elm.parent() != F:
         raise SerError("value must be an element of F1")
     val = int(elm)
@@ -101,20 +101,20 @@ def _serialize_ell1(P, compressed):
             return "\xc0" + "\x00" * 47
         return "\x40" + "\x00" * 95
 
-    x_str = to_bytes_F1(P[0])
+    x_str = _to_bytes_F1(P[0])
     if not compressed:
-        return struct.pack("=" + "B" * 96, *(x_str + to_bytes_F1(P[1])))
+        return struct.pack("=" + "B" * 96, *(x_str + _to_bytes_F1(P[1])))
 
     y_neg = sgn0(P[1]) < 0
     tag_bits = 0xa0 if y_neg else 0x80
     x_str[0] = x_str[0] | tag_bits
     return struct.pack("=" + "B" * 48, *x_str)
 
-def to_bytes_F2(elm):
+def _to_bytes_F2(elm):
     if elm.parent() != F2:
         raise SerError("value must be an element of F2")
     zzelm = ZZR(elm)
-    return to_bytes_F1(F(zzelm[1])) + to_bytes_F1(F(zzelm[0]))
+    return _to_bytes_F1(F(zzelm[1])) + _to_bytes_F1(F(zzelm[0]))
 
 def _serialize_ell2(P, compressed):
     if P.curve() != Ell2:
@@ -124,16 +124,13 @@ def _serialize_ell2(P, compressed):
 
     # handle point at infinity
     if P.is_zero():
-        ret = chr(first_tag) + "\x00" * 47 + "\xc0" + "\x00" * 47
-        if not compressed:
-            ret += "\x00" * 96
-        return ret
+        return chr(first_tag) + "\x00" * 47 + "\xc0" + "\x00" * (47 if compressed else 143)
 
-    x_str = to_bytes_F2(P[0])
+    x_str = _to_bytes_F2(P[0])
     x_str[0] = x_str[0] | first_tag
     if not compressed:
         x_str[48] = x_str[48] | 0x80
-        return struct.pack("=" + "B" * 192, *(x_str + to_bytes_F2(P[1])))
+        return struct.pack("=" + "B" * 192, *(x_str + _to_bytes_F2(P[1])))
 
     y_neg = sgn0(P[1]) < 0
     tag_bits = 0xa0 if y_neg else 0x80
@@ -149,7 +146,7 @@ def deserialize(sp):
         return _deserialize_ell2(data, tag)
     return _deserialize_ell1(data, tag)
 
-def from_bytes_F1(data):
+def _from_bytes_F1(data):
     assert len(data) == 48
     ret = 0
     for d in data:
@@ -167,8 +164,8 @@ def _deserialize_ell1(data, tag):
         # uncompressed point
         if len(data) != 96:
             raise DeserError("invalid uncompressed point: length must be 96, got %d" % len(data))
-        x = from_bytes_F1(data[:48])
-        y = from_bytes_F1(data[48:])
+        x = _from_bytes_F1(data[:48])
+        y = _from_bytes_F1(data[48:])
 
         if y ** 2 != _gx1(x):
             raise DeserError("invalid uncompressed point: not on curve")
@@ -187,7 +184,7 @@ def _deserialize_ell1(data, tag):
         # compressed point not at infinity
         if len(data) != 48:
             raise DeserError("invalid compressed point: length must be 48, got %d" % len(data))
-        x = from_bytes_F1(data)
+        x = _from_bytes_F1(data)
 
         # recompute y
         gx = _gx1(x)
@@ -203,9 +200,9 @@ def _deserialize_ell1(data, tag):
 
     raise DeserError("invalid tag for Ell1 point: %d" % tag)
 
-def from_bytes_F2(data):
+def _from_bytes_F2(data):
     assert len(data) == 96
-    return F2(X * from_bytes_F1(data[:48]) + from_bytes_F1(data[48:]))
+    return F2(X * _from_bytes_F1(data[:48]) + _from_bytes_F1(data[48:]))
 
 def _gx2(x):
     return x ** 3 + 4 * (X + 1)
@@ -231,8 +228,8 @@ def _deserialize_ell2(data, tag):
             raise DeserError("invalid uncompressed point: length must be 192, got %d" % len(data))
         if tag2 == 5:
             raise DeserError("invalid uncompressed point: tag2 cannot be 5")
-        x = from_bytes_F2(data[:96])
-        y = from_bytes_F2(data[96:])
+        x = _from_bytes_F2(data[:96])
+        y = _from_bytes_F2(data[96:])
 
         if y ** 2 != _gx2(x):
             raise DeserError("invalid uncompressed point: not on curve")
@@ -242,7 +239,7 @@ def _deserialize_ell2(data, tag):
         # compressed point on G2
         if len(data) != 96:
             raise DeserError("invalid compressed point: length must be 96, got %d" % len(data))
-        x = from_bytes_F2(data)
+        x = _from_bytes_F2(data)
 
         # recompute y
         gx = _gx2(x)
@@ -256,7 +253,7 @@ def _deserialize_ell2(data, tag):
 
         return Ell2(x, y)
 
-    raise DeserError("invalid tag for Ell2 point: %d" % (tag, tag2))
+    raise DeserError("invalid tag/tag2 for Ell2 point: %d/%d" % (tag, tag2))
 
 if __name__ == "__main__":
     import binascii
@@ -324,12 +321,11 @@ if __name__ == "__main__":
         assert P == Pc, "%s\n%s\n%d %d" % (str(P), str(Pc), sgn0(P[1]), sgn0(Pc[1]))
 
     for Pinf in (Ell(0, 1, 0), Ell2(0, 1, 0)):
+        test_ell(Pinf)
         sys.stdout.write('.')
         sys.stdout.flush()
-        test_ell(Pinf, False)
-        test_ell(Pinf, True)
 
-    for i in range(0, 8):
+    for _ in range(0, 8):
         sys.stdout.write('.')
         sys.stdout.flush()
         test_ell(None, False)
@@ -337,7 +333,7 @@ if __name__ == "__main__":
 
     for inval in invalid_inputs:
         try:
-            P = deserialize(binascii.unhexlify(inval))
+            deserialize(binascii.unhexlify(inval))
         except DeserError:
             sys.stdout.write('*')
             sys.stdout.flush()
