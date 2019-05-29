@@ -51,37 +51,45 @@ def osswu2_help(t):
 
     # first, compute X0(t), detecting and handling exceptional case
     num_den_common = xi_2 ** 2 * t ** 4 + xi_2 * t ** 2
-    if num_den_common == 0:
-        # exceptional case: recover by setting x0 to a value s.t. g(x0) is a square
-        # we choose xi_2 the smallest nonsquare s.t. g(b/(xi a)) is square
-        x0 = Ell2p_b / (xi_2 * Ell2p_a)
-    else:
-        x0 = -Ell2p_b * (num_den_common + 1) / (Ell2p_a * num_den_common)
+    x0_num = Ell2p_b * (num_den_common + 1)
+    x0_den = -Ell2p_a * num_den_common
+    x0_den = Ell2p_a * xi_2 if x0_den == 0 else x0_den
 
-    # g(X0(t))
-    gx0 = x0 ** 3 + Ell2p_a * x0 + Ell2p_b
+    # compute num and den of g(X0(t))
+    gx0_den = pow(x0_den, 3)
+    gx0_num = Ell2p_b * gx0_den
+    gx0_num += Ell2p_a * x0_num * pow(x0_den, 2)
+    gx0_num += pow(x0_num, 3)
 
     # try taking sqrt of g(X0(t))
-    sqrt_candidate = gx0 ** ((p ** 2 + 7) // 16)
+    # this uses the trick for combining division and sqrt from Section 5 of
+    # Bernstein, Duif, Lange, Schwabe, and Yang, "High-speed high-security signatures."
+    # J Crypt Eng 2(2):77--89, Sept. 2012. http://ed25519.cr.yp.to/ed25519-20110926.pdf
+    tmp1 = pow(gx0_den, 7)          # v^7
+    tmp2 = gx0_num * tmp1           # u v^7
+    tmp1 = tmp1 * tmp2 * gx0_den    # u v^15
+    sqrt_candidate = tmp2 * pow(tmp1, (p ** 2 - 9) // 16)
+
+    # check if g(X0(t)) is square and return the sqrt if so
     for root in roots_of_unity:
         y0 = sqrt_candidate * root
-        if y0 ** 2 == gx0:
+        if y0 ** 2 * gx0_den == gx0_num:
             # found sqrt(g(X0(t))). force sign of y to equal sign of t
             y0 = sgn0(y0) * sgn0(t) * y0
             assert sgn0(y0) == sgn0(t)
-            return (x0, y0, 1)
+            return (x0_num * x0_den, y0 * pow(x0_den, 3), x0_den)
 
     # if we've gotten here, then g(X0(t)) is not square. convert srqt_candidate to sqrt(g(X1(t)))
-    x1 = xi_2 * t ** 2 * x0
-    gx1 = xi_2 ** 3 * t ** 6 * gx0
+    (x1_num, x1_den) = (xi_2 * t ** 2 * x0_num, x0_den)
+    (gx1_num, gx1_den) = (xi_2 ** 3 * t ** 6 * gx0_num, gx0_den)
     sqrt_candidate *= t ** 3
     for eta in etas:
         y1 = eta * sqrt_candidate
-        if y1 ** 2 == gx1:
+        if y1 ** 2 * gx1_den == gx1_num:
             # found sqrt(g(X1(t))). force sign of y to equal sign of t
             y1 = sgn0(y1) * sgn0(t) * y1
             assert sgn0(y1) == sgn0(t)
-            return (x1, y1, 1)
+            return (x1_num * x1_den, y1 * pow(x1_den, 3), x1_den)
 
     # if we got here, something is wrong
     raise RuntimeError("osswu2_help failed for unknown reasons")
@@ -146,7 +154,8 @@ def run_tests():
         # make sure each helper function actually returns a point on the curve
         for t in (t1, t2):
             P = osswu2_help(t)
-            assert P[0] ** 3 + Ell2p_a * P[0] + Ell2p_b == P[1] ** 2
+            Pp = from_jacobian(P)
+            assert Pp[0] ** 3 + Ell2p_a * Pp[0] + Ell2p_b == Pp[1] ** 2
             P = iso3(P)
             Pp = from_jacobian(P)
             assert Pp[0] ** 3 + Fq2(p, 4, 4) == Pp[1] ** 2

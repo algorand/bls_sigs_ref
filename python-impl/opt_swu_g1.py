@@ -32,32 +32,38 @@ def osswu_help(t):
 
     # first, compute X0(t), detecting and handling exceptional case
     num_den_common = xi_1 ** 2 * t ** 4 + xi_1 * t ** 2
-    if num_den_common == 0:
-        # exceptional case: recover by setting x0 to a value s.t. g(x0) is square
-        # we choose xi_1 the smallest nonsquare s.t. g(b/(xi a)) is square
-        x0 = EllP_b / (xi_1 * EllP_a)
-    else:
-        x0 = -EllP_b * (num_den_common + 1) / (EllP_a * num_den_common)
+    x0_num = EllP_b * (num_den_common + 1)
+    x0_den = -EllP_a * num_den_common
+    x0_den = EllP_a * xi_1 if x0_den == 0 else x0_den
 
     # g(X0(t))
-    gx0 = x0 ** 3 + EllP_a * x0 + EllP_b
+    gx0_den = pow(x0_den, 3)
+    gx0_num = EllP_b * gx0_den
+    gx0_num += EllP_a * x0_num * pow(x0_den, 2)
+    gx0_num += pow(x0_num, 3)
 
     # try taking sqrt of g(X0(t))
-    sqrt_candidate = gx0 ** ((p + 1) // 4)
-    if sqrt_candidate ** 2 == gx0:
+    # this uses the trick for combining division and sqrt from Section 5 of
+    # Bernstein, Duif, Lange, Schwabe, and Yang, "High-speed high-security signatures."
+    # J Crypt Eng 2(2):77--89, Sept. 2012. http://ed25519.cr.yp.to/ed25519-20110926.pdf
+    tmp1 = gx0_num * gx0_den            # u v
+    tmp2 = tmp1 * pow(gx0_den, 2)       # u v^3
+    sqrt_candidate = tmp1 * pow(tmp2, (p - 3) // 4)
+
+    # did we find it?
+    if sqrt_candidate ** 2 * gx0_den == gx0_num:
         # found sqrt(g(X0(t))). Force sign of y to equal sign of t
-        (x, y) = (x0, sqrt_candidate)
+        (x_num, y) = (x0_num, sqrt_candidate)
 
     else:
-        x1 = xi_1 * t ** 2 * x0
+        x1_num = xi_1 * t ** 2 * x0_num
         y1 = sqrt_candidate * t ** 3
-        (x, y) = (x1, y1)
+        (x_num, y) = (x1_num, y1)
 
     # set sign of y equal to sign of t
     y = sgn0(y) * sgn0(t) * y
-    assert y ** 2 == x ** 3 + EllP_a * x + EllP_b
     assert sgn0(y) == sgn0(t)
-    return (x, y, 1)
+    return (x_num * x0_den, y * pow(x0_den, 3), x0_den)
 
 ###
 ## 11-isogeny from Ell1' to Ell1
@@ -140,7 +146,8 @@ def run_tests():
     # test helpers individually
     for t in (t1, t2):
         P = osswu_help(t)
-        assert P[0] ** 3 + EllP_a * P[0] + EllP_b == P[1] ** 2
+        Pp = from_jacobian(P)
+        assert Pp[0] ** 3 + EllP_a * Pp[0] + EllP_b == Pp[1] ** 2
         P = iso11(P)
         Pp = from_jacobian(P)
         assert Pp[0] ** 3 + 4 == Pp[1] ** 2
