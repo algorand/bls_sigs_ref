@@ -76,8 +76,8 @@ def osswu_help(t):
 
 # map from a string
 def map2curve_osswu(alpha):
-    t1 = F(hash_to_field(alpha, 1, p, 1)[0])
-    t2 = F(hash_to_field(alpha, 2, p, 1)[0])
+    t1 = F(hash_to_field(alpha, 0, p, 1)[0])
+    t2 = F(hash_to_field(alpha, 1, p, 1)[0])
     P = osswu_help(t1)
     P2 = osswu_help(t2)
     ret = (1 - ell_u) * iso(P + P2)

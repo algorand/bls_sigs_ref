@@ -37,10 +37,10 @@ int main(int argc, char **argv) {
             memcpy(msg_hash + SHA256_DIGEST_LENGTH, &i, sizeof(uint32_t));
         }
         const size_t digest_len = SHA256_DIGEST_LENGTH + (i == 0 ? 0 : sizeof(uint32_t));
-        hash_to_field_idx(msg_hash, digest_len, 1, 1, u1->s);
-        hash_to_field_idx(msg_hash, digest_len, 1, 2, u1->t);
-        hash_to_field_idx(msg_hash, digest_len, 2, 1, u2->s);
-        hash_to_field_idx(msg_hash, digest_len, 2, 2, u2->t);
+        hash_to_field_idx(msg_hash, digest_len, 0, 1, u1->s);
+        hash_to_field_idx(msg_hash, digest_len, 0, 2, u1->t);
+        hash_to_field_idx(msg_hash, digest_len, 1, 1, u2->s);
+        hash_to_field_idx(msg_hash, digest_len, 1, 2, u2->t);
         swu2_map2(x, y, z, u1, u2);
 
         // show results

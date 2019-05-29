@@ -156,7 +156,7 @@ if __name__ == "__main__":
     else:
         ciphersuite = bytes([1])
         msg_to_hash = ciphersuite + sys.argv[1].encode('utf-8')
-        t1 = Fq(p, *Hp(msg_to_hash, 1))
-        t2 = Fq(p, *Hp(msg_to_hash, 2))
+        t1 = Fq(p, *Hp(msg_to_hash, 0))
+        t2 = Fq(p, *Hp(msg_to_hash, 1))
         P = opt_swu_map(t1, t2)
         print(P)

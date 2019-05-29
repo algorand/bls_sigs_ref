@@ -87,8 +87,8 @@ def from_vec(v):
 
 # map from a string
 def map2curve_osswu2(alpha):
-    t1 = from_vec(hash_to_field(alpha, 1, p, 2))
-    t2 = from_vec(hash_to_field(alpha, 2, p, 2))
+    t1 = from_vec(hash_to_field(alpha, 0, p, 2))
+    t2 = from_vec(hash_to_field(alpha, 1, p, 2))
     P = osswu2_help(t1)
     P2 = osswu2_help(t2)
     return clear_h2(iso2(P + P2))
