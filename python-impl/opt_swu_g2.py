@@ -11,6 +11,7 @@ if sys.version_info[0] < 3:
 from curve_ops import clear_h2, eval_iso, from_jacobian, point_add  # pylint: disable=wrong-import-position
 from fields import Fq2, p                                           # pylint: disable=wrong-import-position
 from hash_to_field import Hp2                                       # pylint: disable=wrong-import-position
+from util import get_cmdline_options                                # pylint: disable=wrong-import-position
 
 # distinguished non-square in Fp2 for SWU map
 xi_2 = Fq2(p, 1, 1)
@@ -133,7 +134,7 @@ def iso3(P):
     return eval_iso(P, (xnum, xden, ynum, yden))
 
 ###
-## map from Fq2 element to point in G2 subgroup of Ell2
+## map from Fq2 element(s) to point in G2 subgroup of Ell2
 ###
 def opt_swu2_map(t, t2=None):
     Pp = osswu2_help(t)
@@ -143,14 +144,21 @@ def opt_swu2_map(t, t2=None):
     P = iso3(Pp)
     return clear_h2(P)
 
+###
+## map from bytes() to point in G2 subgroup of Ell2
+###
+def map2curve_osswu2(alpha):
+    t1 = Fq2(p, *Hp2(alpha, 0))
+    t2 = Fq2(p, *Hp2(alpha, 1))
+    return opt_swu2_map(t1, t2)
+
 if __name__ == "__main__":
     def run_tests():
         import random
         from curve_ops import psi
-        for _ in range(0, 100):
+        for _ in range(0, 128):
             t1 = Fq2(p, random.getrandbits(380), random.getrandbits(380))
             t2 = Fq2(p, random.getrandbits(380), random.getrandbits(380))
-
             # make sure each helper function actually returns a point on the curve
             for t in (t1, t2):
                 P = osswu2_help(t)
@@ -165,22 +173,22 @@ if __name__ == "__main__":
                 P = clear_h2(P)
                 Pp = from_jacobian(P)
                 assert Pp[0] ** 3 + Fq2(p, 4, 4) == Pp[1] ** 2
-
             # now test end-to-end
             P = opt_swu2_map(t1, t2)
             Pp = from_jacobian(P)
             assert Pp[0] ** 3 + Fq2(p, 4, 4) == Pp[1] ** 2
+            sys.stdout.write('.')
+            sys.stdout.flush()
+        sys.stdout.write("\n")
 
     def main():
-        if len(sys.argv) == 1:
+        opts = get_cmdline_options()
+        if opts is None:
             run_tests()
         else:
             ciphersuite = bytes([2])
-            for msg in sys.argv[1:]:
-                msg_to_hash = ciphersuite + msg.encode('utf-8')
-                t1 = Fq2(p, *Hp2(msg_to_hash, 0))
-                t2 = Fq2(p, *Hp2(msg_to_hash, 1))
-                P = from_jacobian(opt_swu2_map(t1, t2))
+            for (msg, _) in opts:
+                P = from_jacobian(map2curve_osswu2(ciphersuite + msg))
                 print(P)
 
     main()

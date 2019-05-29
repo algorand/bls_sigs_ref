@@ -8,9 +8,10 @@ import sys
 if sys.version_info[0] < 3:
     raise RuntimeError("this script requires Python 3")
 
-from curve_ops import clear_h, eval_iso, from_jacobian, point_add  # pylint: disable=wrong-import-position
-from fields import Fq, p                                           # pylint: disable=wrong-import-position
-from hash_to_field import Hp                                       # pylint: disable=wrong-import-position
+from curve_ops import clear_h, eval_iso, from_jacobian, point_add   # pylint: disable=wrong-import-position
+from fields import Fq, p                                            # pylint: disable=wrong-import-position
+from hash_to_field import Hp                                        # pylint: disable=wrong-import-position
+from util import get_cmdline_options                                # pylint: disable=wrong-import-position
 
 # distinguished non-square in Fp for SWU map
 xi_1 = Fq(p, -1)
@@ -136,39 +137,43 @@ def opt_swu_map(t, t2=None):
     P = iso11(Pp)
     return clear_h(P)
 
+def map2curve_osswu(alpha):
+    t1 = Fq(p, *Hp(alpha, 0))
+    t2 = Fq(p, *Hp(alpha, 1))
+    return opt_swu_map(t1, t2)
+
 if __name__ == "__main__":
     def run_tests():
         import random
-        for _ in range(0, 100):
+        for _ in range(0, 128):
             t1 = Fq(p, random.getrandbits(380))
             t2 = Fq(p, random.getrandbits(380))
-
-        # test helpers individually
-        for t in (t1, t2):
-            P = osswu_help(t)
-            Pp = from_jacobian(P)
-            assert Pp[0] ** 3 + EllP_a * Pp[0] + EllP_b == Pp[1] ** 2
-            P = iso11(P)
-            Pp = from_jacobian(P)
-            assert Pp[0] ** 3 + 4 == Pp[1] ** 2
-            P = clear_h(P)
-            Pp = from_jacobian(P)
-            assert Pp[0] ** 3 + 4 == Pp[1] ** 2
-
-        # now test end-to-end
-        P = from_jacobian(opt_swu_map(t1, t2))
-        assert P[0] ** 3 + 4 == P[1] ** 2
+            # test helpers individually
+            for t in (t1, t2):
+                P = osswu_help(t)
+                Pp = from_jacobian(P)
+                assert Pp[0] ** 3 + EllP_a * Pp[0] + EllP_b == Pp[1] ** 2
+                P = iso11(P)
+                Pp = from_jacobian(P)
+                assert Pp[0] ** 3 + 4 == Pp[1] ** 2
+                P = clear_h(P)
+                Pp = from_jacobian(P)
+                assert Pp[0] ** 3 + 4 == Pp[1] ** 2
+            # now test end-to-end
+            P = from_jacobian(opt_swu_map(t1, t2))
+            assert P[0] ** 3 + 4 == P[1] ** 2
+            sys.stdout.write('.')
+            sys.stdout.flush()
+        sys.stdout.write("\n")
 
     def main():
-        if len(sys.argv) == 1:
+        opts = get_cmdline_options()
+        if opts is None:
             run_tests()
         else:
             ciphersuite = bytes([1])
-            for msg in sys.argv[1:]:
-                msg_to_hash = ciphersuite + msg.encode('utf-8')
-                t1 = Fq(p, *Hp(msg_to_hash, 0))
-                t2 = Fq(p, *Hp(msg_to_hash, 1))
-                P = from_jacobian(opt_swu_map(t1, t2))
+            for (msg, _) in opts:
+                P = from_jacobian(map2curve_osswu(ciphersuite + msg))
                 print(P)
 
     main()
