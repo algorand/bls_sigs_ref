@@ -8,9 +8,9 @@ import sys
 if sys.version_info[0] < 3:
     raise RuntimeError("this script requires Python 3")
 
-from curve_ops import clear_h2, eval_iso, from_jacobian, point_add, to_jacobian  # pylint: disable=wrong-import-position
-from fields import Fq2, p                                                        # pylint: disable=wrong-import-position
-from hash_to_field import Hp2                                                    # pylint: disable=wrong-import-position
+from curve_ops import clear_h2, eval_iso, from_jacobian, point_add  # pylint: disable=wrong-import-position
+from fields import Fq2, p                                           # pylint: disable=wrong-import-position
+from hash_to_field import Hp2                                       # pylint: disable=wrong-import-position
 
 # distinguished non-square in Fp2 for SWU map
 xi_2 = Fq2(p, 1, 1)
@@ -69,7 +69,7 @@ def osswu2_help(t):
             # found sqrt(g(X0(t))). force sign of y to equal sign of t
             y0 = sgn0(y0) * sgn0(t) * y0
             assert sgn0(y0) == sgn0(t)
-            return (x0, y0)
+            return (x0, y0, 1)
 
     # if we've gotten here, then g(X0(t)) is not square. convert srqt_candidate to sqrt(g(X1(t)))
     x1 = xi_2 * t ** 2 * x0
@@ -81,7 +81,7 @@ def osswu2_help(t):
             # found sqrt(g(X1(t))). force sign of y to equal sign of t
             y1 = sgn0(y1) * sgn0(t) * y1
             assert sgn0(y1) == sgn0(t)
-            return (x1, y1)
+            return (x1, y1, 1)
 
     # if we got here, something is wrong
     raise RuntimeError("osswu2_help failed for unknown reasons")
@@ -132,7 +132,7 @@ def opt_swu2_map(t, t2=None):
     if t2 is not None:
         Pp2 = osswu2_help(t2)
         # inefficient: needs inversion after the add. Better to work in projective coords throughout
-        Pp = from_jacobian(point_add(to_jacobian(Pp), to_jacobian(Pp2)))
+        Pp = point_add(Pp, Pp2)
     P = iso3(Pp)
     return clear_h2(P)
 
@@ -148,23 +148,30 @@ def run_tests():
             P = osswu2_help(t)
             assert P[0] ** 3 + Ell2p_a * P[0] + Ell2p_b == P[1] ** 2
             P = iso3(P)
-            assert P[0] ** 3 + Fq2(p, 4, 4) == P[1] ** 2
+            Pp = from_jacobian(P)
+            assert Pp[0] ** 3 + Fq2(p, 4, 4) == Pp[1] ** 2
             P = psi(P)
-            assert P[0] ** 3 + Fq2(p, 4, 4) == P[1] ** 2
+            Pp = from_jacobian(P)
+            assert Pp[0] ** 3 + Fq2(p, 4, 4) == Pp[1] ** 2
             P = clear_h2(P)
-            assert P[0] ** 3 + Fq2(p, 4, 4) == P[1] ** 2
+            Pp = from_jacobian(P)
+            assert Pp[0] ** 3 + Fq2(p, 4, 4) == Pp[1] ** 2
 
         # now test end-to-end
         P = opt_swu2_map(t1, t2)
-        assert P[0] ** 3 + Fq2(p, 4, 4) == P[1] ** 2
+        Pp = from_jacobian(P)
+        assert Pp[0] ** 3 + Fq2(p, 4, 4) == Pp[1] ** 2
 
 if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        run_tests()
-    else:
-        ciphersuite = bytes([2])
-        msg_to_hash = ciphersuite + sys.argv[1].encode('utf-8')
-        t1 = Fq2(p, *Hp2(msg_to_hash, 0))
-        t2 = Fq2(p, *Hp2(msg_to_hash, 1))
-        P = opt_swu2_map(t1, t2)
-        print(P)
+    def main():
+        if len(sys.argv) == 1:
+            run_tests()
+        else:
+            ciphersuite = bytes([2])
+            for msg in sys.argv[1:]:
+                msg_to_hash = ciphersuite + msg.encode('utf-8')
+                t1 = Fq2(p, *Hp2(msg_to_hash, 0))
+                t2 = Fq2(p, *Hp2(msg_to_hash, 1))
+                P = from_jacobian(opt_swu2_map(t1, t2))
+                print(P)
+    main()
