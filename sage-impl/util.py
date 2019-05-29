@@ -59,9 +59,8 @@ def get_cmdline_options():
         (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:dT:")
 
     except getopt.GetoptError as err:
-        print "Usage: %s [-d] [-k key] [-T test_file] [msg ...]"
-        print str(err)
-        sys.exit(1)
+        print "Usage: %s [-d] [-k key] [-T test_file] [msg ...]" % sys.argv[0]
+        sys.exit(str(err))
 
     for (opt, arg) in opts:
         if opt == "-k":
