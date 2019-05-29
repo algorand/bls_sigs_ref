@@ -11,7 +11,7 @@ if sys.version_info[0] < 3:
 from curve_ops import clear_h2, eval_iso, from_jacobian, point_add  # pylint: disable=wrong-import-position
 from fields import Fq2, p                                           # pylint: disable=wrong-import-position
 from hash_to_field import Hp2                                       # pylint: disable=wrong-import-position
-from util import get_cmdline_options                                # pylint: disable=wrong-import-position
+from util import get_cmdline_options, print_g2_hex, print_tv_hash   # pylint: disable=wrong-import-position
 
 # distinguished non-square in Fp2 for SWU map
 xi_2 = Fq2(p, 1, 1)
@@ -186,9 +186,8 @@ if __name__ == "__main__":
         if opts is None:
             run_tests()
         else:
-            ciphersuite = bytes([2])
+            ciphersuite = 2
             for (msg, _) in opts:
-                P = from_jacobian(map2curve_osswu2(ciphersuite + msg))
-                print(P)
+                print_tv_hash(msg, ciphersuite, map2curve_osswu2, print_g2_hex)
 
     main()
