@@ -139,7 +139,6 @@ def opt_swu2_map(t, t2=None):
     Pp = osswu2_help(t)
     if t2 is not None:
         Pp2 = osswu2_help(t2)
-        # inefficient: needs inversion after the add. Better to work in projective coords throughout
         Pp = point_add(Pp, Pp2)
     P = iso3(Pp)
     return clear_h2(P)
