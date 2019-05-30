@@ -10,7 +10,7 @@ import os
 import struct
 import sys
 
-from curve_ops import from_jacobian
+from curve_ops import from_jacobian, g1gen, g2gen, q
 
 def get_cmdline_options():
     sk = bytes("11223344556677889900112233445566", "ascii")
@@ -51,6 +51,8 @@ def get_cmdline_options():
 
 def print_g1_hex(P, margin=8):
     indent_str = " " * margin
+    if len(P) == 3:
+        P = from_jacobian(P)
     print(indent_str, "x = 0x%x" % P[0])
     print(indent_str, "y = 0x%x" % P[1])
 
@@ -60,6 +62,8 @@ def print_f2_hex(vv, name, margin=8):
     print(indent_str + name + "1 = 0x%x" % vv[1])
 
 def print_g2_hex(P, margin=8):
+    if len(P) == 3:
+        P = from_jacobian(P)
     print_f2_hex(P[0], 'x', margin)
     print_f2_hex(P[1], 'y', margin)
 
@@ -100,6 +104,40 @@ def print_tv_hash(msg, ciphersuite, hash_fn, print_pt_fn):
     print_value(msg, 13, True)
 
     print("result:")
-    print_pt_fn(from_jacobian(P))
+    print_pt_fn(P)
 
     print("===============  end hash test vector  ==================")
+
+def print_tv_sig(sk, msg, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig_fn):
+    # generate key and signature
+    (x_prime, pk) = keygen_fn(sk)
+    sig = sign_fn(x_prime, msg, ciphersuite)
+
+    # output the test vector
+    print("================== begin test vector ====================")
+
+    print("g1 generator:")
+    print_g1_hex(g1gen)
+
+    print("g2 generator:")
+    print_g2_hex(g2gen)
+
+    print("group order: 0x%x" % q)
+    print("ciphersuite: 0x%x" % ciphersuite)
+
+    sys.stdout.write("message:     ")
+    print_value(msg, 13, True)
+
+    sys.stdout.write("sk:          ")
+    print_value(sk, 13, True)
+
+    sys.stdout.write("x_prime:     ")
+    print_value(x_prime, 13, True)
+
+    print("public key:")
+    print_pk_fn(pk)
+
+    print("signature:")
+    print_sig_fn(sig)
+
+    print("==================  end test vector  ====================")

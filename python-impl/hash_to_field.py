@@ -6,6 +6,7 @@
 #     https://github.com/pairingwg/bls_standard/blob/master/minutes/spec-v1.md
 
 from hashlib import sha256
+
 from curve_ops import p
 
 # defined in RFC 3447, section 4.1

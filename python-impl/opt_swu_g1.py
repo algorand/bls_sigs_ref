@@ -4,14 +4,10 @@
 #
 # pure Python implementation of optimized simplified SWU map to BLS12-381 G1
 
-import sys
-if sys.version_info[0] < 3:
-    raise RuntimeError("this script requires Python 3")
-
-from curve_ops import clear_h, eval_iso, from_jacobian, point_add, p    # pylint: disable=wrong-import-position
-from fields import Fq                                                   # pylint: disable=wrong-import-position
-from hash_to_field import Hp                                            # pylint: disable=wrong-import-position
-from util import get_cmdline_options, print_g1_hex, print_tv_hash       # pylint: disable=wrong-import-position
+from curve_ops import clear_h, eval_iso, from_jacobian, point_add, p
+from fields import Fq
+from hash_to_field import Hp
+from util import get_cmdline_options, print_g1_hex, print_tv_hash
 
 # distinguished non-square in Fp for SWU map
 xi_1 = Fq(p, -1)
@@ -151,6 +147,8 @@ def map2curve_osswu(alpha):
     return opt_swu_map(t1, t2)
 
 if __name__ == "__main__":
+    import sys
+
     def run_tests():
         import random
         for _ in range(0, 128):
