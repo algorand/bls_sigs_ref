@@ -9,6 +9,7 @@
 #
 # Changes from the original version:
 # * Some unneeded functionality was removed and some pylint errors were fixed.
+# * added trivial __reversed__ method to Fq to support generic sgn0 impl
 
 from copy import deepcopy
 
@@ -101,6 +102,9 @@ class Fq(int):
     __truediv__ = __floordiv__
 
     def __iter__(self):
+        yield self
+
+    def __reversed__(self):
         yield self
 
     def __deepcopy__(self, memo):

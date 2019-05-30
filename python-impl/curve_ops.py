@@ -14,6 +14,18 @@ def from_jacobian(P):
     z3inv = ~(P[2] ** 3)
     return (P[0] * P[2] * z3inv, P[1] * z3inv)
 
+# equality for Jacobian points
+def point_eq(P, Q):
+    (X1, Y1, Z1) = P
+    (X2, Y2, Z2) = Q
+    Z1sq = pow(Z1, 2)
+    Z2sq = pow(Z2, 2)
+    X12 = X1 * Z2sq
+    X21 = X2 * Z1sq
+    Y12 = Y1 * Z2sq * Z2
+    Y21 = Y2 * Z1sq * Z1
+    return (X12, Y12) == (X21, Y21)
+
 # http://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-add-2007-bl
 def point_add(P, Q):
     (X1, Y1, Z1) = P

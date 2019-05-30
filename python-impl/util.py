@@ -7,6 +7,7 @@
 import binascii
 import getopt
 import os
+import struct
 import sys
 
 from curve_ops import from_jacobian
@@ -64,7 +65,7 @@ def print_g2_hex(P, margin=8):
 
 def prepare_msg(msg, ciphersuite):
     assert isinstance(msg, bytes) and isinstance(ciphersuite, int)
-    return bytes((ciphersuite,)) + msg
+    return ciphersuite.to_bytes(1, "big") + msg
 
 def print_value(iv, indent=8, skip_first=False):
     max_line_length = 111

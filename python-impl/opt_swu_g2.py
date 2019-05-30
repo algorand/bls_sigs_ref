@@ -11,6 +11,7 @@ if sys.version_info[0] < 3:
 from curve_ops import clear_h2, eval_iso, from_jacobian, point_add  # pylint: disable=wrong-import-position
 from fields import Fq2, p                                           # pylint: disable=wrong-import-position
 from hash_to_field import Hp2                                       # pylint: disable=wrong-import-position
+from opt_swu_g1 import sgn0                                         # pylint: disable=wrong-import-position
 from util import get_cmdline_options, print_g2_hex, print_tv_hash   # pylint: disable=wrong-import-position
 
 # distinguished non-square in Fp2 for SWU map
@@ -20,28 +21,25 @@ xi_2 = Fq2(p, 1, 1)
 Ell2p_a = Fq2(p, 0, 240)
 Ell2p_b = Fq2(p, 1012, 1012)
 
-# roots of unity, used for computing sqrt(g(X0(t)))
+# roots of unity, used for computing square roots
 rv1 = 0x6af0e0437ff400b6831e36d6bd17ffe48395dabc2d3435e77f76e17009241c5ee67992f72ec05f4c81084fbede3cc09
 roots_of_unity = (Fq2(p, 1, 0), Fq2(p, 0, 1), Fq2(p, rv1, rv1), Fq2(p, rv1, p - rv1))
 del rv1
+
+# sqrt function -- returns None when input is nonsquare
+def sqrt_F2(val):
+    sqrt_cand = pow(val, (p ** 2 + 7) // 16)
+    ret = None
+    for root in roots_of_unity:
+        tmp = sqrt_cand * root
+        ret = tmp if pow(tmp, 2) == val else ret
+    return ret
 
 # eta values, used for computing sqrt(g(X1(t)))
 ev1 = 0x2c4a7244a026bd3e305cc456ad9e235ed85f8b53954258ec8186bb3d4eccef7c4ee7b8d4b9e063a6c88d0aa3e03ba01
 ev2 = 0x85fa8cd9105715e641892a0f9a4bb2912b58b8d32f26594c60679cc7973076dc6638358daf3514d6426a813ae01f51a
 etas = (Fq2(p, ev1, 0), Fq2(p, 0, ev1), Fq2(p, ev2, ev2), Fq2(p, ev2, p - ev2))
 del ev1, ev2
-
-# "sign" of x: returns -1 if x is the lexically larger of x and -1 * x, else returns 1
-def sgn0(x):
-    thresh = (p - 1) // 2
-    sign = 0
-    for xi in reversed(x):
-        if xi > thresh:
-            sign = -1 if sign == 0 else sign
-        elif xi > 0:
-            sign = 1 if sign == 0 else sign
-    sign = 1 if sign == 0 else sign
-    return sign
 
 ###
 ## Simplified SWU map, optimized and adapted to Ell2'
