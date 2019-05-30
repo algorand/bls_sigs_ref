@@ -4,7 +4,8 @@
 #
 # pure Python implementation of optimized simplified SWU map to BLS12-381 G2
 
-from curve_ops import clear_h2, eval_iso, from_jacobian, g2suite, point_add, p
+from consts import g2suite, p
+from curve_ops import clear_h2, eval_iso, from_jacobian, point_add
 from fields import Fq2
 from hash_to_field import Hp2
 from opt_swu_g1 import sgn0

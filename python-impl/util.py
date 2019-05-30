@@ -10,7 +10,8 @@ import os
 import struct
 import sys
 
-from curve_ops import from_jacobian, g1gen, g2gen, q
+from consts import q
+from curve_ops import g1gen, g2gen, from_jacobian
 
 def get_cmdline_options():
     sk = bytes("11223344556677889900112233445566", "ascii")

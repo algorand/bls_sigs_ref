@@ -7,7 +7,7 @@
 
 from hashlib import sha256
 
-from curve_ops import p
+from consts import p
 
 # defined in RFC 3447, section 4.1
 def I2OSP(val, length):

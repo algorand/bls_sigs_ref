@@ -2,7 +2,8 @@
 #
 # (C) Riad S. Wahby <rsw@cs.stanford.edu>
 
-from curve_ops import q, g2gen, g1suite, point_mul
+from consts import q, g1suite
+from curve_ops import g2gen, point_mul
 from hash_to_field import hash_to_field
 from opt_swu_g1 import map2curve_osswu
 from util import get_cmdline_options, prepare_msg, print_g1_hex, print_g2_hex, print_tv_sig

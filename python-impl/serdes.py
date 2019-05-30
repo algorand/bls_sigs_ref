@@ -11,7 +11,8 @@
 import struct
 import sys
 
-from curve_ops import from_jacobian, point_eq, p
+from consts import p
+from curve_ops import from_jacobian, point_eq
 from fields import Fq, Fq2
 from opt_swu_g1 import sgn0, opt_swu_map
 from opt_swu_g2 import sqrt_F2, opt_swu2_map
