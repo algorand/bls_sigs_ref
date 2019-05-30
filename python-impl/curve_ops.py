@@ -4,12 +4,29 @@
 #
 # pure Python implementation of curve ops for Ell2 on BLS12-381
 
+import sys
+
 from fields import Fq, Fq2
+
+if sys.version_info[0] < 3:
+    sys.exit("This script requires Python3 or PyPy3")
 
 # base field order
 p = 0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab
 # subgroup order
-r = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
+q = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
+
+# generators and ciphersuite numbers
+g1gen = (Fq(p, 0x17f1d3a73197d7942695638c4fa9ac0fc3688c4f9774b905a14e3a3f171bac586c55e83ff97a1aeffb3af00adb22c6bb),
+         Fq(p, 0x08b3f481e3aaa0f1a09e30ed741d8ae4fcf5e095d5d00af600db18cb2c04b3edd03cc744a2888ae40caa232946c5e7e1),
+         Fq.one(p))
+g1suite = 1
+g2gen = (Fq2(p, 0x024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8,
+                0x13e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e),
+         Fq2(p, 0x0ce5d527727d6e118cc9cdc6da2e351aadfd9baa8cbdd3a76d429a695160d12c923ac9cc3baca289e193548608b82801,
+                0x0606c4a02ea734cc32acd2b02bc28b99cb3e287e85a763af267492ab572e99ab3f370d275cec1da1aaa9075ff05f79be),
+         Fq2.one(p))
+g2suite = 2
 
 ###
 ## Basic curve operations
@@ -35,6 +52,9 @@ def point_eq(P, Q):
 def point_add(P, Q):
     (X1, Y1, Z1) = P
     (X2, Y2, Z2) = Q
+    p_inf = Z1 == 0
+    q_inf = Z2 == 0
+
     Z1Z1 = Z1 ** 2
     Z2Z2 = Z2 ** 2
     U1 = X1 * Z2Z2
@@ -49,11 +69,16 @@ def point_add(P, Q):
     X3 = rr ** 2 - J - 2 * V
     Y3 = rr * (V - X3) - 2 * S1 * J
     Z3 = 2 * Z1 * Z2 * H
-    return (X3, Y3, Z3)
+
+    ty = type(X1)
+    inf = (ty.zero(p), ty.one(p), ty.zero(p))
+    return inf if p_inf and q_inf else P if q_inf else Q if p_inf else (X3, Y3, Z3)
 
 # http://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#doubling-dbl-2009-l
 def point_double(P):
     (X, Y, Z) = P
+    p_inf = Z == 0
+
     A = X ** 2
     B = Y ** 2
     C = B ** 2
@@ -63,7 +88,9 @@ def point_double(P):
     Xout = F - 2 * D
     Yout = E * (D - Xout) - 8 * C
     Zout = 2 * Y * Z
-    return (Xout, Yout, Zout)
+
+    ty = type(X)
+    return (ty.zero(p), ty.one(p), Zout) if Zout == 0 else (Xout, Yout, Zout)
 
 # negate the Y-coordinate
 def point_neg(P):
@@ -76,6 +103,22 @@ def x_chain(P):
         Q = point_add(Q, P)
         for _ in range(0, ndoubles):
             Q = point_double(Q)
+    return Q
+
+# NOTE: this routine is NOT constant time!
+def point_mul(k, P):
+    ty = type(P[0])
+    Q = (ty.zero(p), ty.one(p), ty.zero(p))
+    for b in bin(k)[2:]:
+        if Q[2] != 0:
+            Q = point_double(Q)
+        if b == '1':
+            if Q[2] == 0:
+                Q = P
+            elif point_eq(Q, P):
+                Q = point_double(Q)
+            else:
+                Q = point_add(P, Q)
     return Q
 
 ###

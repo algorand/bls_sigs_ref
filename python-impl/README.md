@@ -2,6 +2,8 @@
 
 This directory contains implementations of the optimized simplfied SWU maps to G1 and G2 of BLS12-381, in pure python.
 
+**Note: this code is not constant time and should not be used except for testing.**
+
 # license
 
 All files in the subdirectory other than `fields.py` are
