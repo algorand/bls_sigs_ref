@@ -8,10 +8,10 @@ import sys
 if sys.version_info[0] < 3:
     raise RuntimeError("this script requires Python 3")
 
-from curve_ops import clear_h, eval_iso, from_jacobian, point_add   # pylint: disable=wrong-import-position
-from fields import Fq, p                                            # pylint: disable=wrong-import-position
-from hash_to_field import Hp                                        # pylint: disable=wrong-import-position
-from util import get_cmdline_options, print_g1_hex, print_tv_hash   # pylint: disable=wrong-import-position
+from curve_ops import clear_h, eval_iso, from_jacobian, point_add, p    # pylint: disable=wrong-import-position
+from fields import Fq                                                   # pylint: disable=wrong-import-position
+from hash_to_field import Hp                                            # pylint: disable=wrong-import-position
+from util import get_cmdline_options, print_g1_hex, print_tv_hash       # pylint: disable=wrong-import-position
 
 # distinguished non-square in Fp for SWU map
 xi_1 = Fq(p, -1)

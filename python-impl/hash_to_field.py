@@ -6,7 +6,7 @@
 #     https://github.com/pairingwg/bls_standard/blob/master/minutes/spec-v1.md
 
 from hashlib import sha256
-from fields import p
+from curve_ops import p
 
 # defined in RFC 3447, section 4.1
 def I2OSP(val, length):

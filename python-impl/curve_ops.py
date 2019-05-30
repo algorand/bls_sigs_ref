@@ -4,7 +4,12 @@
 #
 # pure Python implementation of curve ops for Ell2 on BLS12-381
 
-from fields import Fq, Fq2, p
+from fields import Fq, Fq2
+
+# base field order
+p = 0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab
+# subgroup order
+r = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
 
 ###
 ## Basic curve operations
@@ -39,10 +44,10 @@ def point_add(P, Q):
     H = U2 - U1
     I = (2 * H) ** 2
     J = H * I
-    r = 2 * (S2 - S1)
+    rr = 2 * (S2 - S1)
     V = U1 * I
-    X3 = r ** 2 - J - 2 * V
-    Y3 = r * (V - X3) - 2 * S1 * J
+    X3 = rr ** 2 - J - 2 * V
+    Y3 = rr * (V - X3) - 2 * S1 * J
     Z3 = 2 * Z1 * Z2 * H
     return (X3, Y3, Z3)
 
