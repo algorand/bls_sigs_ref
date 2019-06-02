@@ -23,6 +23,7 @@ def sign(x_prime, msg, ciphersuite):
 
 if __name__ == "__main__":
     def main():
-        for (msg, sk) in get_cmdline_options():
+        opts = get_cmdline_options()
+        for (msg, sk) in opts.sig_inputs:
             print_tv_sig(sk, msg, g2suite, sign, keygen, print_g1_hex, print_g2_hex)
     main()

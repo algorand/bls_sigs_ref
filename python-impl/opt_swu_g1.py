@@ -175,10 +175,10 @@ if __name__ == "__main__":
 
     def main():
         opts = get_cmdline_options()
-        if opts is None:
+        if opts.run_tests:
             run_tests()
         else:
-            for (msg, _) in opts:
+            for (msg, _) in opts.sig_inputs:
                 print_tv_hash(msg, g1suite, map2curve_osswu, print_g1_hex)
 
     main()

@@ -4,7 +4,7 @@
 #
 # utilities for BLS sigs Python ref impl
 
-import binascii
+from binascii import unhexlify
 import getopt
 import os
 import struct
@@ -13,18 +13,34 @@ import sys
 from consts import q
 from curve_ops import g1gen, g2gen, from_jacobian
 
+class Options(object):
+    run_tests = False
+    sig_inputs = None
+    ver_inputs = None
+    verify_generated_sigs = False
+
+    def __init__(self):
+        self.sig_inputs = []
+        self.ver_inputs = []
+
+def _read_test_file(filename):
+    ret = []
+    with open(filename, "r") as test_file:
+        ret += [ tuple( unhexlify(val) for val in line.strip().split(' ') ) for line in test_file.readlines() ]
+    return ret
+
 def get_cmdline_options():
     sk = bytes("11223344556677889900112233445566", "ascii")
     msg_dflt = bytes("the message to be signed", "ascii")
-    test_inputs = []
+    ret = Options()
 
     # process cmdline args with getopt
     try:
-        (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:T:t")
+        (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:T:tvV:")
 
     except getopt.GetoptError as err:
         print("Usage: %s [-t]" % sys.argv[0])
-        print("       %s [-k key] [-T test_file] [msg ...]" % sys.argv[0])
+        print("       %s [-v] [-k key] [-T test_file] [msg ...]" % sys.argv[0])
         sys.exit(str(err))
 
     for (opt, arg) in opts:
@@ -32,21 +48,24 @@ def get_cmdline_options():
             sk = os.fsencode(arg)
 
         elif opt == "-T":
-            with open(arg, "r") as test_file:
-                test_inputs += [ tuple( binascii.unhexlify(val) \
-                                        for val in line.strip().split(' ') ) \
-                                 for line in test_file.readlines() ]
+            ret.sig_inputs += _read_test_file(arg)
+
+        elif opt == "-V":
+            ret.ver_inputs += _read_test_file(arg)
 
         elif opt == "-t":
-            return None
+            ret.run_tests = True
+
+        elif opt == "-v":
+            ret.verify_generated_sigs = True
 
         else:
             raise RuntimeError("got unexpected option %s from getopt" % opt)
 
     # build up return value: (msg, sk) tuples from cmdline and test files
-    ret = [ (os.fsencode(arg), sk) for arg in args ] + test_inputs
-    if not ret:
-        ret = [ (msg_dflt, sk) ]
+    ret.sig_inputs += [ (os.fsencode(arg), sk) for arg in args ]
+    if not ret.sig_inputs:
+        ret.sig_inputs = [ (msg_dflt, sk) ]
 
     return ret
 
