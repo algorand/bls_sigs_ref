@@ -11,3 +11,4 @@ psha256
 bls_hash
 hash_and_try
 *.sage.py
+__pycache__
