@@ -37,15 +37,16 @@ def from_jacobian(P):
 def _point_eq_coz(P, Q, coZ):
     (X1, Y1, Z1) = P
     (X2, Y2, Z2) = Q
-    inf_match = (Z1 == 0) ^ (Z2 == 0) ^ 1   # true just if both or neither are infty
     Z1sq = pow(Z1, 2)
     Z2sq = pow(Z2, 2)
     X12 = X1 * Z2sq
     X21 = X2 * Z1sq
     Y12 = Y1 * Z2sq * Z2
     Y21 = Y2 * Z1sq * Z1
+    inf_match = (Z1 == 0) ^ (Z2 == 0) ^ 1   # true just if both or neither are infty
     if not coZ:
-        return ((X12, Y12) == (X21, Y21)) & inf_match
+        # inf_match ensures that the invalid point (0,0,0) isn't equal to everything
+        return bool(((X12, Y12) == (X21, Y21)) & inf_match)
     if not inf_match:
         raise ValueError("cannot make finite point co-Z with infty")
     Z12 = Z1 * Z2
