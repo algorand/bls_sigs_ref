@@ -3,9 +3,10 @@
 # (C) Riad S. Wahby <rsw@cs.stanford.edu>
 
 from consts import q, g1suite
-from curve_ops import g2gen, point_mul
+from curve_ops import g2gen, point_mul, point_neg
 from hash_to_field import hash_to_field
 from opt_swu_g1 import map2curve_osswu
+from pairing import multi_pairing
 from util import get_cmdline_options, prepare_msg, print_g1_hex, print_g2_hex, print_tv_sig
 
 # sk must be bytes()
@@ -21,9 +22,16 @@ def sign(x_prime, msg, ciphersuite):
     P = map2curve_osswu(prepare_msg(msg, ciphersuite))
     return point_mul(x_prime, P)
 
+# verification corresponding to sign()
+# returns True if the signature is correct, False otherwise
+def verify(pk, sig, msg, ciphersuite):
+    P = map2curve_osswu(prepare_msg(msg, ciphersuite))
+    return multi_pairing((P, sig), (pk, point_neg(g2gen))) == 1
+
 if __name__ == "__main__":
     def main():
         opts = get_cmdline_options()
+        ver_fn = verify if opts.verify else None
         for (msg, sk) in opts.sig_inputs:
-            print_tv_sig(sk, msg, g1suite, sign, keygen, print_g2_hex, print_g1_hex)
+            print_tv_sig(sk, msg, g1suite, sign, keygen, print_g2_hex, print_g1_hex, ver_fn)
     main()

@@ -17,7 +17,7 @@ class Options(object):
     run_tests = False
     sig_inputs = None
     ver_inputs = None
-    verify_generated_sigs = False
+    verify = False
 
     def __init__(self):
         self.sig_inputs = []
@@ -57,7 +57,7 @@ def get_cmdline_options():
             ret.run_tests = True
 
         elif opt == "-v":
-            ret.verify_generated_sigs = True
+            ret.verify = True
 
         else:
             raise RuntimeError("got unexpected option %s from getopt" % opt)
@@ -128,10 +128,11 @@ def print_tv_hash(msg, ciphersuite, hash_fn, print_pt_fn):
 
     print("===============  end hash test vector  ==================")
 
-def print_tv_sig(sk, msg, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig_fn):
+def print_tv_sig(sk, msg, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig_fn, ver_fn):
     # generate key and signature
     (x_prime, pk) = keygen_fn(sk)
     sig = sign_fn(x_prime, msg, ciphersuite)
+    assert ver_fn is None or ver_fn(pk, sig, msg, ciphersuite)
 
     # output the test vector
     print("================== begin test vector ====================")
