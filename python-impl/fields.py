@@ -11,11 +11,24 @@
 # * Some unneeded functionality was removed and some pylint errors were fixed.
 # * added trivial __reversed__ method to Fq to support generic sgn0 impl
 # * q -> p in frob_coeffs for consistency with the rest of this library
+# * moved sgn0 and sqrt_F2 into this file
 #
 # Changes (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
 
 from copy import deepcopy
 from consts import p
+
+# "sign" of x: returns -1 if x is the lexically larger of x and -1 * x, else returns 1
+def sgn0(x):
+    thresh = (p - 1) // 2
+    sign = 0
+    for xi in reversed(x):
+        if xi > thresh:
+            sign = -1 if sign == 0 else sign
+        elif xi > 0:
+            sign = 1 if sign == 0 else sign
+    sign = 1 if sign == 0 else sign
+    return sign
 
 class Fq(int):
     """
@@ -344,6 +357,20 @@ class Fq2(FieldExtBase):
         # multiply by u + 1
         a, b = self
         return Fq2(self.Q, a - b, a + b)
+
+# roots of unity, used for computing square roots in Fq2
+rv1 = 0x6af0e0437ff400b6831e36d6bd17ffe48395dabc2d3435e77f76e17009241c5ee67992f72ec05f4c81084fbede3cc09
+roots_of_unity = (Fq2(p, 1, 0), Fq2(p, 0, 1), Fq2(p, rv1, rv1), Fq2(p, rv1, p - rv1))
+del rv1
+
+# sqrt function -- returns None when input is nonsquare
+def sqrt_F2(val):
+    sqrt_cand = pow(val, (p ** 2 + 7) // 16)
+    ret = None
+    for root in roots_of_unity:
+        tmp = sqrt_cand * root
+        ret = tmp if pow(tmp, 2) == val else ret
+    return ret
 
 class Fq6(FieldExtBase):
     # Fq6 is constructed as Fq2(v) / (v^3 - j) where j = u + 1

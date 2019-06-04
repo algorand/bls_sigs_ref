@@ -12,16 +12,15 @@ import sys
 
 from consts import q
 from curve_ops import g1gen, g2gen, from_jacobian
+from serdes import serialize, deserialize, SerError, DeserError
 
 class Options(object):
     run_tests = False
-    sig_inputs = None
-    ver_inputs = None
+    test_inputs = None
     verify = False
 
     def __init__(self):
-        self.sig_inputs = []
-        self.ver_inputs = []
+        self.test_inputs = []
 
 def _read_test_file(filename):
     ret = []
@@ -36,7 +35,7 @@ def get_cmdline_options():
 
     # process cmdline args with getopt
     try:
-        (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:T:tvV:")
+        (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:T:tv")
 
     except getopt.GetoptError as err:
         print("Usage: %s [-t]" % sys.argv[0])
@@ -48,10 +47,7 @@ def get_cmdline_options():
             sk = os.fsencode(arg)
 
         elif opt == "-T":
-            ret.sig_inputs += _read_test_file(arg)
-
-        elif opt == "-V":
-            ret.ver_inputs += _read_test_file(arg)
+            ret.test_inputs += _read_test_file(arg)
 
         elif opt == "-t":
             ret.run_tests = True
@@ -63,9 +59,9 @@ def get_cmdline_options():
             raise RuntimeError("got unexpected option %s from getopt" % opt)
 
     # build up return value: (msg, sk) tuples from cmdline and test files
-    ret.sig_inputs += [ (os.fsencode(arg), sk) for arg in args ]
-    if not ret.sig_inputs:
-        ret.sig_inputs = [ (msg_dflt, sk) ]
+    ret.test_inputs += [ (os.fsencode(arg), sk) for arg in args ]
+    if not ret.test_inputs:
+        ret.test_inputs = [ (msg_dflt, sk) ]
 
     return ret
 
@@ -113,8 +109,20 @@ def print_value(iv, indent=8, skip_first=False):
         line_length += len(out_str) + 1
     sys.stdout.write("\n")
 
-def print_tv_hash(msg, ciphersuite, hash_fn, print_pt_fn):
+def print_tv_hash(hash_in, ciphersuite, hash_fn, print_pt_fn):
+    if len(hash_in) > 2:
+        (msg, _, hash_expect) = hash_in[:3]
+    else:
+        msg = hash_in[0]
+        hash_expect = None
+    # hash to point
     P = hash_fn(prepare_msg(msg, ciphersuite))
+
+    if hash_expect is not None:
+        if serialize(P) != hash_expect:
+            raise SerError("serializing P did not give hash_expect")
+        if from_jacobian(deserialize(hash_expect)) != from_jacobian(P):
+            raise DeserError("deserializing hash_expect did not give P")
 
     print("=============== begin hash test vector ==================")
 
@@ -128,11 +136,24 @@ def print_tv_hash(msg, ciphersuite, hash_fn, print_pt_fn):
 
     print("===============  end hash test vector  ==================")
 
-def print_tv_sig(sk, msg, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig_fn, ver_fn):
+def print_tv_sig(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig_fn, ver_fn):
+    if len(sig_in) > 2:
+        (msg, sk, sig_expect) = sig_in[:3]
+    else:
+        (msg, sk) = sig_in
+        sig_expect = None
     # generate key and signature
     (x_prime, pk) = keygen_fn(sk)
     sig = sign_fn(x_prime, msg, ciphersuite)
-    assert ver_fn is None or ver_fn(pk, sig, msg, ciphersuite)
+
+    if sig_expect is not None:
+        if serialize(sig) != sig_expect:
+            raise SerError("serializing sig did not give sig_expect")
+        if from_jacobian(deserialize(sig_expect)) != from_jacobian(sig):
+            raise DeserError("deserializing sig_expect did not give sig")
+
+    if ver_fn is not None and not ver_fn(pk, sig, msg, ciphersuite):
+        raise RuntimeError("verifying generated signature failed")
 
     # output the test vector
     print("================== begin test vector ====================")

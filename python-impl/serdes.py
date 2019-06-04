@@ -13,9 +13,7 @@ import sys
 
 from consts import p
 from curve_ops import from_jacobian, point_eq
-from fields import Fq, Fq2
-from opt_swu_g1 import sgn0, opt_swu_map
-from opt_swu_g2 import sqrt_F2, opt_swu2_map
+from fields import Fq, Fq2, sgn0, sqrt_F2
 
 F1_one = Fq.one(p)
 F1_zero = Fq.zero(p)
@@ -222,6 +220,9 @@ def _deserialize_ell2(data, tag):
 if __name__ == "__main__":
     import binascii
     import random
+
+    from opt_swu_g1 import opt_swu_map
+    from opt_swu_g2 import opt_swu2_map
 
     invalid_inputs = [
         # infty points, too short

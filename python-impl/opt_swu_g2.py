@@ -6,9 +6,8 @@
 
 from consts import g2suite, p
 from curve_ops import clear_h2, eval_iso, from_jacobian, point_add
-from fields import Fq2
+from fields import Fq2, sgn0, roots_of_unity
 from hash_to_field import Hp2
-from opt_swu_g1 import sgn0
 from util import get_cmdline_options, print_g2_hex, print_tv_hash
 
 # distinguished non-square in Fp2 for SWU map
@@ -17,20 +16,6 @@ xi_2 = Fq2(p, 1, 1)
 # 3-isogenous curve parameters
 Ell2p_a = Fq2(p, 0, 240)
 Ell2p_b = Fq2(p, 1012, 1012)
-
-# roots of unity, used for computing square roots
-rv1 = 0x6af0e0437ff400b6831e36d6bd17ffe48395dabc2d3435e77f76e17009241c5ee67992f72ec05f4c81084fbede3cc09
-roots_of_unity = (Fq2(p, 1, 0), Fq2(p, 0, 1), Fq2(p, rv1, rv1), Fq2(p, rv1, p - rv1))
-del rv1
-
-# sqrt function -- returns None when input is nonsquare
-def sqrt_F2(val):
-    sqrt_cand = pow(val, (p ** 2 + 7) // 16)
-    ret = None
-    for root in roots_of_unity:
-        tmp = sqrt_cand * root
-        ret = tmp if pow(tmp, 2) == val else ret
-    return ret
 
 # eta values, used for computing sqrt(g(X1(t)))
 ev1 = 0x2c4a7244a026bd3e305cc456ad9e235ed85f8b53954258ec8186bb3d4eccef7c4ee7b8d4b9e063a6c88d0aa3e03ba01
@@ -183,7 +168,7 @@ if __name__ == "__main__":
         if opts.run_tests:
             run_tests()
         else:
-            for (msg, _) in opts.sig_inputs:
-                print_tv_hash(msg, g2suite, map2curve_osswu2, print_g2_hex)
+            for hash_in in opts.test_inputs:
+                print_tv_hash(hash_in, g2suite, map2curve_osswu2, print_g2_hex)
 
     main()

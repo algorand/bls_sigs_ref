@@ -6,7 +6,7 @@
 
 from consts import g1suite, p
 from curve_ops import clear_h, eval_iso, from_jacobian, point_add
-from fields import Fq
+from fields import Fq, sgn0
 from hash_to_field import Hp
 from util import get_cmdline_options, print_g1_hex, print_tv_hash
 
@@ -16,18 +16,6 @@ xi_1 = Fq(p, -1)
 # 11-isogenous curve parameters
 EllP_a = Fq(p, 0x144698a3b8e9433d693a02c96d4982b0ea985383ee66a8d8e8981aefd881ac98936f8da0e0f97f5cf428082d584c1d)
 EllP_b = Fq(p, 0x12e2908d11688030018b12e8753eee3b2016c1f0f24f4070a0b9c14fcef35ef55a23215a316ceaa5d1cc48e98e172be0)
-
-# "sign" of x: returns -1 if x is the lexically larger of x and -1 * x, else returns 1
-def sgn0(x):
-    thresh = (p - 1) // 2
-    sign = 0
-    for xi in reversed(x):
-        if xi > thresh:
-            sign = -1 if sign == 0 else sign
-        elif xi > 0:
-            sign = 1 if sign == 0 else sign
-    sign = 1 if sign == 0 else sign
-    return sign
 
 ###
 ## Simplified SWU map for Ell1'
@@ -178,7 +166,7 @@ if __name__ == "__main__":
         if opts.run_tests:
             run_tests()
         else:
-            for (msg, _) in opts.sig_inputs:
-                print_tv_hash(msg, g1suite, map2curve_osswu, print_g1_hex)
+            for hash_in in opts.test_inputs:
+                print_tv_hash(hash_in, g1suite, map2curve_osswu, print_g1_hex)
 
     main()

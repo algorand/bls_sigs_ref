@@ -1,11 +1,11 @@
 The files in this directory comprises test inputs, one per line.
 
-Each line is a space-separated tuple (msg, key).
+Each line is a space-separated tuple (msg, sk).
 
-msg and key should be interpreted as hex-encoded octet strings, wherein each
+msg and sk should be interpreted as hex-encoded octet strings, wherein each
 pair of hex characters represents one byte.
 
-Equivalently, msg and key can be interpreted as hexadecimal integers and then
+Equivalently, msg and sk can be interpreted as hexadecimal integers and then
 converted to octet strings using I2OSP (RFC 8017).
 
 In Python, the following code can be used to load the file:
@@ -22,3 +22,22 @@ with open("fips_186_3", "r") as vec_file:
 These files are extracted from the NIST CAVP ECDSA test vectors, available from
     https://csrc.nist.gov/Projects/Cryptographic-Algorithm-Validation-Program/Digital-Signatures
     https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/dss/186-3ecdsatestvectors.zip
+
+## `sig_g1`, `sig_g2` subdirectories
+
+The files in these subdirs correspond to the above, except that the lines in each
+file are space-separated tuples (msg, sk, sig).
+
+- In `sig_g1`, sig is the signature on msg under sk in the G1 group.
+
+- In `sig_g2`, the signature is in the G2 group instead.
+
+## `hash_g1`, `hash_g2` subdirectories
+
+The files in these subdirs correspond to the above, except that the lines in each
+file are space-separated tuples (msg, "00", P). The literal string "00" helps
+to avoid confusion with files containing (msg, sk).
+
+- In `hash_g1`, P is the hash of msg to the G1 group.
+
+- In `hash_g2`, P is the hash of msg to the G2 group.
