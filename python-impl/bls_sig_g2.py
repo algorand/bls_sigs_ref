@@ -33,5 +33,5 @@ if __name__ == "__main__":
         opts = get_cmdline_options()
         ver_fn = verify if opts.verify else None
         for sig_in in opts.test_inputs:
-            print_tv_sig(sig_in, g2suite, sign, keygen, print_g1_hex, print_g2_hex, ver_fn)
+            print_tv_sig(sig_in, g2suite, sign, keygen, print_g1_hex, print_g2_hex, ver_fn, opts.quiet)
     main()

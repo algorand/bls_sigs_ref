@@ -18,6 +18,7 @@ class Options(object):
     run_tests = False
     test_inputs = None
     verify = False
+    quiet = False
 
     def __init__(self):
         self.test_inputs = []
@@ -35,11 +36,11 @@ def get_cmdline_options():
 
     # process cmdline args with getopt
     try:
-        (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:T:tv")
+        (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:T:tvq")
 
     except getopt.GetoptError as err:
         print("Usage: %s [-t]" % sys.argv[0])
-        print("       %s [-v] [-k key] [-T test_file] [msg ...]" % sys.argv[0])
+        print("       %s [-v] [-q] [-k key] [-T test_file] [msg ...]" % sys.argv[0])
         sys.exit(str(err))
 
     for (opt, arg) in opts:
@@ -54,6 +55,9 @@ def get_cmdline_options():
 
         elif opt == "-v":
             ret.verify = True
+
+        elif opt == "-q":
+            ret.quiet = True
 
         else:
             raise RuntimeError("got unexpected option %s from getopt" % opt)
@@ -109,7 +113,7 @@ def print_value(iv, indent=8, skip_first=False):
         line_length += len(out_str) + 1
     sys.stdout.write("\n")
 
-def print_tv_hash(hash_in, ciphersuite, hash_fn, print_pt_fn):
+def print_tv_hash(hash_in, ciphersuite, hash_fn, print_pt_fn, quiet):
     if len(hash_in) > 2:
         (msg, _, hash_expect) = hash_in[:3]
     else:
@@ -124,6 +128,9 @@ def print_tv_hash(hash_in, ciphersuite, hash_fn, print_pt_fn):
         if from_jacobian(deserialize(hash_expect)) != from_jacobian(P):
             raise DeserError("deserializing hash_expect did not give P")
 
+    if quiet:
+        return
+
     print("=============== begin hash test vector ==================")
 
     print("ciphersuite: 0x%x" % ciphersuite)
@@ -136,7 +143,7 @@ def print_tv_hash(hash_in, ciphersuite, hash_fn, print_pt_fn):
 
     print("===============  end hash test vector  ==================")
 
-def print_tv_sig(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig_fn, ver_fn):
+def print_tv_sig(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig_fn, ver_fn, quiet):
     if len(sig_in) > 2:
         (msg, sk, sig_expect) = sig_in[:3]
     else:
@@ -154,6 +161,9 @@ def print_tv_sig(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig
 
     if ver_fn is not None and not ver_fn(pk, sig, msg, ciphersuite):
         raise RuntimeError("verifying generated signature failed")
+
+    if quiet:
+        return
 
     # output the test vector
     print("================== begin test vector ====================")

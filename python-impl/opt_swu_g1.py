@@ -167,6 +167,6 @@ if __name__ == "__main__":
             run_tests()
         else:
             for hash_in in opts.test_inputs:
-                print_tv_hash(hash_in, g1suite, map2curve_osswu, print_g1_hex)
+                print_tv_hash(hash_in, g1suite, map2curve_osswu, print_g1_hex, opts.quiet)
 
     main()
