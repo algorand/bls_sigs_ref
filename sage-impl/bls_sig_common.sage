@@ -10,6 +10,7 @@ import sys
 from util import print_value
 from __sage__g1_common import Ell, q, print_g1_hex
 from __sage__g2_common import Ell2, F2, X, print_g2_hex
+from __sage__serdes import serialize, deserialize, SerError, DeserError
 
 # generator of G1
 g_x = 0x17f1d3a73197d7942695638c4fa9ac0fc3688c4f9774b905a14e3a3f171bac586c55e83ff97a1aeffb3af00adb22c6bb
@@ -28,10 +29,22 @@ del g_x, g_y
 def prepare_msg(msg, ciphersuite):
     return "%c%s" % (ciphersuite, msg)
 
-def print_test_vector(sk, msg, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig_fn):
+def print_test_vector(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig_fn):
+    if len(sig_in) > 2:
+        (msg, sk, sig_expect) = sig_in[:3]
+    else:
+        (msg, sk) = sig_in
+        sig_expect = None
+
     # generate the keys and the signature
     (x_prime, pk) = keygen_fn(sk, True)
     sig = sign_fn(x_prime, msg, ciphersuite)
+
+    if sig_expect is not None:
+        if serialize(sig) != sig_expect:
+            raise SerError("serializing sig did not give sig_expect")
+        if deserialize(sig_expect) != sig:
+            raise DeserError("deserializing sig_expect did not give sig")
 
     # output the test vector
     print "================== begin test vector ===================="
@@ -63,8 +76,20 @@ def print_test_vector(sk, msg, ciphersuite, sign_fn, keygen_fn, print_pk_fn, pri
 
     print "==================  end test vector  ===================="
 
-def print_hash_test_vector(msg, ciphersuite, hash_fn, print_pt_fn):
+def print_hash_test_vector(hash_in, ciphersuite, hash_fn, print_pt_fn):
+    if len(hash_in) > 2:
+        (msg, _, hash_expect) = hash_in[:3]
+    else:
+        msg = hash_in[0]
+        hash_expect = None
+
     P = hash_fn(prepare_msg(msg, ciphersuite))
+
+    if hash_expect is not None:
+        if serialize(P) != hash_expect:
+            raise SerError("serializing P did not give hash_expect")
+        if deserialize(hash_expect) != P:
+            raise DeserError("deserializing hash_expect did not give P")
 
     print "=============== begin hash test vector =================="
 

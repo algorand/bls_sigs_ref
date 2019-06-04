@@ -40,6 +40,6 @@ def sign(x_prime, msg, ciphersuite):
 
 if __name__ == "__main__":
     def main():
-        for (msg, sk) in get_cmdline_options():
-            print_test_vector(sk, msg, g1suite, sign, keygen, print_g2_hex, print_g1_hex)
+        for sig_in in get_cmdline_options():
+            print_test_vector(sig_in, g1suite, sign, keygen, print_g2_hex, print_g1_hex)
     main()

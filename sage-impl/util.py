@@ -52,7 +52,7 @@ def print_value(iv, indent=8, skip_first=False):
 def get_cmdline_options():
     sk = "11223344556677889900112233445566"
     msg_dflt = "the message to be signed"
-    test_inputs = []
+    ret = []
 
     # go through the commandline arguments
     try:
@@ -71,17 +71,15 @@ def get_cmdline_options():
 
         elif opt == "-T":
             with open(arg, "r") as test_file:
-                test_inputs += [ tuple( binascii.unhexlify(val) \
-                                        for val in line.strip().split(' ') ) \
-                                 for line in test_file.readlines() ]
+                ret += [ tuple( binascii.unhexlify(val) \
+                                for val in line.strip().split(' ') ) \
+                         for line in test_file.readlines() ]
 
         else:
             raise RuntimeError("got unexpected option %s from getopt" % opt)
 
     # build up return value: (msg, sk) tuples from cmdline and any test files
-    ret = [ (arg, sk) for arg in args ] + test_inputs
-
-    # default if nothing was specified
+    ret += [ (arg, sk) for arg in args ]
     if not ret:
         ret = [ (msg_dflt, sk) ]
 
