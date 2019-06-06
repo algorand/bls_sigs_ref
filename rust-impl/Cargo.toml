@@ -1,0 +1,12 @@
+[package]
+name = "bls_sigs_ref-rs"
+version = "0.0.1"
+authors = ["kwantam <kwantam@gmail.com>"]
+license = "Apache-2.0"
+
+homepage = "https://github.com/kwantam/bls_sigs_ref"
+description = "BLS signatures draft std, ref impl"
+repository = "https://github.com/kwantam/bls_sigs_ref"
+
+[dependencies]
+sha2 = "0.8.0"
