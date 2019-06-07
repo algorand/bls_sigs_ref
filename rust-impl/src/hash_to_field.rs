@@ -7,10 +7,10 @@ use std::io::{Cursor, Read};
 // 1 << 256
 const FQREPR_2_256: FqRepr = FqRepr([0, 0, 0, 0, 1, 0]);
 const FRREPR_2_256: FrRepr = FrRepr([
-                                    0x1fffffffe,
-                                    0x5884b7fa00034802,
-                                    0x998c4fefecbc4ff5,
-                                    0x1824b159acc5056f,
+    0x1fffffffe,
+    0x5884b7fa00034802,
+    0x998c4fefecbc4ff5,
+    0x1824b159acc5056f,
 ]);
 const FRREPR_2_254: FrRepr = FrRepr([0, 0, 0, 0x4000000000000000]);
 
