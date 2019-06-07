@@ -17,8 +17,8 @@ You will need the following:
 
 To set up your build directory:
 
-    $ mkdir -p /path/to/bls_hash/src/build
-    $ cd /path/to/bls_hash/src/build
+    $ mkdir -p /path/to/bls_hash/c-impl/build
+    $ cd /path/to/bls_hash/c-impl/build
     $ cmake ..
 
 All further commands should be run from the `build` directory.
