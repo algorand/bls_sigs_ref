@@ -7,7 +7,7 @@
 
 from hashlib import sha256
 
-from consts import p
+from consts import p, q
 
 # defined in RFC 3447, section 4.1
 def I2OSP(val, length):
@@ -51,3 +51,8 @@ def Hp2(msg, ctr):
     if not isinstance(msg, bytes):
         raise ValueError("Hp2 can't hash anything but bytes")
     return hash_to_field(msg, ctr, p, 2)
+
+def Hr(msg):
+    if not isinstance(msg, bytes):
+        raise ValueError("Hr can't hash anything but bytes")
+    return hash_to_field(msg, 0, q, 1)

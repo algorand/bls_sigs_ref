@@ -2,16 +2,16 @@
 #
 # (C) Riad S. Wahby <rsw@cs.stanford.edu>
 
-from consts import q, g1suite
+from consts import g1suite
 from curve_ops import g2gen, point_mul, point_neg
-from hash_to_field import hash_to_field
+from hash_to_field import Hr
 from opt_swu_g1 import map2curve_osswu
 from pairing import multi_pairing
 from util import get_cmdline_options, prepare_msg, print_g1_hex, print_g2_hex, print_tv_sig
 
 # sk must be bytes()
 def keygen(sk):
-    (x_prime,) = hash_to_field(sk, 0, q, 1)
+    (x_prime,) = Hr(sk)
     return (x_prime, point_mul(x_prime, g2gen))
 
 # signing as in
