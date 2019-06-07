@@ -66,12 +66,12 @@ fn sha2_basic() {
 
 #[test]
 fn test_hash_to_fq() {
-    use super::hash_to_field::HashToFieldIter;
+    use super::hash_to_field::HashToField;
     use pairing::bls12_381::{Fq, FqRepr};
     use pairing::PrimeField;
 
-    let mut hash_iter = HashToFieldIter::new("hello world", 1);
-    let fq_val = hash_iter.next_fq();
+    let mut hash_iter = HashToField::<Fq>::new("hello world", 1);
+    let fq_val = hash_iter.next().unwrap();
     let expect = FqRepr([
         0x88f18d0462b674d1,
         0xb3984de38e881934,
@@ -82,7 +82,10 @@ fn test_hash_to_fq() {
     ]);
     assert_eq!(fq_val, Fq::from_repr(expect).unwrap());
 
-    let fq_val = hash_iter.next_fq();
+    let fq_val = hash_iter.with_ctr(0);
+    assert_eq!(fq_val, Fq::from_repr(expect).unwrap());
+
+    let fq_val = hash_iter.next().unwrap();
     let expect = FqRepr([
         0x6911c2017aa9caae,
         0x982a3bcc633a3068,
@@ -96,12 +99,12 @@ fn test_hash_to_fq() {
 
 #[test]
 fn test_hash_to_fq2() {
-    use super::hash_to_field::HashToFieldIter;
+    use super::hash_to_field::HashToField;
     use pairing::bls12_381::{Fq, Fq2, FqRepr};
     use pairing::PrimeField;
 
-    let mut hash_iter = HashToFieldIter::new("hello world", 2);
-    let fq2_val = hash_iter.next_fq2();
+    let mut hash_iter = HashToField::<Fq2>::new("hello world", 2);
+    let fq2_val = hash_iter.next().unwrap();
     let expect_c0 = FqRepr([
         0x789267e9340db222,
         0x5be9f23c58cb7a94,
@@ -124,7 +127,7 @@ fn test_hash_to_fq2() {
     };
     assert_eq!(fq2_val, expect);
 
-    let fq2_val = hash_iter.next_fq2();
+    let fq2_val = hash_iter.next().unwrap();
     let expect_c0 = FqRepr([
         0xfe1b6eca2cc49311,
         0xc7841643f75a3a4,
@@ -146,15 +149,18 @@ fn test_hash_to_fq2() {
         c1: Fq::from_repr(expect_c1).unwrap(),
     };
     assert_eq!(fq2_val, expect);
+
+    let fq2_val = hash_iter.with_ctr(1);
+    assert_eq!(fq2_val, expect);
 }
 
 #[test]
-fn test_hash_to_fr() {
-    use super::hash_to_field::hash_to_fr;
+fn test_xprime_from_sk() {
+    use super::hash_to_field::xprime_from_sk;
     use pairing::bls12_381::{Fr, FrRepr};
     use pairing::PrimeField;
 
-    let fr_val = hash_to_fr("hello world (it's a secret!)");
+    let fr_val = xprime_from_sk("hello world (it's a secret!)");
     let expect = FrRepr([
         0xcd56808ee5ccd455,
         0xd0ab47882e9318f5,
