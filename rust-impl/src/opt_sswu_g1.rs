@@ -326,3 +326,28 @@ pub fn chain_pm3div4(tmpvar1: &mut Fq, tmpvar0: &Fq) {
     tmpvar1.mul_assign(&tmpvar2); /*  455 : 500301194402708424177223728216988019569610352492375985666507267015503956311354733055335953641126958004736784069973 */
     tmpvar1.square(); /*  456 : 1000602388805416848354447456433976039139220704984751971333014534031007912622709466110671907282253916009473568139946 */
 }
+
+#[test]
+fn test_fq_chain() {
+    use pairing::bls12_381::Fq;
+    use pairing::Field;
+    use rand::{thread_rng, Rand};
+
+    let mut rng = thread_rng();
+    let p_m3_over4 = [
+        0xee7fbfffffffeaaau64,
+        0x7aaffffac54ffffu64,
+        0xd9cc34a83dac3d89u64,
+        0xd91dd2e13ce144afu64,
+        0x92c6e9ed90d2eb35u64,
+        0x680447a8e5ff9a6u64,
+    ];
+
+    let mut result = Fq::zero();
+    for _ in 0..32 {
+        let mut input = Fq::rand(&mut rng);
+        chain_pm3div4(&mut result, &input);
+        input = input.pow(&p_m3_over4);
+        assert_eq!(input, result);
+    }
+}

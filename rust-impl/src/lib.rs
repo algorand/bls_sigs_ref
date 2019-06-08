@@ -23,5 +23,3 @@ extern crate sha2;
 pub mod hash_to_field;
 pub mod opt_sswu_g1;
 pub mod opt_sswu_g2;
-#[cfg(test)]
-mod tests;
