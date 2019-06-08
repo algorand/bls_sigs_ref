@@ -3,8 +3,8 @@
  for use with BLS signatures.
 */
 
-use pairing::bls12_381::{Fq, Fq2, FqRepr, Fr, FrRepr};
 use ff::{Field, PrimeField, PrimeFieldRepr};
+use pairing::bls12_381::{Fq, Fq2, FqRepr, Fr, FrRepr};
 use sha2::digest::generic_array::GenericArray;
 use sha2::{Digest, Sha256};
 use std::io::{Cursor, Read};
@@ -98,9 +98,9 @@ impl FromRO for Fq2 {
 /// Implements the inner loop of hash_to_field from
 ///     https://github.com/pairingwg/bls_standard/blob/master/minutes/spec-v1.md
 /// for field Fp, p a prime.
-pub trait BaseFromRO: Field + PrimeField {
+pub trait BaseFromRO: Field {
     /// The value 2^256 mod p, which is used to combine the two SHA evaluations.
-    const F_2_256: <Self as PrimeField>::Repr;
+    const F_2_256: Self;
 
     /// Takes the 32-byte SHA256 result `sha` and returns the value OS2IP(sha) % p.
     fn sha_to_base(sha: &[u8]) -> Self;
@@ -114,14 +114,23 @@ pub trait BaseFromRO: Field + PrimeField {
         );
         let f2 =
             <Self as BaseFromRO>::sha_to_base(hash_state.chain([ctr, idx, 2]).result().as_slice());
-        f1.mul_assign(&Self::from_repr(Self::F_2_256).unwrap());
+        f1.mul_assign(&Self::F_2_256);
         f1.add_assign(&f2);
         f1
     }
 }
 
 impl BaseFromRO for Fq {
-    const F_2_256: FqRepr = FqRepr([0, 0, 0, 0, 1, 0]);
+    const F_2_256: Fq = unsafe {
+        pairing::bls12_381::transmute::fq(FqRepr([
+            0x75b3cd7c5ce820fu64,
+            0x3ec6ba621c3edb0bu64,
+            0x168a13d82bff6bceu64,
+            0x87663c4bf8c449d2u64,
+            0x15f34c83ddc8d830u64,
+            0xf9628b49caa2e85u64,
+        ]))
+    };
 
     fn sha_to_base(sha: &[u8]) -> Fq {
         let mut repr = FqRepr([0; 6]);
@@ -133,14 +142,23 @@ impl BaseFromRO for Fq {
     }
 }
 
-const FRREPR_2_254: FrRepr = FrRepr([0, 0, 0, 0x4000000000000000]);
+const FR_2_254: Fr = unsafe {
+    pairing::bls12_381::transmute::fr(FrRepr([
+        0x32667a637cfca71cu64,
+        0xc9a9767521e35c08u64,
+        0x67e0272ba3ce7067u64,
+        0x58c473f4c70c9dbau64,
+    ]))
+};
 impl BaseFromRO for Fr {
-    const F_2_256: FrRepr = FrRepr([
-        0x1fffffffe,
-        0x5884b7fa00034802,
-        0x998c4fefecbc4ff5,
-        0x1824b159acc5056f,
-    ]);
+    const F_2_256: Fr = unsafe {
+        pairing::bls12_381::transmute::fr(FrRepr([
+            0xc999e990f3f29c6d,
+            0x2b6cedcb87925c23,
+            0x5d314967254398f,
+            0x748d9d99f59ff11,
+        ]))
+    };
 
     fn sha_to_base(sha: &[u8]) -> Fr {
         let mut repr = FrRepr([0; 4]);
@@ -156,7 +174,7 @@ impl BaseFromRO for Fr {
         let mut result = Fr::from_repr(repr).unwrap();
 
         // unwraps below are safe: fixed, valid field element and val in [0,3]
-        let mut adjust = Fr::from_repr(FRREPR_2_254).unwrap();
+        let mut adjust = FR_2_254;
         adjust.mul_assign(&Fr::from_repr(FrRepr::from(msbyte_val)).unwrap());
         result.add_assign(&adjust);
         result
