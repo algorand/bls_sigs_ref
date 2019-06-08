@@ -9,7 +9,8 @@ description = "BLS signatures draft std, ref impl"
 repository = "https://github.com/kwantam/bls_sigs_ref"
 
 [dependencies]
-pairing = "0.14"
+ff = "0.4"
+pairing = { git = "https://github.com/kwantam/pairing" }
 sha2 = "0.8.0"
 
 [dev-dependencies]

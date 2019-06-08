@@ -4,7 +4,7 @@
 */
 
 use pairing::bls12_381::{Fq, Fq2, FqRepr, Fr, FrRepr};
-use pairing::{Field, PrimeField, PrimeFieldRepr};
+use ff::{Field, PrimeField, PrimeFieldRepr};
 use sha2::digest::generic_array::GenericArray;
 use sha2::{Digest, Sha256};
 use std::io::{Cursor, Read};

@@ -3,7 +3,7 @@
 */
 
 use pairing::bls12_381::Fq2;
-use pairing::Field;
+use ff::Field;
 
 /* *** addchain for 1001205140483106588246484290269935788605945006208159541241399033561623546780709821462541004956387089373434649096260670658193992783731681621012512651314777238193313314641988297376025498093520728838658813979860931248214124593092835 *** */
 /* Bos-Coster (win=4) : 895 links, 17 variables */
@@ -562,8 +562,6 @@ pub fn chain_p2m9div16(tmpvar1: &mut Fq2, tmpvar0: &Fq2) {
 
 #[test]
 fn test_fq2_chain() {
-    use pairing::bls12_381::Fq2;
-    use pairing::Field;
     use rand::{thread_rng, Rand};
 
     let mut rng = thread_rng();

@@ -12,6 +12,7 @@
 
 #[cfg(test)]
 extern crate byteorder;
+extern crate ff;
 #[cfg(test)]
 #[macro_use]
 extern crate hex_literal;

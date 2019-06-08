@@ -3,7 +3,7 @@ Hashing to G1.
 */
 
 use pairing::bls12_381::Fq;
-use pairing::Field;
+use ff::Field;
 
 /* *** addchain for 1000602388805416848354447456433976039139220704984751971333014534031007912622709466110671907282253916009473568139946 *** */
 /* Bos-Coster (win=4) : 458 links, 16 variables */
@@ -329,8 +329,6 @@ pub fn chain_pm3div4(tmpvar1: &mut Fq, tmpvar0: &Fq) {
 
 #[test]
 fn test_fq_chain() {
-    use pairing::bls12_381::Fq;
-    use pairing::Field;
     use rand::{thread_rng, Rand};
 
     let mut rng = thread_rng();
