@@ -67,6 +67,11 @@ def point_add(P, Q):
     U2 = X2 * Z1Z1
     S1 = Y1 * Z2 * Z2Z2
     S2 = Y2 * Z1 * Z1Z1
+
+    # detect exceptional case P == Q
+    if U1 == U2 and S1 == S2:
+        return point_double(P)
+
     H = U2 - U1
     I = (2 * H) ** 2
     J = H * I
@@ -78,7 +83,7 @@ def point_add(P, Q):
 
     ty = type(X1)
     inf = (ty.zero(p), ty.one(p), ty.zero(p))
-    return inf if p_inf and q_inf else P if q_inf else Q if p_inf else (X3, Y3, Z3)
+    return inf if Z3 == 0 or (p_inf and q_inf) else P if q_inf else Q if p_inf else (X3, Y3, Z3)
 
 # http://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#doubling-dbl-2009-l
 def point_double(P):
@@ -116,18 +121,17 @@ def x_chain(P):
 # basic double-and-add
 # NOTE: this routine is NOT constant time!
 def _point_mul_dbladd(k, P):
+    (kz, negate) = (-k, True) if k < 0 else (k, False)
     ty = type(P[0])
+
     Q = (ty.zero(p), ty.one(p), ty.zero(p))
-    for b in bin(k)[2:]:
-        if Q[2] != 0:
-            Q = point_double(Q)
+    for b in bin(kz)[2:]:
+        Q = point_double(Q)
         if b == '1':
-            if Q[2] == 0:
-                Q = P
-            elif point_eq(Q, P):
-                Q = point_double(Q)
-            else:
-                Q = point_add(P, Q)
+            Q = point_add(P, Q)
+
+    if negate:
+        return point_neg(Q)
     return Q
 
 # ZDAU', Alg 23 (sans Z-coord) of
@@ -179,8 +183,12 @@ def _cneg(P, neg):
 #     http://joye.site88.net/papers/GJMRV11regpm.pdf
 # NOTE: this routine only works for P in the subgroup of order q!
 def point_mul(k, P):
+    kz = k % q
+    if kz in (0, 1, q - 1):
+        # exceptional cases use non--constant-time point multiplication
+        return _point_mul_dbladd(k, P)
     # make sure that kz is always 258 bits long and odd
-    kz = (5 * q if k % 2 == 0 else 6 * q) + k
+    kz = (5 * q if kz % 2 == 0 else 6 * q) + kz
     assert kz.bit_length() == 258
     assert kz % 2 == 1
 
