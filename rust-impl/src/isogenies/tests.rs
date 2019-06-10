@@ -2,7 +2,7 @@
 Tests for isogenies.
 */
 
-use super::{iso11, iso3};
+use super::IsogenyMap;
 use ff::{Field, PrimeField};
 use pairing::bls12_381::transmute::{g1_projective, g2_projective};
 use pairing::bls12_381::{Fq, Fq2, FqRepr};
@@ -11,14 +11,16 @@ use pairing::CurveProjective;
 #[test]
 fn test_iso11() {
     let zero = Fq::zero();
-    let pt = iso11(unsafe { g1_projective(zero, zero, zero) });
+    let mut pt = unsafe { g1_projective(zero, zero, zero) };
+    pt.isogeny_map();
     let (x, y, z) = pt.as_tuple();
     assert_eq!(x, &zero);
     assert_eq!(y, &zero);
     assert_eq!(z, &zero);
 
     let one = Fq::one();
-    let pt = iso11(unsafe { g1_projective(one, one, one) });
+    let mut pt = unsafe { g1_projective(one, one, one) };
+    pt.isogeny_map();
     let (x, y, z) = pt.as_tuple();
     assert_eq!(
         x,
@@ -84,7 +86,8 @@ fn test_iso11() {
         0x064bb4b501466b2au64,
     ]))
     .unwrap();
-    let pt = iso11(unsafe { g1_projective(xi, yi, zi) });
+    let mut pt = unsafe { g1_projective(xi, yi, zi) };
+    pt.isogeny_map();
     let (x, y, z) = pt.as_tuple();
     assert_eq!(
         x,
@@ -127,14 +130,16 @@ fn test_iso11() {
 #[test]
 fn test_iso3() {
     let zero = Fq2::zero();
-    let pt = iso3(unsafe { g2_projective(zero, zero, zero) });
+    let mut pt = unsafe { g2_projective(zero, zero, zero) };
+    pt.isogeny_map();
     let (x, y, z) = pt.as_tuple();
     assert_eq!(x, &zero);
     assert_eq!(y, &zero);
     assert_eq!(z, &zero);
 
     let one = Fq2::one();
-    let pt = iso3(unsafe { g2_projective(one, one, one) });
+    let mut pt = unsafe { g2_projective(one, one, one) };
+    pt.isogeny_map();
     let (x, y, z) = pt.as_tuple();
     let c0 = FqRepr([
         0x57c6555579807bcau64,
@@ -260,7 +265,8 @@ fn test_iso3() {
         c0: Fq::from_repr(c0).unwrap(),
         c1: Fq::from_repr(c1).unwrap(),
     };
-    let pt = iso3(unsafe { g2_projective(xi, yi, zi) });
+    let mut pt = unsafe { g2_projective(xi, yi, zi) };
+    pt.isogeny_map();
     let (x, y, z) = pt.as_tuple();
     let c0 = FqRepr([
         0xf119e132b7ebd22cu64,
