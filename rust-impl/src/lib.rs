@@ -21,7 +21,6 @@ extern crate pairing;
 extern crate rand;
 extern crate sha2;
 
+pub mod chains;
 pub mod hash_to_field;
 pub mod isogenies;
-pub mod opt_sswu_g1;
-pub mod opt_sswu_g2;

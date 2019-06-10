@@ -6,7 +6,7 @@ mod g1_consts;
 mod g2_consts;
 
 use ff::Field;
-use pairing::bls12_381::{Fq, Fq2, G1, G2};
+use pairing::bls12_381::{G1, G2};
 use pairing::CurveProjective;
 
 /// Alias for the coordinate type corresponding to a CurveProjective type
@@ -116,7 +116,7 @@ pub fn iso3(pt: G2) -> G2 {
 fn test_iso11() {
     use ff::PrimeField;
     use pairing::bls12_381::transmute::g1_projective;
-    use pairing::bls12_381::FqRepr;
+    use pairing::bls12_381::{Fq, FqRepr};
 
     let zero = Fq::zero();
     let pt = iso11(unsafe { g1_projective(zero, zero, zero) });
@@ -236,7 +236,7 @@ fn test_iso11() {
 fn test_iso3() {
     use ff::PrimeField;
     use pairing::bls12_381::transmute::g2_projective;
-    use pairing::bls12_381::FqRepr;
+    use pairing::bls12_381::{Fq, Fq2, FqRepr};
 
     let zero = Fq2::zero();
     let pt = iso3(unsafe { g2_projective(zero, zero, zero) });
