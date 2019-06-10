@@ -22,5 +22,6 @@ extern crate rand;
 extern crate sha2;
 
 pub mod chains;
+pub mod cofactors;
 pub mod hash_to_field;
 pub mod isogenies;
