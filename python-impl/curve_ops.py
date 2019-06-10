@@ -83,7 +83,7 @@ def point_add(P, Q):
 
     ty = type(X1)
     inf = (ty.zero(p), ty.one(p), ty.zero(p))
-    return inf if Z3 == 0 or (p_inf and q_inf) else P if q_inf else Q if p_inf else (X3, Y3, Z3)
+    return inf if p_inf and q_inf else P if q_inf else Q if p_inf else inf if Z3 == 0 else (X3, Y3, Z3)
 
 # http://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#doubling-dbl-2009-l
 def point_double(P):
