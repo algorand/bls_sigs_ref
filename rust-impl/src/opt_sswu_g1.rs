@@ -2,8 +2,8 @@
 Hashing to G1.
 */
 
-use pairing::bls12_381::Fq;
 use ff::Field;
+use pairing::bls12_381::Fq;
 
 /* *** addchain for 1000602388805416848354447456433976039139220704984751971333014534031007912622709466110671907282253916009473568139946 *** */
 /* Bos-Coster (win=4) : 458 links, 16 variables */
