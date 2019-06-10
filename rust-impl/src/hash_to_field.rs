@@ -18,15 +18,9 @@ pub struct HashToField<T> {
     phantom: PhantomData<T>,
 }
 
-impl<T> HashToField<T>
-where
-    T: FromRO,
-{
+impl<T: FromRO> HashToField<T> {
     /// Create a new struct given a message and ciphersuite.
-    pub fn new<B>(msg: B, ciphersuite: u8) -> HashToField<T>
-    where
-        B: AsRef<[u8]>,
-    {
+    pub fn new<B: AsRef<[u8]>>(msg: B, ciphersuite: u8) -> HashToField<T> {
         HashToField::<T> {
             msg_hashed: Sha256::new()
                 .chain([ciphersuite])
@@ -44,10 +38,7 @@ where
 }
 
 /// Iterator that outputs the sequence of field elements corresponding to increasing `ctr` values.
-impl<T> Iterator for HashToField<T>
-where
-    T: FromRO,
-{
+impl<T: FromRO> Iterator for HashToField<T> {
     type Item = T;
     fn next(&mut self) -> Option<T> {
         if self.ctr == 255 {
@@ -62,30 +53,19 @@ where
 /// Trait implementing hashing to a field or extension.
 pub trait FromRO {
     /// from_ro gives the result of hash_to_field(msg, ctr) when input = H(msg).
-    fn from_ro<B>(input: B, ctr: u8) -> Self
-    where
-        B: AsRef<[u8]>;
+    fn from_ro<B: AsRef<[u8]>>(input: B, ctr: u8) -> Self;
 }
 
 /// Generic implementation for non-extension fields having a BaseFromRO impl.
-impl<T> FromRO for T
-where
-    T: BaseFromRO,
-{
-    fn from_ro<B>(input: B, ctr: u8) -> T
-    where
-        B: AsRef<[u8]>,
-    {
+impl<T: BaseFromRO> FromRO for T {
+    fn from_ro<B: AsRef<[u8]>>(input: B, ctr: u8) -> T {
         T::base_from_ro(input.as_ref(), ctr, 1)
     }
 }
 
 /// Fq2 implementation: hash to two elemnts of Fq and combine.
 impl FromRO for Fq2 {
-    fn from_ro<B>(input: B, ctr: u8) -> Fq2
-    where
-        B: AsRef<[u8]>,
-    {
+    fn from_ro<B: AsRef<[u8]>>(input: B, ctr: u8) -> Fq2 {
         let c0_val = Fq::base_from_ro(input.as_ref(), ctr, 1);
         let c1_val = Fq::base_from_ro(input.as_ref(), ctr, 2);
         Fq2 {
@@ -182,10 +162,7 @@ impl BaseFromRO for Fr {
 }
 
 /// Hash a secret key sk to the secret exponent x'; then (PK_BLS, SK_BLS) = (g^{x'}, x').
-pub fn xprime_from_sk<B>(msg: B) -> Fr
-where
-    B: AsRef<[u8]>,
-{
+pub fn xprime_from_sk<B: AsRef<[u8]>>(msg: B) -> Fr {
     let msg_hashed = Sha256::new().chain(msg.as_ref()).result();
     Fr::from_ro(msg_hashed.as_slice(), 0)
 }
