@@ -7,6 +7,7 @@ mod g2_consts;
 #[cfg(test)]
 mod tests;
 
+use super::CoordT;
 use ff::Field;
 use pairing::bls12_381::{G1, G2};
 use pairing::CurveProjective;
@@ -30,9 +31,6 @@ impl IsogenyMap for G2 {
         eval_iso(self, [&XNUM[..], &XDEN[..], &YNUM[..], &YDEN[..]]);
     }
 }
-
-/// Alias for the coordinate type corresponding to a CurveProjective type
-type CoordT<PtT> = <PtT as CurveProjective>::Base;
 
 /// Generic isogeny evaluation function
 fn eval_iso<PtT: CurveProjective>(pt: &mut PtT, coeffs: [&[CoordT<PtT>]; 4]) {

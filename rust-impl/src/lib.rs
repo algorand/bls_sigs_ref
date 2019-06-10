@@ -21,7 +21,13 @@ extern crate pairing;
 extern crate rand;
 extern crate sha2;
 
+use pairing::CurveProjective;
+
+/// Alias for the coordinate type corresponding to a CurveProjective type
+type CoordT<PtT> = <PtT as CurveProjective>::Base;
+
 pub mod chain;
 pub mod cofactor;
 pub mod hash_to_field;
 pub mod isogeny;
+pub mod osswu_map;
