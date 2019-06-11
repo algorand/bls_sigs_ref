@@ -31,3 +31,4 @@ pub mod cofactor;
 pub mod hash_to_field;
 pub mod isogeny;
 pub mod osswu_map;
+pub mod signum;
