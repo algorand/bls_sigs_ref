@@ -6,7 +6,7 @@ use pairing::bls12_381::transmute::fq;
 use pairing::bls12_381::{Fq2, FqRepr};
 
 /// Coefficients of the 3-isogeny x map's numerator
-pub const XNUM: [Fq2; 4] = unsafe {
+pub(super) const XNUM: [Fq2; 4] = unsafe {
     [
         Fq2 {
             c0: fq(FqRepr([
@@ -84,7 +84,7 @@ pub const XNUM: [Fq2; 4] = unsafe {
 };
 
 /// Coefficients of the 3-isogeny x map's denominator
-pub const XDEN: [Fq2; 3] = unsafe {
+pub(super) const XDEN: [Fq2; 3] = unsafe {
     [
         Fq2 {
             c0: fq(FqRepr([
@@ -144,7 +144,7 @@ pub const XDEN: [Fq2; 3] = unsafe {
 };
 
 /// Coefficients of the 3-isogeny y map's numerator
-pub const YNUM: [Fq2; 4] = unsafe {
+pub(super) const YNUM: [Fq2; 4] = unsafe {
     [
         Fq2 {
             c0: fq(FqRepr([
@@ -222,7 +222,7 @@ pub const YNUM: [Fq2; 4] = unsafe {
 };
 
 /// Coefficients of the 3-isogeny y map's denominator
-pub const YDEN: [Fq2; 4] = unsafe {
+pub(super) const YDEN: [Fq2; 4] = unsafe {
     [
         Fq2 {
             c0: fq(FqRepr([
