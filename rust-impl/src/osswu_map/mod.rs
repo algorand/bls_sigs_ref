@@ -7,9 +7,26 @@ pub(crate) mod g2;
 #[cfg(test)]
 mod tests;
 
-use super::CoordT;
+use cofactor::ClearH;
 use ff::Field;
+use hash_to_field::{FromRO, HashToField};
+use isogeny::IsogenyMap;
 use pairing::CurveProjective;
+use CoordT;
+
+/// Generic hash-to-curve function based on OSSWU Map
+pub fn hash_to_curve<B: AsRef<[u8]>, PtT>(msg: B, ciphersuite: u8) -> PtT
+where
+    PtT: ClearH + IsogenyMap + OSSWUMap,
+    CoordT<PtT>: FromRO,
+{
+    let h2f = HashToField::<CoordT<PtT>>::new(msg, ciphersuite);
+    let mut p = PtT::osswu_map(&h2f.with_ctr(0));
+    p.add_assign(&PtT::osswu_map(&h2f.with_ctr(1)));
+    p.isogeny_map();
+    p.clear_h();
+    p
+}
 
 /// Trait for mapping from base field element to curve point
 pub trait OSSWUMap: CurveProjective {

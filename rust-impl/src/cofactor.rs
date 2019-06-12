@@ -36,12 +36,12 @@ fn chain_z<PtT: CurveProjective>(tmpvar1: &mut PtT, tmpvar0: &PtT) {
 }
 
 /// Trait implementing cofactor clearing for projective coords
-pub trait ClearHProjective: CurveProjective {
+pub trait ClearH: CurveProjective {
     /// Clear the cofactor in-place
     fn clear_h(&mut self);
 }
 
-impl ClearHProjective for G1 {
+impl ClearH for G1 {
     fn clear_h(&mut self) {
         let pt_in = *self;
         chain_z(self, &pt_in);
@@ -49,7 +49,7 @@ impl ClearHProjective for G1 {
     }
 }
 
-impl ClearHProjective for G2 {
+impl ClearH for G2 {
     fn clear_h(&mut self) {
         let mut work = G2::zero();
         chain_z(&mut work, self);
@@ -214,7 +214,7 @@ fn psi(pt: &mut G2) {
 /// Tests for cofactor clearing
 #[cfg(test)]
 mod tests {
-    use super::{psi, qi_x, qi_y, ClearHProjective};
+    use super::{psi, qi_x, qi_y, ClearH};
     use ff::{Field, PrimeField};
     use pairing::bls12_381::transmute::g2_projective;
     use pairing::bls12_381::{Fq, Fq2, FqRepr, FrRepr, G1, G2};

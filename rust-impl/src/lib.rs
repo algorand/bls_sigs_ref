@@ -32,4 +32,5 @@ pub mod hash_to_field;
 pub mod isogeny;
 pub mod osswu_map;
 pub mod serdes;
+pub mod signature;
 pub mod signum;
