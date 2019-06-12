@@ -2,11 +2,12 @@
 Constants for G1 isogeny.
 */
 
+use super::{eval_iso, IsogenyMap};
 use pairing::bls12_381::transmute::fq;
-use pairing::bls12_381::{Fq, FqRepr};
+use pairing::bls12_381::{Fq, FqRepr, G1};
 
 /// Coefficients of the 11-isogeny x map's numerator
-pub(super) const XNUM: [Fq; 12] = unsafe {
+const XNUM: [Fq; 12] = unsafe {
     [
         fq(FqRepr([
             0x4d18b6f3af00131cu64,
@@ -108,7 +109,7 @@ pub(super) const XNUM: [Fq; 12] = unsafe {
 };
 
 /// Coefficients of the 11-isogeny x map's denominator
-pub(super) const XDEN: [Fq; 11] = unsafe {
+const XDEN: [Fq; 11] = unsafe {
     [
         fq(FqRepr([
             0xb962a077fdb0f945u64,
@@ -202,7 +203,7 @@ pub(super) const XDEN: [Fq; 11] = unsafe {
 };
 
 /// Coefficients of the 11-isogeny y map's numerator
-pub(super) const YNUM: [Fq; 16] = unsafe {
+const YNUM: [Fq; 16] = unsafe {
     [
         fq(FqRepr([
             0x2b567ff3e2837267u64,
@@ -336,7 +337,7 @@ pub(super) const YNUM: [Fq; 16] = unsafe {
 };
 
 /// Coefficients of the 11-isogeny y map's denominator
-pub(super) const YDEN: [Fq; 16] = unsafe {
+const YDEN: [Fq; 16] = unsafe {
     [
         fq(FqRepr([
             0xeb6c359d47e52b1cu64,
@@ -468,3 +469,9 @@ pub(super) const YDEN: [Fq; 16] = unsafe {
         ])),
     ]
 };
+
+impl IsogenyMap for G1 {
+    fn isogeny_map(&mut self) {
+        eval_iso(self, [&XNUM[..], &XDEN[..], &YNUM[..], &YDEN[..]]);
+    }
+}

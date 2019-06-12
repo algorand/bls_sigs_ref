@@ -2,11 +2,12 @@
 Constants for G2 isogeny.
 */
 
+use super::{eval_iso, IsogenyMap};
 use pairing::bls12_381::transmute::fq;
-use pairing::bls12_381::{Fq2, FqRepr};
+use pairing::bls12_381::{Fq2, FqRepr, G2};
 
 /// Coefficients of the 3-isogeny x map's numerator
-pub(super) const XNUM: [Fq2; 4] = unsafe {
+const XNUM: [Fq2; 4] = unsafe {
     [
         Fq2 {
             c0: fq(FqRepr([
@@ -84,7 +85,7 @@ pub(super) const XNUM: [Fq2; 4] = unsafe {
 };
 
 /// Coefficients of the 3-isogeny x map's denominator
-pub(super) const XDEN: [Fq2; 3] = unsafe {
+const XDEN: [Fq2; 3] = unsafe {
     [
         Fq2 {
             c0: fq(FqRepr([
@@ -144,7 +145,7 @@ pub(super) const XDEN: [Fq2; 3] = unsafe {
 };
 
 /// Coefficients of the 3-isogeny y map's numerator
-pub(super) const YNUM: [Fq2; 4] = unsafe {
+const YNUM: [Fq2; 4] = unsafe {
     [
         Fq2 {
             c0: fq(FqRepr([
@@ -222,7 +223,7 @@ pub(super) const YNUM: [Fq2; 4] = unsafe {
 };
 
 /// Coefficients of the 3-isogeny y map's denominator
-pub(super) const YDEN: [Fq2; 4] = unsafe {
+const YDEN: [Fq2; 4] = unsafe {
     [
         Fq2 {
             c0: fq(FqRepr([
@@ -298,3 +299,9 @@ pub(super) const YDEN: [Fq2; 4] = unsafe {
         },
     ]
 };
+
+impl IsogenyMap for G2 {
+    fn isogeny_map(&mut self) {
+        eval_iso(self, [&XNUM[..], &XDEN[..], &YNUM[..], &YDEN[..]]);
+    }
+}

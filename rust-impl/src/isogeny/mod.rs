@@ -9,27 +9,12 @@ mod tests;
 
 use super::CoordT;
 use ff::Field;
-use pairing::bls12_381::{G1, G2};
 use pairing::CurveProjective;
 
 /// Evaluate isogeny map from curve with non-zero j-invariant.
 pub trait IsogenyMap {
     /// Eavluate isogeny map
     fn isogeny_map(&mut self);
-}
-
-impl IsogenyMap for G1 {
-    fn isogeny_map(&mut self) {
-        use self::g1::{XDEN, XNUM, YDEN, YNUM};
-        eval_iso(self, [&XNUM[..], &XDEN[..], &YNUM[..], &YDEN[..]]);
-    }
-}
-
-impl IsogenyMap for G2 {
-    fn isogeny_map(&mut self) {
-        use self::g2::{XDEN, XNUM, YDEN, YNUM};
-        eval_iso(self, [&XNUM[..], &XDEN[..], &YNUM[..], &YDEN[..]]);
-    }
 }
 
 /// Generic isogeny evaluation function
