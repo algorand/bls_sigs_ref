@@ -51,7 +51,6 @@ impl Signum0 for Fq {
             0x0d0088f51cbff34du64,
         ]);
 
-        println!("{:?}", self.into_repr().cmp(&PM1DIV2));
         if self.into_repr().cmp(&PM1DIV2) == Ordering::Greater {
             Sgn0Result::Negative
         } else {
