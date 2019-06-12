@@ -60,9 +60,9 @@ fn eval_iso<PtT: CurveProjective>(pt: &mut PtT, coeffs: [&[CoordT<PtT>]; 4]) {
             }
             // compute map value by Horner's rule
             mapvals[idx] = coeffs[idx][clen];
-            for jdx in 0..clen {
+            for tmpval in &tmp[..clen] {
                 mapvals[idx].mul_assign(x);
-                mapvals[idx].add_assign(&tmp[jdx]);
+                mapvals[idx].add_assign(tmpval);
             }
         }
 

@@ -81,7 +81,7 @@ impl SerDes for G2Affine {
             let len = if compressed { 96 } else { 192 };
             to_write[0] = tag1;
             to_write[48] = 0xc0u8; // g2 tag for point at infinity
-            writer.write(&to_write[..len])?;
+            writer.write_all(&to_write[..len])?;
             return Ok(());
         }
 
@@ -108,7 +108,7 @@ impl SerDes for G2Affine {
         }; // borrow of to_write ends
         to_write[0] |= tag1;
         to_write[48] |= tag2;
-        writer.write(&to_write[..len])?;
+        writer.write_all(&to_write[..len])?;
         Ok(())
     }
 
@@ -122,16 +122,6 @@ impl SerDes for G2Affine {
         let tag2 = x_in[48] >> 5;
         x_in[0] &= 0x1f;
         x_in[48] &= 0x1f;
-
-        // point at infinity
-        if tag2 == 6 {
-            if tag1 != 3 && tag1 != 7 {
-                return Err(Error::new(
-                    ErrorKind::InvalidInput,
-                    format!("invalid tag1 {} for G2 point", tag1),
-                ));
-            }
-        }
 
         // tag1 can be 3 or 7
         // tag2 can be 4, 5, or 6
@@ -195,12 +185,10 @@ impl SerDes for G2Affine {
 
                 Ok(unsafe { g2_affine(x, y, false) })
             }
-            _ => {
-                return Err(Error::new(
-                    ErrorKind::InvalidInput,
-                    format!("invalid tag {}:{} for G2 point", tag1, tag2),
-                ));
-            }
+            _ => Err(Error::new(
+                ErrorKind::InvalidInput,
+                format!("invalid tag {}:{} for G2 point", tag1, tag2),
+            )),
         }
     }
 }

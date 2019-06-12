@@ -62,7 +62,6 @@ impl ClearHProjective for G2 {
 
         let tmp2 = work;
         chain_z(&mut work, &tmp2); // work = (z^2 - z) P + z psi(P)
-        drop(tmp2);
 
         self.add_assign(&work); // self = (z^2 - z) P + (z - 1) psi(P)
         self.sub_assign(&tmp1); // self = (z^2 - z - 1) P + (z - 1) psi(P)
@@ -512,7 +511,7 @@ mod tests {
             0x142de6c241302b0au64,
         ]))
         .unwrap();
-        let mut inval = Fq2 { c0: c0, c1: c1 };
+        let mut inval = Fq2 { c0, c1 };
         let c0 = Fq::from_repr(FqRepr([
             0x45ae3c8684d165e3u64,
             0x1b8198ea6b12076cu64,
@@ -531,7 +530,7 @@ mod tests {
             0x13ecae1708e6355eu64,
         ]))
         .unwrap();
-        let expect = Fq2 { c0: c0, c1: c1 };
+        let expect = Fq2 { c0, c1 };
         qi_x(&mut inval);
         assert_eq!(inval, expect);
 
@@ -553,7 +552,7 @@ mod tests {
             0x0bcb29bbb1bbb684u64,
         ]))
         .unwrap();
-        let mut inval = Fq2 { c0: c0, c1: c1 };
+        let mut inval = Fq2 { c0, c1 };
         let c0 = Fq::from_repr(FqRepr([
             0xbdba5bcc0ff565d7u64,
             0xba1064f2b43e5824u64,
@@ -572,7 +571,7 @@ mod tests {
             0x05c4d856875afbe0u64,
         ]))
         .unwrap();
-        let expect = Fq2 { c0: c0, c1: c1 };
+        let expect = Fq2 { c0, c1 };
         qi_x(&mut inval);
         assert_eq!(inval, expect);
 
@@ -594,7 +593,7 @@ mod tests {
             0x0562eabe516f8f89u64,
         ]))
         .unwrap();
-        let mut inval = Fq2 { c0: c0, c1: c1 };
+        let mut inval = Fq2 { c0, c1 };
         let c0 = Fq::from_repr(FqRepr([
             0x6c8a7d22a51dfdc4u64,
             0x238737eb53b0260bu64,
@@ -613,7 +612,7 @@ mod tests {
             0x04fdc6894c10ebd1u64,
         ]))
         .unwrap();
-        let expect = Fq2 { c0: c0, c1: c1 };
+        let expect = Fq2 { c0, c1 };
         qi_x(&mut inval);
         assert_eq!(inval, expect);
 
@@ -635,7 +634,7 @@ mod tests {
             0x08efbca7bf9df492u64,
         ]))
         .unwrap();
-        let mut inval = Fq2 { c0: c0, c1: c1 };
+        let mut inval = Fq2 { c0, c1 };
         let c0 = Fq::from_repr(FqRepr([
             0x3aabae617c3d49fau64,
             0xd027a191fa23f89eu64,
@@ -654,7 +653,7 @@ mod tests {
             0x06a636c8054a88b5u64,
         ]))
         .unwrap();
-        let expect = Fq2 { c0: c0, c1: c1 };
+        let expect = Fq2 { c0, c1 };
         qi_x(&mut inval);
         assert_eq!(inval, expect);
 
@@ -676,7 +675,7 @@ mod tests {
             0x0541a0abe367f98au64,
         ]))
         .unwrap();
-        let mut inval = Fq2 { c0: c0, c1: c1 };
+        let mut inval = Fq2 { c0, c1 };
         let c0 = Fq::from_repr(FqRepr([
             0x625b119d57a79473u64,
             0x5643d8d2e2053dacu64,
@@ -695,7 +694,7 @@ mod tests {
             0x18372d281eeb84a0u64,
         ]))
         .unwrap();
-        let expect = Fq2 { c0: c0, c1: c1 };
+        let expect = Fq2 { c0, c1 };
         qi_y(&mut inval);
         assert_eq!(inval, expect);
 
@@ -717,7 +716,7 @@ mod tests {
             0x0ce612ffb945927au64,
         ]))
         .unwrap();
-        let mut inval = Fq2 { c0: c0, c1: c1 };
+        let mut inval = Fq2 { c0, c1 };
         let c0 = Fq::from_repr(FqRepr([
             0xb3a8b8312fff00c5u64,
             0xaa1311849271180du64,
@@ -736,7 +735,7 @@ mod tests {
             0x0c508e9861483d86u64,
         ]))
         .unwrap();
-        let expect = Fq2 { c0: c0, c1: c1 };
+        let expect = Fq2 { c0, c1 };
         qi_y(&mut inval);
         assert_eq!(inval, expect);
 
@@ -758,7 +757,7 @@ mod tests {
             0x090b19dcde6f24c5u64,
         ]))
         .unwrap();
-        let mut inval = Fq2 { c0: c0, c1: c1 };
+        let mut inval = Fq2 { c0, c1 };
         let c0 = Fq::from_repr(FqRepr([
             0x9057a343df6b9f0du64,
             0x836a574ae94613c0u64,
@@ -777,7 +776,7 @@ mod tests {
             0x193045455c027d8eu64,
         ]))
         .unwrap();
-        let expect = Fq2 { c0: c0, c1: c1 };
+        let expect = Fq2 { c0, c1 };
         qi_y(&mut inval);
         assert_eq!(inval, expect);
 
@@ -799,7 +798,7 @@ mod tests {
             0x106bb8b7a6dd33ccu64,
         ]))
         .unwrap();
-        let mut inval = Fq2 { c0: c0, c1: c1 };
+        let mut inval = Fq2 { c0, c1 };
         let c0 = Fq::from_repr(FqRepr([
             0xfd16cd1f144f500au64,
             0x3916b7e6ad0c226fu64,
@@ -818,7 +817,7 @@ mod tests {
             0x044b982815695acbu64,
         ]))
         .unwrap();
-        let expect = Fq2 { c0: c0, c1: c1 };
+        let expect = Fq2 { c0, c1 };
         qi_y(&mut inval);
         assert_eq!(inval, expect);
     }

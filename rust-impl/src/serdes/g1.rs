@@ -47,7 +47,7 @@ impl SerDes for G1Affine {
                 (96, 0x40u8)
             };
             to_write[0] = tag;
-            writer.write(&to_write[..len])?;
+            writer.write_all(&to_write[..len])?;
             return Ok(());
         }
 
@@ -66,7 +66,7 @@ impl SerDes for G1Affine {
             }
         } // borrow of to_write ends
         if !compressed {
-            writer.write(&to_write[..96])?;
+            writer.write_all(&to_write[..96])?;
             return Ok(());
         }
 
@@ -76,7 +76,7 @@ impl SerDes for G1Affine {
         } else {
             0x80u8
         };
-        writer.write(&to_write[..48])?;
+        writer.write_all(&to_write[..48])?;
         Ok(())
     }
 
@@ -152,12 +152,10 @@ impl SerDes for G1Affine {
 
                 Ok(unsafe { g1_affine(x, y, false) })
             }
-            _ => {
-                return Err(Error::new(
-                    ErrorKind::InvalidInput,
-                    format!("invalid tag {} for G1 point", tag),
-                ))
-            }
+            _ => Err(Error::new(
+                ErrorKind::InvalidInput,
+                format!("invalid tag {} for G1 point", tag),
+            )),
         }
     }
 }
