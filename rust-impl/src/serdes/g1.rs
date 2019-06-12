@@ -41,7 +41,11 @@ impl SerDes for G1Affine {
 
         // point at infinity
         if self.is_zero() {
-            let (len, tag) = if compressed { (48, 0xc0u8) } else { (96, 0x40u8) };
+            let (len, tag) = if compressed {
+                (48, 0xc0u8)
+            } else {
+                (96, 0x40u8)
+            };
             to_write[0] = tag;
             writer.write(&to_write[..len])?;
             return Ok(());

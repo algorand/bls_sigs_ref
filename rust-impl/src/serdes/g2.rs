@@ -50,11 +50,11 @@ fn deser_fq2(mut cur: Cursor<&[u8]>) -> Result<Fq2> {
 }
 
 fn sqrt_fq2(gx: &Fq2) -> Option<Fq2> {
-    use ::osswu_map::g2::ROOTS_OF_UNITY;
+    use osswu_map::g2::ROOTS_OF_UNITY;
     let sqrt_candidate = {
         let mut tmp = *gx;
         chain_p2m9div16(&mut tmp, gx); // gx ^ ((p^2 - 9) // 16)
-        tmp.mul_assign(gx);  // gx ^ ((p^2 + 7) // 16)
+        tmp.mul_assign(gx); // gx ^ ((p^2 + 7) // 16)
         tmp
     };
     for root in &ROOTS_OF_UNITY[..] {
@@ -126,7 +126,10 @@ impl SerDes for G2Affine {
         // point at infinity
         if tag2 == 6 {
             if tag1 != 3 && tag1 != 7 {
-                return Err(Error::new(ErrorKind::InvalidInput, format!("invalid tag1 {} for G2 point", tag1)));
+                return Err(Error::new(
+                    ErrorKind::InvalidInput,
+                    format!("invalid tag1 {} for G2 point", tag1),
+                ));
             }
         }
 
@@ -150,7 +153,7 @@ impl SerDes for G2Affine {
                 }
 
                 Ok(G2Affine::zero())
-            },
+            }
             (3, 4) => {
                 // uncompressed point
                 let x = deser_fq2(Cursor::new(&x_in[..]))?;
@@ -166,7 +169,7 @@ impl SerDes for G2Affine {
                 // XXX: check if point is in subgroup?
 
                 Ok(unsafe { g2_affine(x, y, false) })
-            },
+            }
             (7, 4) | (7, 5) => {
                 // compressed point
                 let x = deser_fq2(Cursor::new(&x_in[..]))?;
@@ -181,17 +184,23 @@ impl SerDes for G2Affine {
                             };
                         tmp.negate_if(y_neg);
                         tmp
-                    },
+                    }
                     None => {
-                        return Err(Error::new(ErrorKind::InvalidData, "invalid compressed point: not on curve"));
-                    },
+                        return Err(Error::new(
+                            ErrorKind::InvalidData,
+                            "invalid compressed point: not on curve",
+                        ));
+                    }
                 };
 
                 Ok(unsafe { g2_affine(x, y, false) })
-            },
+            }
             _ => {
-                return Err(Error::new(ErrorKind::InvalidInput, format!("invalid tag {}:{} for G2 point", tag1, tag2)));
-            },
+                return Err(Error::new(
+                    ErrorKind::InvalidInput,
+                    format!("invalid tag {}:{} for G2 point", tag1, tag2),
+                ));
+            }
         }
     }
 }

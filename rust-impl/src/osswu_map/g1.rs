@@ -2,12 +2,12 @@
 Constants for OSSWU map for G1
 */
 
-use ::chain::chain_pm3div4;
-use ::signum::Signum0;
-use super::{OSSWUMap, osswu_help};
+use super::{osswu_help, OSSWUMap};
+use chain::chain_pm3div4;
 use ff::Field;
 use pairing::bls12_381::transmute::{fq, g1_projective};
 use pairing::bls12_381::{Fq, FqRepr, G1};
+use signum::Signum0;
 
 pub(super) const ELLP_A: Fq = unsafe {
     fq(FqRepr([
