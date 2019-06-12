@@ -3,6 +3,7 @@ Serialization / deserialization
 */
 
 mod g1;
+mod g2;
 #[cfg(test)]
 mod tests;
 
@@ -20,12 +21,23 @@ pub trait SerDes: Sized {
 }
 
 /// Convert PrimeFieldDecodingError to io::Error
-fn to_ioresult<F: Field>(res: RResult<F, PrimeFieldDecodingError>, e_str: &str) -> Result<F> {
+fn to_ioresult<F: Field>(res: RResult<F, PrimeFieldDecodingError>) -> Result<F> {
     match res {
         Err(PrimeFieldDecodingError::NotInField(s)) => Err(Error::new(
-            ErrorKind::InvalidData,
-            format!("{} coord is invalid: {}", e_str, s),
+            ErrorKind::InvalidInput,
+            format!("coord is invalid: {}", s),
         )),
         Ok(v) => Ok(v),
     }
+}
+
+/// Check whether point is on curve
+fn check_point<F: Field, G: Fn(&F) -> F>(x: &F, y: &F, g: G) -> bool {
+    let ysq = {
+        let mut tmp = *y;
+        tmp.square();
+        tmp
+    };
+
+    ysq == g(x)
 }

@@ -2,7 +2,7 @@
 SerDes for G1
 */
 
-use super::{to_ioresult, SerDes};
+use super::{check_point, to_ioresult, SerDes};
 use chain::chain_pm3div4;
 use ff::{Field, PrimeField, PrimeFieldRepr};
 use pairing::bls12_381::transmute::{fq, g1_affine};
@@ -29,36 +29,29 @@ fn gx1(x: &Fq) -> Fq {
     ret
 }
 
-fn point_on_g1(x: &Fq, y: &Fq) -> bool {
-    let y2 = {
-        let mut tmp = *y;
-        tmp.square();
-        tmp
-    };
-
-    gx1(x) == y2
+fn deser_fq(cur: Cursor<&[u8]>) -> Result<Fq> {
+    let mut repr = FqRepr([0; 6]);
+    repr.read_be(cur)?;
+    to_ioresult(Fq::from_repr(repr))
 }
 
 impl SerDes for G1Affine {
     fn serialize<W: Write>(&self, writer: &mut W, compressed: bool) -> Result<()> {
-        // Serialize the point at infinity.
+        let mut to_write = [0u8; 96];
+
+        // point at infinity
         if self.is_zero() {
-            let mut to_write = [0u8; 96];
-            let len = {
-                if compressed {
-                    to_write[0] = 0xc0;
-                    48
-                } else {
-                    to_write[0] = 0x40;
-                    96
-                }
-            };
+            let (len, tag) = if compressed { (48, 0xc0u8) } else { (96, 0x40u8) };
+            to_write[0] = tag;
             writer.write(&to_write[..len])?;
             return Ok(());
         }
 
+        // not the point at infinity
         let (x, y) = self.as_tuple();
-        let mut to_write = [0u8; 96];
+        if !check_point(x, y, gx1) {
+            return Err(Error::new(ErrorKind::InvalidData, "point is not on curve"));
+        }
         // start of to_write borrow for serializing x and possibly y
         {
             let mut cur = Cursor::new(&mut to_write[..]);
@@ -95,20 +88,14 @@ impl SerDes for G1Affine {
         match tag {
             0 => {
                 // this is an uncompressed point
-                let x = {
-                    let mut x_repr = FqRepr([0; 6]);
-                    x_repr.read_be(Cursor::new(&x_in[..]))?;
-                    to_ioresult(Fq::from_repr(x_repr), "x")?
-                };
+                let x = deser_fq(Cursor::new(&x_in[..]))?;
                 let y = {
                     let mut y_in = [0u8; 48];
                     reader.read_exact(&mut y_in)?;
-                    let mut y_repr = FqRepr([0; 6]);
-                    y_repr.read_be(Cursor::new(&y_in[..]))?;
-                    to_ioresult(Fq::from_repr(y_repr), "y")?
+                    deser_fq(Cursor::new(&y_in[..]))?
                 };
 
-                if !point_on_g1(&x, &y) {
+                if !check_point(&x, &y, gx1) {
                     return Err(Error::new(ErrorKind::InvalidData, "point is not on curve"));
                 }
                 // XXX: check if point is in subgroup?
@@ -124,7 +111,7 @@ impl SerDes for G1Affine {
                     }
                 {
                     return Err(Error::new(
-                        ErrorKind::InvalidData,
+                        ErrorKind::InvalidInput,
                         "invalid point at infinity: must be all 0s other than tag",
                     ));
                 }
@@ -132,11 +119,7 @@ impl SerDes for G1Affine {
                 Ok(G1Affine::zero())
             }
             4 | 5 => {
-                let x = {
-                    let mut x_repr = FqRepr([0; 6]);
-                    x_repr.read_be(Cursor::new(&x_in[..]))?;
-                    to_ioresult(Fq::from_repr(x_repr), "x")?
-                };
+                let x = deser_fq(Cursor::new(&x_in[..]))?;
                 let gx = gx1(&x);
                 let y = {
                     let mut tmp = Fq::zero();
@@ -175,13 +158,17 @@ impl SerDes for G1Affine {
     }
 }
 
+// The rustc conflicting implementation check appears to preclude making the below generic.
+// Specifically, you could imagine implementing for T: CurveProjective where T::Affine has
+// a SerDes impl. But then rustc tells you that an upstream crate might impl CurveProjective
+// for T::Affine (which happens to be false here, but rustc doesn't know that).
 impl SerDes for G1 {
     fn serialize<W: Write>(&self, writer: &mut W, compressed: bool) -> Result<()> {
         self.into_affine().serialize(writer, compressed)
     }
 
     fn deserialize<R: Read>(reader: &mut R) -> Result<G1> {
-        let res_affine: G1Affine = G1Affine::deserialize(reader)?;
+        let res_affine = G1Affine::deserialize(reader)?;
         Ok(res_affine.into_projective())
     }
 }

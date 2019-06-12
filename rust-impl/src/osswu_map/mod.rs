@@ -3,7 +3,7 @@ Optimized Simplified SWU maps for G1 and G2
 */
 
 mod g1;
-mod g2;
+pub(crate) mod g2;
 #[cfg(test)]
 mod tests;
 

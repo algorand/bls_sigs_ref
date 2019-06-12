@@ -145,7 +145,7 @@ pub(super) const ETAS: [Fq2; 4] = unsafe {
     ]
 };
 
-pub(super) const ROOTS_OF_UNITY: [Fq2; 4] = unsafe {
+pub(crate) const ROOTS_OF_UNITY: [Fq2; 4] = unsafe {
     [
         Fq2 {
             c0: fq(FqRepr([
