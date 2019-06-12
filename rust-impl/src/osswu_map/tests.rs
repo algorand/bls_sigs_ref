@@ -46,12 +46,12 @@ fn check_g_prime<F: Field>(x: &F, y: &F, z: &F, a: &F, b: &F) {
 }
 
 fn check_g1_prime(x: &Fq, y: &Fq, z: &Fq) {
-    use super::g1_consts::{ELLP_A, ELLP_B};
+    use super::g1::{ELLP_A, ELLP_B};
     check_g_prime(x, y, z, &ELLP_A, &ELLP_B);
 }
 
 fn check_g2_prime(x: &Fq2, y: &Fq2, z: &Fq2) {
-    use super::g2_consts::{ELLP_A, ELLP_B};
+    use super::g2::{ELLP_A, ELLP_B};
     check_g_prime(x, y, z, &ELLP_A, &ELLP_B);
 }
 

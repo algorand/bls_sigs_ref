@@ -2,8 +2,8 @@
 Optimized Simplified SWU maps for G1 and G2
 */
 
-mod g1_consts;
-mod g2_consts;
+mod g1;
+mod g2;
 #[cfg(test)]
 mod tests;
 
@@ -85,7 +85,7 @@ fn osswu_help<F: Field>(u: &F, xi: &F, ellp_a: &F, ellp_b: &F) -> [F; 7] {
 
 impl OSSWUMap for G1 {
     fn osswu_map(u: &Fq) -> G1 {
-        use self::g1_consts::{ELLP_A, ELLP_B, XI};
+        use self::g1::{ELLP_A, ELLP_B, XI};
 
         // compute x0 and g(x0)
         let [usq, xi_usq, _, x0_num, x0_den, gx0_num, gx0_den] =
@@ -135,7 +135,7 @@ impl OSSWUMap for G1 {
 
 impl OSSWUMap for G2 {
     fn osswu_map(u: &Fq2) -> G2 {
-        use self::g2_consts::{ELLP_A, ELLP_B, ETAS, ROOTS_OF_UNITY, XI};
+        use self::g2::{ELLP_A, ELLP_B, ETAS, ROOTS_OF_UNITY, XI};
 
         // compute x0 and g(x0)
         let [usq, xi_usq, xi2_u4, x0_num, x0_den, gx0_num, gx0_den] =

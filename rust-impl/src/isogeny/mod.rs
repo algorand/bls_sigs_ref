@@ -2,8 +2,8 @@
 Isogenies E' -> E and E2' -> E2 for OSSWU map.
 */
 
-mod g1_consts;
-mod g2_consts;
+mod g1;
+mod g2;
 #[cfg(test)]
 mod tests;
 
@@ -20,14 +20,14 @@ pub trait IsogenyMap {
 
 impl IsogenyMap for G1 {
     fn isogeny_map(&mut self) {
-        use self::g1_consts::{XDEN, XNUM, YDEN, YNUM};
+        use self::g1::{XDEN, XNUM, YDEN, YNUM};
         eval_iso(self, [&XNUM[..], &XDEN[..], &YNUM[..], &YDEN[..]]);
     }
 }
 
 impl IsogenyMap for G2 {
     fn isogeny_map(&mut self) {
-        use self::g2_consts::{XDEN, XNUM, YDEN, YNUM};
+        use self::g2::{XDEN, XNUM, YDEN, YNUM};
         eval_iso(self, [&XNUM[..], &XDEN[..], &YNUM[..], &YDEN[..]]);
     }
 }
@@ -35,7 +35,7 @@ impl IsogenyMap for G2 {
 /// Generic isogeny evaluation function
 fn eval_iso<PtT: CurveProjective>(pt: &mut PtT, coeffs: [&[CoordT<PtT>]; 4]) {
     // XXX hack: In array below, 16 is long enough for both iso11 and iso3.
-    // Rust (still) can't handle generic array sizes.
+    // Rust (still) can't handle generic array sizes (issue #43408)
     let mut tmp = [CoordT::<PtT>::zero(); 16];
     let mut mapvals = [CoordT::<PtT>::zero(); 4];
     // scope for pt borrow
