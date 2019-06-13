@@ -7,8 +7,13 @@
  This crate has utilities to test bls_sigs_ref-rs.
 */
 
+extern crate bls_sigs_ref_rs;
+extern crate pairing;
+
+use bls_sigs_ref_rs::{BLSSignature, HashToCurve, SerDes};
+use pairing::CurveProjective;
 use std::fs::File;
-use std::io::{BufRead, BufReader, Result};
+use std::io::{BufRead, BufReader, Cursor, Result};
 
 fn hexnum(c: u8) -> u8 {
     match c {
@@ -62,4 +67,56 @@ pub fn proc_testvec_file(filename: &str) -> Result<Vec<TestVector>> {
         .lines()
         .map(|x| x.map(|xx| proc_testvec_line(xx.as_ref())))
         .collect()
+}
+
+/// Test hash function
+pub fn test_hash<G>(tests: Vec<TestVector>, ciphersuite: u8, len: usize) -> Result<()>
+where
+    G: CurveProjective + HashToCurve + SerDes,
+{
+    for TestVector { msg, expect, .. } in tests {
+        let result = G::hash_to_curve(&msg, ciphersuite);
+        match expect {
+            None => println!("{:?}", result),
+            Some(e) => {
+                let mut buf = [0u8; 96];
+                {
+                    let mut cur = Cursor::new(&mut buf[..]);
+                    result.serialize(&mut cur, true)?;
+                }
+                assert_eq!(e.as_ref() as &[u8], &buf[..len]);
+
+                let deser = G::deserialize(&mut Cursor::new(&e))?;
+                assert_eq!(result, deser);
+            }
+        }
+    }
+    Ok(())
+}
+
+/// Test sign functionality
+pub fn test_sig<G>(tests: Vec<TestVector>, ciphersuite: u8, len: usize) -> Result<()>
+where
+    G: BLSSignature + CurveProjective + SerDes,
+{
+    for TestVector { msg, sk, expect } in tests {
+        let (x_prime, pk) = G::keygen(sk);
+        let sig = G::sign(x_prime, &msg, ciphersuite);
+        assert!(G::verify(pk, sig, &msg, ciphersuite));
+        match expect {
+            None => println!("{:?}", sig),
+            Some(e) => {
+                let mut buf = [0u8; 96];
+                {
+                    let mut cur = Cursor::new(&mut buf[..]);
+                    sig.serialize(&mut cur, true)?;
+                }
+                assert_eq!(e.as_ref() as &[u8], &buf[..len]);
+
+                let deser = G::deserialize(&mut Cursor::new(&e))?;
+                assert_eq!(sig, deser);
+            }
+        }
+    }
+    Ok(())
 }
