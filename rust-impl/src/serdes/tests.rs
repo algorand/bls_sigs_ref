@@ -92,28 +92,6 @@ fn test_g2_serdes_loopback() {
     }
 }
 
-/*
-fn hexnum(c: u8) -> u8 {
-    match c {
-        b'0'...b'9' => c - 48,
-        b'a'...b'f' => c - 87,
-        b'A'...b'F' => c - 55,
-        _ => panic!("not a hex digit"),
-    }
-}
-
-fn ascii_to_bytes(input: &[u8]) -> Vec<u8> {
-    assert!(input.len() % 2 == 0);
-    let ret_len = input.len() / 2;
-    let mut ret = Vec::<u8>::with_capacity(ret_len);
-
-    for idx in 0..ret_len {
-        ret.push(16 * hexnum(input[2 * idx]) + hexnum(input[2 * idx + 1]));
-    }
-    ret
-}
-*/
-
 const INVALID: [&'static [u8]; 39] = [
     &hex!("c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
     &hex!("4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
