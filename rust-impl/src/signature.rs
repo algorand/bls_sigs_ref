@@ -95,21 +95,21 @@ mod tests {
     use super::BLSSignature;
     use pairing::bls12_381::{G1, G2};
 
-    fn test_sig<T: BLSSignature>() {
+    fn test_sig<T: BLSSignature>(ciphersuite: u8) {
         let msg = "this is the message";
         let sk = "this is the key";
         let (x_prime, pk) = T::keygen(sk);
-        let sig = T::sign(x_prime, msg, 1u8);
-        assert!(T::verify(pk, sig, msg, 1u8));
+        let sig = T::sign(x_prime, msg, ciphersuite);
+        assert!(T::verify(pk, sig, msg, ciphersuite));
     }
 
     #[test]
     fn test_g1() {
-        test_sig::<G1>();
+        test_sig::<G1>(1u8);
     }
 
     #[test]
     fn test_g2() {
-        test_sig::<G2>();
+        test_sig::<G2>(2u8);
     }
 }
