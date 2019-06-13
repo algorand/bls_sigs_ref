@@ -2,9 +2,9 @@
 BLS signatures
 */
 
+use super::HashToCurve;
 use ff::Field;
 use hash_to_field::xprime_from_sk;
-use osswu_map::hash_to_curve;
 use pairing::bls12_381::{Bls12, Fq12, Fr, G1, G2};
 use pairing::{CurveAffine, CurveProjective, Engine};
 
@@ -37,15 +37,13 @@ impl BLSSignature for G1 {
     }
 
     fn sign<B: AsRef<[u8]>>(x_prime: Fr, msg: B, ciphersuite: u8) -> G1 {
-        let mut p = hash_to_curve::<B, G1>(msg, ciphersuite);
+        let mut p = G1::hash_to_curve(msg, ciphersuite);
         p.mul_assign(x_prime);
         p
     }
 
     fn verify<B: AsRef<[u8]>>(pk: G2, sig: G1, msg: B, ciphersuite: u8) -> bool {
-        let p = hash_to_curve::<B, G1>(msg, ciphersuite)
-            .into_affine()
-            .prepare();
+        let p = G1::hash_to_curve(msg, ciphersuite).into_affine().prepare();
         let g2gen = {
             let mut tmp = G2::one();
             tmp.negate();
@@ -71,15 +69,13 @@ impl BLSSignature for G2 {
     }
 
     fn sign<B: AsRef<[u8]>>(x_prime: Fr, msg: B, ciphersuite: u8) -> G2 {
-        let mut p = hash_to_curve::<B, G2>(msg, ciphersuite);
+        let mut p = G2::hash_to_curve(msg, ciphersuite);
         p.mul_assign(x_prime);
         p
     }
 
     fn verify<B: AsRef<[u8]>>(pk: G1, sig: G2, msg: B, ciphersuite: u8) -> bool {
-        let p = hash_to_curve::<B, G2>(msg, ciphersuite)
-            .into_affine()
-            .prepare();
+        let p = G2::hash_to_curve(msg, ciphersuite).into_affine().prepare();
         let g1gen = {
             let mut tmp = G1::one();
             tmp.negate();

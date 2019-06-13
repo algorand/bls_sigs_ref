@@ -26,11 +26,56 @@ use pairing::CurveProjective;
 /// Alias for the coordinate type corresponding to a CurveProjective type
 type CoordT<PtT> = <PtT as CurveProjective>::Base;
 
-pub mod chain;
-pub mod cofactor;
-pub mod hash_to_field;
-pub mod isogeny;
-pub mod osswu_map;
-pub mod serdes;
-pub mod signature;
-pub mod signum;
+mod chain;
+mod cofactor;
+mod hash_to_field;
+mod isogeny;
+mod osswu_map;
+mod serdes;
+mod signature;
+mod signum;
+
+pub use cofactor::ClearH;
+pub use hash_to_field::FromRO;
+use hash_to_field::HashToField;
+pub use isogeny::IsogenyMap;
+pub use osswu_map::OSSWUMap;
+pub use serdes::SerDes;
+pub use signature::BLSSignature;
+
+/// Random oracle and injective maps to curve
+pub trait HashToCurve {
+    /// Random oracle
+    fn hash_to_curve<B: AsRef<[u8]>>(msg: B, ciphersuite: u8) -> Self;
+
+    /// Injective map
+    fn map_to_curve<B: AsRef<[u8]>>(msg: B, ciphersuite: u8) -> Self;
+}
+
+impl<PtT> HashToCurve for PtT
+where
+    PtT: ClearH + IsogenyMap + OSSWUMap,
+    CoordT<PtT>: FromRO,
+{
+    fn hash_to_curve<B: AsRef<[u8]>>(msg: B, ciphersuite: u8) -> PtT {
+        let mut p = {
+            let h2f = HashToField::<CoordT<PtT>>::new(msg, ciphersuite);
+            let mut tmp = PtT::osswu_map(&h2f.with_ctr(0));
+            tmp.add_assign(&PtT::osswu_map(&h2f.with_ctr(1)));
+            tmp
+        };
+        p.isogeny_map();
+        p.clear_h();
+        p
+    }
+
+    fn map_to_curve<B: AsRef<[u8]>>(msg: B, ciphersuite: u8) -> PtT {
+        let mut p = {
+            let h2f = HashToField::<CoordT<PtT>>::new(msg, ciphersuite);
+            PtT::osswu_map(&h2f.with_ctr(0))
+        };
+        p.isogeny_map();
+        p.clear_h();
+        p
+    }
+}
