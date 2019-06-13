@@ -5,3 +5,4 @@ authors = ["kwantam <kwantam@gmail.com>"]
 
 [dependencies]
 bls_sigs_ref-rs = { path = "../" }
+pairing = { version = "0.14.3", git = "https://github.com/kwantam/pairing", features = [ "transmutable" ] }

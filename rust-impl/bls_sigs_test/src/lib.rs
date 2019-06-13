@@ -35,19 +35,22 @@ fn hexstring_to_bytes(input: &str) -> Vec<u8> {
 #[derive(Debug)]
 /// One processed line of a test vector
 pub struct TestVector {
-    msg: Vec<u8>,
-    sk: Vec<u8>,
-    expect: Option<Vec<u8>>,
+    /// The message being tested
+    pub msg: Vec<u8>,
+    /// The secret key being tested
+    pub sk: Vec<u8>,
+    /// The expected result, if any
+    pub expect: Option<Vec<u8>>,
 }
 
-/// Process one line of a test vector
-pub fn proc_testvec_line(input: &str) -> TestVector {
+// Process one line of a test vector
+fn proc_testvec_line(input: &str) -> TestVector {
     let mut result: Vec<Vec<u8>> = input
         .split_ascii_whitespace()
         .take(3)
         .map(|s| hexstring_to_bytes(s))
         .collect();
-    let expect = result.pop();
+    let expect = if result.len() > 2 { result.pop() } else { None };
     let sk = result.pop().unwrap();
     let msg = result.pop().unwrap();
     TestVector { msg, sk, expect }
