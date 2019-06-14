@@ -2,6 +2,7 @@
 name = "bls_sigs_test"
 version = "0.1.0"
 authors = ["kwantam <kwantam@gmail.com>"]
+license = "Apache-2.0"
 
 [dependencies]
 bls_sigs_ref-rs = { path = "../" }

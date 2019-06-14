@@ -1,6 +1,6 @@
 # hash-to-curve proof-of-concept implementations in Sage
 
-This directory contains a Sage implementation of BLS signing (verifying is WIP).
+This directory contains a Sage implementation of the BLS signatures draft.
 
 ## prerequisites
 
