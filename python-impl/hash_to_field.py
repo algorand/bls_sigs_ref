@@ -54,24 +54,27 @@ def hkdf_expand(prk, info, length, hash_fn):
 
 # hash_to_base as defined in draft-irtf-cfrg-hash-to-curve-04
 def hash_to_base(msg, ctr, dst, modulus, degree, blen, hash_fn):
-    rets = [None] * m
-    m_prime = hkdf_extract(dst, msg)
+    rets = [None] * degree
+    m_prime = hkdf_extract(dst, msg, hash_fn)
     info = b'H2C' + I2OSP(ctr, 1)
-    for i in range(0, m):
-        t = hkdf_expand(m_prime, info + I2OSP(i + 1, 1), blen)
+    for i in range(0, degree):
+        t = hkdf_expand(m_prime, info + I2OSP(i + 1, 1), blen, hash_fn)
         rets[i] = OS2IP(t) % modulus
     return rets
 
+# TODO add DST as arg to this fn?
 def Hp(msg, ctr):
     if not isinstance(msg, bytes):
         raise ValueError("Hp can't hash anything but bytes")
     return hash_to_base(msg, ctr, b'', p, 1, 64, hashlib.sha256)
 
+# TODO add DST as arg to this fn?
 def Hp2(msg, ctr):
     if not isinstance(msg, bytes):
         raise ValueError("Hp2 can't hash anything but bytes")
     return hash_to_base(msg, ctr, b'', p, 2, 64, hashlib.sha256)
 
+# TODO add DST to this fn?
 def Hr(msg):
     if not isinstance(msg, bytes):
         raise ValueError("Hr can't hash anything but bytes")
@@ -138,10 +141,10 @@ def test():
                    , int(0x2c91117204d745f3500d636a62f64f0ab3bae548aa53d423b0d1f27ebba6f5e5673a081d70cce7acfc48).to_bytes(42, 'big')
                    )
                  ]
-    for (h, i, s, n, l, p, o) in test_cases:
+    for (h, i, s, n, l, px, o) in test_cases:
         pp = hkdf_extract(s, i, h)
         op = hkdf_expand(pp, n, l, h)
-        assert pp == p, "prk mismatch"
+        assert pp == px, "prk mismatch"
         assert op == o, "okm mismatch"
 
 if __name__ == "__main__":
