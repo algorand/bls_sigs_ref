@@ -69,7 +69,7 @@ def hash_to_base(msg, ctr, dst, modulus, degree, blen, hash_fn):
     info = 'H2C' + I2OSP(ctr, 1)
     for i in range(0, degree):
         t = hkdf_expand(msg_prime, info + I2OSP(i + 1, 1), blen, hash_fn)
-        print_iv(t, "t" % (i + 1), "hash_to_base")
+        print_iv(t, "t", "hash_to_base")
 
         rets[i] = OS2IP(t) % modulus
         print_iv(rets[i], "rets[%d]" % i, "hash_to_base")
