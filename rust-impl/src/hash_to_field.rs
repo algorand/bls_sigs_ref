@@ -4,8 +4,10 @@
 */
 
 use ff::{Field, PrimeField, PrimeFieldRepr};
+use hkdf::Hkdf;
 use pairing::bls12_381::{Fq, Fq2, FqRepr, Fr, FrRepr};
-use sha2::digest::generic_array::GenericArray;
+use sha2::digest::generic_array::typenum::{U48, U64};
+use sha2::digest::generic_array::{ArrayLength, GenericArray};
 use sha2::{Digest, Sha256};
 use std::io::{Cursor, Read};
 use std::marker::PhantomData;
@@ -75,33 +77,42 @@ impl FromRO for Fq2 {
     }
 }
 
-/// Implements the inner loop of hash_to_field from
-///     https://github.com/pairingwg/bls_standard/blob/master/minutes/spec-v1.md
-/// for field Fp, p a prime.
-pub trait BaseFromRO: Field {
-    /// The value 2^256 mod p, which is used to combine the two SHA evaluations.
-    const F_2_256: Self;
+/// Implements the loop body of hash_to_base from hash-to-curve draft.
+pub trait BaseFromRO: Field + PrimeField {
+    /// The length of the HKDF output used to hash to a field element.
+    type Length: ArrayLength<u8>;
 
-    /// Takes the 32-byte SHA256 result `sha` and returns the value OS2IP(sha) % p.
-    fn sha_to_base(sha: &[u8]) -> Self;
+    /// 2^(8 * Length / 2) in the field
+    const F_2_LEN_OVER2: Self;
+
+    /// Convert output of HKDF to two field elements
+    fn hkdf_to_elm(okm: &[u8]) -> Self;
 
     /// Returns the value from the inner loop of hash_to_field by
     /// hashing twice, calling sha_to_base on each, and combining the result.
     fn base_from_ro(msg_hashed: &[u8], ctr: u8, idx: u8) -> Self {
-        let hash_state = Sha256::new().chain(msg_hashed);
-        let mut f1 = <Self as BaseFromRO>::sha_to_base(
-            hash_state.clone().chain([ctr, idx, 1]).result().as_slice(),
-        );
-        let f2 =
-            <Self as BaseFromRO>::sha_to_base(hash_state.chain([ctr, idx, 2]).result().as_slice());
-        f1.mul_assign(&Self::F_2_256);
+        let (mut f1, f2) = {
+            let mut result = GenericArray::<u8, <Self as BaseFromRO>::Length>::default();
+            let h = Hkdf::<Sha256>::from_prk(msg_hashed).unwrap();
+            // "H2C" || I2OSP(ctr, 1) || I2OSP(idx, 1)
+            let info = [72, 50, 67, ctr, idx];
+            h.expand(&info, result.as_mut_slice()).unwrap();
+            let len = result.len();
+            (
+                <Self as BaseFromRO>::hkdf_to_elm(&result[..len / 2]),
+                <Self as BaseFromRO>::hkdf_to_elm(&result[len / 2..]),
+            )
+        };
+        f1.mul_assign(&<Self as BaseFromRO>::F_2_LEN_OVER2);
         f1.add_assign(&f2);
         f1
     }
 }
 
 impl BaseFromRO for Fq {
-    const F_2_256: Fq = unsafe {
+    type Length = U64;
+
+    const F_2_LEN_OVER2: Fq = unsafe {
         pairing::bls12_381::transmute::fq(FqRepr([
             0x75b3cd7c5ce820fu64,
             0x3ec6ba621c3edb0bu64,
@@ -112,52 +123,33 @@ impl BaseFromRO for Fq {
         ]))
     };
 
-    fn sha_to_base(sha: &[u8]) -> Fq {
-        let mut repr = FqRepr([0; 6]);
-
-        // unwraps are safe here: sha256 output is exactly 32 bytes, value is strictly less than p
-        repr.read_be(Cursor::new([0; 16]).chain(Cursor::new(sha)))
+    fn hkdf_to_elm(okm: &[u8]) -> Fq {
+        // unwraps are safe here: we only use 32 bytes at a time, which is strictly less than p
+        let mut repr = FqRepr::default();
+        repr.read_be(Cursor::new([0; 16]).chain(Cursor::new(okm)))
             .unwrap();
         Fq::from_repr(repr).unwrap()
     }
 }
 
-const FR_2_254: Fr = unsafe {
-    pairing::bls12_381::transmute::fr(FrRepr([
-        0x32667a637cfca71cu64,
-        0xc9a9767521e35c08u64,
-        0x67e0272ba3ce7067u64,
-        0x58c473f4c70c9dbau64,
-    ]))
-};
 impl BaseFromRO for Fr {
-    const F_2_256: Fr = unsafe {
+    type Length = U48;
+
+    const F_2_LEN_OVER2: Fr = unsafe {
         pairing::bls12_381::transmute::fr(FrRepr([
-            0xc999e990f3f29c6d,
-            0x2b6cedcb87925c23,
-            0x5d314967254398f,
-            0x748d9d99f59ff11,
+            0x59476ebc41b4528fu64,
+            0xc5a30cb243fcc152u64,
+            0x2b34e63940ccbd72u64,
+            0x1e179025ca247088u64,
         ]))
     };
 
-    fn sha_to_base(sha: &[u8]) -> Fr {
-        let mut repr = FrRepr([0; 4]);
-        // unwrap is safe here: sha256 output is exactly 32 bytes
-        repr.read_be(Cursor::new(sha)).unwrap();
-
-        // clear most significant two bits of repr
-        let msbyte = repr.as_ref()[3];
-        repr.as_mut()[3] = msbyte & ((1u64 << 62) - 1);
-        let msbyte_val = (msbyte & 0xc000000000000000u64) >> 62;
-
-        // unwrap is safe: value is less than 2^254
-        let mut result = Fr::from_repr(repr).unwrap();
-
-        // unwraps below are safe: fixed, valid field element and val in [0,3]
-        let mut adjust = FR_2_254;
-        adjust.mul_assign(&Fr::from_repr(FrRepr::from(msbyte_val)).unwrap());
-        result.add_assign(&adjust);
-        result
+    fn hkdf_to_elm(okm: &[u8]) -> Fr {
+        // unwraps are safe here: we only use 24 bytes at a time, which is strictly less than p
+        let mut repr = FrRepr::default();
+        repr.read_be(Cursor::new([0; 8]).chain(Cursor::new(okm)))
+            .unwrap();
+        Fr::from_repr(repr).unwrap()
     }
 }
 

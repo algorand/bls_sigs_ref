@@ -16,6 +16,7 @@ extern crate ff;
 #[cfg(test)]
 #[macro_use]
 extern crate hex_literal;
+extern crate hkdf;
 extern crate pairing;
 #[cfg(test)]
 extern crate rand;
