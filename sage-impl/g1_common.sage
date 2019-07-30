@@ -5,6 +5,9 @@
 #
 # common routines and definitions for G1
 
+import hashlib
+
+from hash_to_field import hash_to_base, hkdf_extract, hkdf_expand, OS2IP
 from util import print_iv, is_debug
 
 # BLS12-381 G1 curve
@@ -36,6 +39,17 @@ def sgn0(x):
     for xi in reversed(list(xi_values)):
         sign = select_sign(-2 * (xi > thresh) + (xi > 0))
     return select_sign(1)
+
+def Hp(msg, ctr):
+    return hash_to_base(msg, ctr, '', p, 1, 64, hashlib.sha256)
+
+def Hp2(msg, ctr):
+    return hash_to_base(msg, ctr, '', p, 2, 64, hashlib.sha256)
+
+def Hr(msg):
+    prk = hkdf_extract(None, msg, hashlib.sha256)
+    okm = hkdf_expand(prk, None, 48, hashlib.sha256)
+    return OS2IP(okm) % q
 
 # print out a point on g1
 def print_g1_hex(P, margin=8):

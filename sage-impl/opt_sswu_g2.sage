@@ -5,10 +5,9 @@
 
 import sys
 
-from hash_to_field import hash_to_field
 from util import get_cmdline_options
 try:
-    from __sage__g1_common import ZZR, p, q, sgn0
+    from __sage__g1_common import Hp2, p, sgn0
     from __sage__g2_common import Ell2, F2, X, roots_of_unity, clear_h2, print_g2_hex, print_iv_F2
     from __sage__bls_sig_common import print_hash_test_vector, g2suite
 except ImportError:
@@ -79,7 +78,7 @@ def osswu2_help(t):
             return Ell2p(x1, y1)
 
     # if we got here, something went very wrong
-    assert False, "osswu2_help failed"
+    raise RuntimeError("osswu2_help failed")
 
 # F2 elm from vector of F elms
 def from_vec(v):
@@ -87,8 +86,8 @@ def from_vec(v):
 
 # map from a string
 def map2curve_osswu2(alpha):
-    t1 = from_vec(hash_to_field(alpha, 0, p, 2))
-    t2 = from_vec(hash_to_field(alpha, 1, p, 2))
+    t1 = from_vec(Hp2(alpha, 0))
+    t2 = from_vec(Hp2(alpha, 1))
     P = osswu2_help(t1)
     P2 = osswu2_help(t2)
     return clear_h2(iso2(P + P2))

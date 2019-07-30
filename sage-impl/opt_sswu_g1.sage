@@ -5,10 +5,9 @@
 
 import sys
 
-from hash_to_field import hash_to_field
 from util import get_cmdline_options, print_iv
 try:
-    from __sage__g1_common import Ell, F, ell_u, p, q, sgn0, print_g1_hex
+    from __sage__g1_common import Ell, F, Hp, ell_u, p, q, sgn0, print_g1_hex
     from __sage__bls_sig_common import print_hash_test_vector, g1suite
 except ImportError:
     sys.exit("Error loading preprocessed sage files. Try running `make clean pyfiles`")
@@ -76,8 +75,8 @@ def osswu_help(t):
 
 # map from a string
 def map2curve_osswu(alpha):
-    t1 = F(hash_to_field(alpha, 0, p, 1)[0])
-    t2 = F(hash_to_field(alpha, 1, p, 1)[0])
+    t1 = F(Hp(alpha, 0)[0])
+    t2 = F(Hp(alpha, 1)[0])
     P = osswu_help(t1)
     P2 = osswu_help(t2)
     ret = (1 - ell_u) * iso(P + P2)
