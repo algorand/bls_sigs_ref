@@ -11,7 +11,7 @@ from util import get_cmdline_options, prepare_msg, print_g1_hex, print_g2_hex, p
 
 # sk must be bytes()
 def keygen(sk):
-    (x_prime,) = Hr(sk)
+    x_prime = Hr(sk)
     return (x_prime, point_mul(x_prime, g2gen))
 
 # signing as in
