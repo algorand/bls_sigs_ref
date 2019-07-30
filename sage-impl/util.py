@@ -12,13 +12,21 @@ if sys.version_info[0] != 2:
     raise RuntimeError("this code is geared toward Python2/Sage, not Python3")
 
 DEBUG = False
+GENVEC = False
 
 def is_debug():
     return DEBUG
 
+def is_genvec():
+    return GENVEC
+
 def enable_debug():
     global DEBUG # pylint: disable=global-statement
     DEBUG = True
+
+def enable_genvec():
+    global GENVEC # pylint: disable=global-statement
+    GENVEC = True
 
 def print_iv(iv, name, fn, indent=8):
     if not DEBUG:
@@ -56,7 +64,7 @@ def get_cmdline_options():
 
     # go through the commandline arguments
     try:
-        (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:dT:")
+        (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:dgT:")
 
     except getopt.GetoptError as err:
         print "Usage: %s [-d] [-k key] [-T test_file] [msg ...]" % sys.argv[0]
@@ -68,6 +76,9 @@ def get_cmdline_options():
 
         elif opt == "-d":
             enable_debug()
+
+        elif opt == "-g":
+            enable_genvec()
 
         elif opt == "-T":
             with open(arg, "r") as test_file:

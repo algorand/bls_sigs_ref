@@ -5,9 +5,10 @@
 #
 # consts for BLS signatures, adapted from Zhenfei Zhang's 'poc_v1' implementation
 
+from binascii import hexlify
 import sys
 
-from util import print_value
+from util import print_value, is_genvec
 from __sage__g1_common import Ell, q, print_g1_hex
 from __sage__g2_common import Ell2, F2, X, print_g2_hex
 from __sage__serdes import serialize, deserialize, SerError, DeserError
@@ -45,6 +46,9 @@ def print_test_vector(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, prin
             raise SerError("serializing sig did not give sig_expect")
         if deserialize(sig_expect) != sig:
             raise DeserError("deserializing sig_expect did not give sig")
+    elif is_genvec():
+        print hexlify(msg), hexlify(sk), hexlify(serialize(sig))
+        return
 
     # output the test vector
     print "================== begin test vector ===================="
@@ -90,6 +94,9 @@ def print_hash_test_vector(hash_in, ciphersuite, hash_fn, print_pt_fn):
             raise SerError("serializing P did not give hash_expect")
         if deserialize(hash_expect) != P:
             raise DeserError("deserializing hash_expect did not give P")
+    elif is_genvec():
+        print hexlify(msg), '00', hexlify(serialize(P))
+        return
 
     print "=============== begin hash test vector =================="
 
