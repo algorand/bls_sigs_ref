@@ -18,7 +18,7 @@ except ImportError:
 # keygen takes in sk as byte[32] and outputs the secrete exponent and the public key in G2
 def keygen(sk, output_pk=True):
     # https://github.com/pairingwg/bls_standard/blob/master/minutes/spec-v1.md#basic-signature-in-g1
-    (x_prime,) = Hr(sk)
+    x_prime = Hr(sk)
     print_iv(x_prime, "x'", "keygen")
     return (x_prime, (x_prime * g2gen) if output_pk else None)
 
