@@ -36,7 +36,7 @@ def OS2IP(octets):
 def hkdf_extract(salt, ikm, hash_fn):
     if salt is None:
         salt = bytes((0,) * hash_fn().digest_size)
-    return hmac.digest(salt, ikm, hash_fn)
+    return hmac.HMAC(salt, ikm, hash_fn).digest()
 def hkdf_expand(prk, info, length, hash_fn):
     digest_size = hash_fn().digest_size
     if len(prk) < digest_size:
@@ -48,7 +48,7 @@ def hkdf_expand(prk, info, length, hash_fn):
         info = b''
     last = okm = b''
     for rep in range(0, nreps):
-        last = hmac.digest(prk, last + info + I2OSP(rep + 1, 1), hash_fn)
+        last = hmac.HMAC(prk, last + info + I2OSP(rep + 1, 1), hash_fn).digest()
         okm += last
     return okm[:length]
 
