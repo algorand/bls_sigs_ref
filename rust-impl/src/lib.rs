@@ -49,8 +49,8 @@ pub trait HashToCurve {
     /// Random oracle
     fn hash_to_curve<B: AsRef<[u8]>>(msg: B, ciphersuite: u8) -> Self;
 
-    /// Injective map
-    fn map_to_curve<B: AsRef<[u8]>>(msg: B, ciphersuite: u8) -> Self;
+    /// Injective encoding
+    fn encode_to_curve<B: AsRef<[u8]>>(msg: B, ciphersuite: u8) -> Self;
 }
 
 impl<PtT> HashToCurve for PtT
@@ -60,7 +60,7 @@ where
 {
     fn hash_to_curve<B: AsRef<[u8]>>(msg: B, ciphersuite: u8) -> PtT {
         let mut p = {
-            let h2f = HashToField::<CoordT<PtT>>::new(msg, ciphersuite);
+            let h2f = HashToField::<CoordT<PtT>>::new(msg, Some(&[ciphersuite]));
             let mut tmp = PtT::osswu_map(&h2f.with_ctr(0));
             tmp.add_assign(&PtT::osswu_map(&h2f.with_ctr(1)));
             tmp
@@ -70,10 +70,10 @@ where
         p
     }
 
-    fn map_to_curve<B: AsRef<[u8]>>(msg: B, ciphersuite: u8) -> PtT {
+    fn encode_to_curve<B: AsRef<[u8]>>(msg: B, ciphersuite: u8) -> PtT {
         let mut p = {
-            let h2f = HashToField::<CoordT<PtT>>::new(msg, ciphersuite);
-            PtT::osswu_map(&h2f.with_ctr(0))
+            let h2f = HashToField::<CoordT<PtT>>::new(msg, Some(&[ciphersuite]));
+            PtT::osswu_map(&h2f.with_ctr(2))
         };
         p.isogeny_map();
         p.clear_h();

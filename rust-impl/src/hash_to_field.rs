@@ -22,12 +22,9 @@ pub struct HashToField<T> {
 
 impl<T: FromRO> HashToField<T> {
     /// Create a new struct given a message and ciphersuite.
-    pub fn new<B: AsRef<[u8]>>(msg: B, ciphersuite: u8) -> HashToField<T> {
+    pub fn new<B: AsRef<[u8]>>(msg: B, dst: Option<&[u8]>) -> HashToField<T> {
         HashToField::<T> {
-            msg_hashed: Sha256::new()
-                .chain([ciphersuite])
-                .chain(msg.as_ref())
-                .result(),
+            msg_hashed: Hkdf::<Sha256>::extract(dst, msg.as_ref()).0,
             ctr: 0,
             phantom: PhantomData::<T>,
         }
@@ -35,7 +32,7 @@ impl<T: FromRO> HashToField<T> {
 
     /// Compute the output of the random oracle specified by `ctr`.
     pub fn with_ctr(&self, ctr: u8) -> T {
-        T::from_ro(self.msg_hashed.as_slice(), ctr)
+        T::from_ro(&self.msg_hashed, ctr)
     }
 }
 
@@ -82,81 +79,85 @@ pub trait BaseFromRO: Field + PrimeField {
     /// The length of the HKDF output used to hash to a field element.
     type Length: ArrayLength<u8>;
 
-    /// 2^(8 * Length / 2) in the field
-    const F_2_LEN_OVER2: Self;
-
-    /// Convert output of HKDF to two field elements
-    fn hkdf_to_elm(okm: &[u8]) -> Self;
+    /// Convert piece of HKDF output to field element
+    fn from_okm(okm: &GenericArray<u8, <Self as BaseFromRO>::Length>) -> Self;
 
     /// Returns the value from the inner loop of hash_to_field by
     /// hashing twice, calling sha_to_base on each, and combining the result.
     fn base_from_ro(msg_hashed: &[u8], ctr: u8, idx: u8) -> Self {
-        let (mut f1, f2) = {
-            let mut result = GenericArray::<u8, <Self as BaseFromRO>::Length>::default();
-            let h = Hkdf::<Sha256>::from_prk(msg_hashed).unwrap();
-            // "H2C" || I2OSP(ctr, 1) || I2OSP(idx, 1)
-            let info = [72, 50, 67, ctr, idx];
-            h.expand(&info, result.as_mut_slice()).unwrap();
-            let len = result.len();
-            (
-                <Self as BaseFromRO>::hkdf_to_elm(&result[..len / 2]),
-                <Self as BaseFromRO>::hkdf_to_elm(&result[len / 2..]),
-            )
-        };
-        f1.mul_assign(&<Self as BaseFromRO>::F_2_LEN_OVER2);
-        f1.add_assign(&f2);
-        f1
+        let mut result = GenericArray::<u8, <Self as BaseFromRO>::Length>::default();
+        let h = Hkdf::<Sha256>::from_prk(msg_hashed).unwrap();
+        // "H2C" || I2OSP(ctr, 1) || I2OSP(idx, 1)
+        let info = [72, 50, 67, ctr, idx];
+        h.expand(&info, &mut result).unwrap();
+        <Self as BaseFromRO>::from_okm(&result)
     }
 }
 
 impl BaseFromRO for Fq {
     type Length = U64;
 
-    const F_2_LEN_OVER2: Fq = unsafe {
-        pairing::bls12_381::transmute::fq(FqRepr([
-            0x75b3cd7c5ce820fu64,
-            0x3ec6ba621c3edb0bu64,
-            0x168a13d82bff6bceu64,
-            0x87663c4bf8c449d2u64,
-            0x15f34c83ddc8d830u64,
-            0xf9628b49caa2e85u64,
-        ]))
-    };
+    fn from_okm(okm: &GenericArray<u8, U64>) -> Fq {
+        const F_2_256: Fq = unsafe {
+            pairing::bls12_381::transmute::fq(FqRepr([
+                0x75b3cd7c5ce820fu64,
+                0x3ec6ba621c3edb0bu64,
+                0x168a13d82bff6bceu64,
+                0x87663c4bf8c449d2u64,
+                0x15f34c83ddc8d830u64,
+                0xf9628b49caa2e85u64,
+            ]))
+        };
 
-    fn hkdf_to_elm(okm: &[u8]) -> Fq {
         // unwraps are safe here: we only use 32 bytes at a time, which is strictly less than p
         let mut repr = FqRepr::default();
-        repr.read_be(Cursor::new([0; 16]).chain(Cursor::new(okm)))
+        repr.read_be(Cursor::new([0; 16]).chain(Cursor::new(&okm[..32])))
             .unwrap();
-        Fq::from_repr(repr).unwrap()
+        let mut elm = Fq::from_repr(repr).unwrap();
+        elm.mul_assign(&F_2_256);
+
+        repr.read_be(Cursor::new([0; 16]).chain(Cursor::new(&okm[32..])))
+            .unwrap();
+        let elm2 = Fq::from_repr(repr).unwrap();
+        elm.add_assign(&elm2);
+        elm
     }
 }
 
 impl BaseFromRO for Fr {
     type Length = U48;
 
-    const F_2_LEN_OVER2: Fr = unsafe {
-        pairing::bls12_381::transmute::fr(FrRepr([
-            0x59476ebc41b4528fu64,
-            0xc5a30cb243fcc152u64,
-            0x2b34e63940ccbd72u64,
-            0x1e179025ca247088u64,
-        ]))
-    };
+    fn from_okm(okm: &GenericArray<u8, U48>) -> Fr {
+        const F_2_192: Fr = unsafe {
+            pairing::bls12_381::transmute::fr(FrRepr([
+                0x59476ebc41b4528fu64,
+                0xc5a30cb243fcc152u64,
+                0x2b34e63940ccbd72u64,
+                0x1e179025ca247088u64,
+            ]))
+        };
 
-    fn hkdf_to_elm(okm: &[u8]) -> Fr {
         // unwraps are safe here: we only use 24 bytes at a time, which is strictly less than p
         let mut repr = FrRepr::default();
-        repr.read_be(Cursor::new([0; 8]).chain(Cursor::new(okm)))
+        repr.read_be(Cursor::new([0; 8]).chain(Cursor::new(&okm[..24])))
             .unwrap();
-        Fr::from_repr(repr).unwrap()
+        let mut elm = Fr::from_repr(repr).unwrap();
+        elm.mul_assign(&F_2_192);
+
+        repr.read_be(Cursor::new([0; 8]).chain(Cursor::new(&okm[24..])))
+            .unwrap();
+        elm.add_assign(&Fr::from_repr(repr).unwrap());
+        elm
     }
 }
 
 /// Hash a secret key sk to the secret exponent x'; then (PK_BLS, SK_BLS) = (g^{x'}, x').
 pub fn xprime_from_sk<B: AsRef<[u8]>>(msg: B) -> Fr {
-    let msg_hashed = Sha256::new().chain(msg.as_ref()).result();
-    Fr::from_ro(msg_hashed.as_slice(), 0)
+    let mut result = GenericArray::<u8, U48>::default();
+    Hkdf::<Sha256>::new(None, msg.as_ref())
+        .expand(&[], &mut result)
+        .unwrap();
+    Fr::from_okm(&result)
 }
 
 /// Tests for hash_to_field
@@ -231,15 +232,15 @@ mod tests {
 
     #[test]
     fn test_hash_to_fq() {
-        let mut hash_iter = HashToField::<Fq>::new("hello world", 1);
+        let mut hash_iter = HashToField::<Fq>::new("hello world", None);
         let fq_val = hash_iter.next().unwrap();
         let expect = FqRepr([
-            0x88f18d0462b674d1,
-            0xb3984de38e881934,
-            0x4f7c46900e78bb98,
-            0x1a5e9ccdaffd2085,
-            0x5dfdf0235831cf6a,
-            0x167b77631fd6c87d,
+            0x605979d293c88efeu64,
+            0x8cce6e2990ca245eu64,
+            0xb216c1419710b3a9u64,
+            0xeb60d0d2d54275a0u64,
+            0x354a68d7ef36672u64,
+            0x5f74a1547366cecu64,
         ]);
         assert_eq!(fq_val, Fq::from_repr(expect).unwrap());
 
@@ -248,35 +249,35 @@ mod tests {
 
         let fq_val = hash_iter.next().unwrap();
         let expect = FqRepr([
-            0x6911c2017aa9caae,
-            0x982a3bcc633a3068,
-            0x5acdd587be2db2f6,
-            0xcd60171ab4b5b4b9,
-            0xdd7f3eb5bb20a52b,
-            0x12bb4a16473e0394,
+            0x21f37a28981adf2au64,
+            0xfcb319a0d42af630u64,
+            0xbfd027f2c55177fbu64,
+            0x66f286dd263e7609u64,
+            0xa09979be2a6ef430u64,
+            0x39b53f6f58a62fdu64,
         ]);
         assert_eq!(fq_val, Fq::from_repr(expect).unwrap());
     }
 
     #[test]
     fn test_hash_to_fq2() {
-        let mut hash_iter = HashToField::<Fq2>::new("hello world", 2);
+        let mut hash_iter = HashToField::<Fq2>::new("hello world", None);
         let fq2_val = hash_iter.next().unwrap();
         let expect_c0 = FqRepr([
-            0x789267e9340db222,
-            0x5be9f23c58cb7a94,
-            0x13a9c36782296ded,
-            0x29dabe10dd7b0678,
-            0x6f33215ad2d6eb00,
-            0x04c6d0fcdee572b4,
+            0x605979d293c88efeu64,
+            0x8cce6e2990ca245eu64,
+            0xb216c1419710b3a9u64,
+            0xeb60d0d2d54275a0u64,
+            0x354a68d7ef36672u64,
+            0x5f74a1547366cecu64,
         ]);
         let expect_c1 = FqRepr([
-            0x1028e548a4741d2d,
-            0xe10987436043e270,
-            0xa81f246e0dd68689,
-            0x3d798923d0e64c55,
-            0x083ad459191c2c12,
-            0x076d4eb9faf5c968,
+            0x5091f4f73bc1b5f8u64,
+            0xe24885242fa3a122u64,
+            0x4b5e051202bcf75du64,
+            0xb78b75eaaaa87832u64,
+            0x35940e11b7f7cb9au64,
+            0x162c4cd4f9023db6u64,
         ]);
         let expect = Fq2 {
             c0: Fq::from_repr(expect_c0).unwrap(),
@@ -286,20 +287,20 @@ mod tests {
 
         let fq2_val = hash_iter.next().unwrap();
         let expect_c0 = FqRepr([
-            0xfe1b6eca2cc49311,
-            0xc7841643f75a3a4,
-            0x4f1bed64a396b6a6,
-            0x988586238b1b6f6f,
-            0xd59207e7cde8bfae,
-            0x14ab7f6256167494,
+            0x21f37a28981adf2au64,
+            0xfcb319a0d42af630u64,
+            0xbfd027f2c55177fbu64,
+            0x66f286dd263e7609u64,
+            0xa09979be2a6ef430u64,
+            0x39b53f6f58a62fdu64,
         ]);
         let expect_c1 = FqRepr([
-            0x613ad8d8c972fd62,
-            0x7a997fc237f33079,
-            0xdceb873751a679f,
-            0x9b1a646d6e9803c3,
-            0x6556c8487a636ec5,
-            0x9aabaee656e0d36,
+            0x5b4a356b86dc3740u64,
+            0xa50eaa39af36389eu64,
+            0x35f2042b81ea5999u64,
+            0x5dd5cde1b8c03f75u64,
+            0x3e2f80c1855be51fu64,
+            0x1827c0f181cac0a1u64,
         ]);
         let expect = Fq2 {
             c0: Fq::from_repr(expect_c0).unwrap(),
@@ -315,10 +316,10 @@ mod tests {
     fn test_xprime_from_sk() {
         let fr_val = xprime_from_sk("hello world (it's a secret!)");
         let expect = FrRepr([
-            0xcd56808ee5ccd455,
-            0xd0ab47882e9318f5,
-            0x4eb2d85c1729b38c,
-            0x14140be008a0474c,
+            0x73f15a42979430a4u64,
+            0xc26ed5c294f7cbb5u64,
+            0xa98ec5b569484e7du64,
+            0x77cf27e14db0de2u64,
         ]);
         assert_eq!(fr_val, Fr::from_repr(expect).unwrap());
     }
