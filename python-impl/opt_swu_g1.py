@@ -130,9 +130,9 @@ def opt_swu_map(t, t2=None):
     P = iso11(Pp)
     return clear_h(P)
 
-def map2curve_osswu(alpha):
-    t1 = Fq(p, *Hp(alpha, 0))
-    t2 = Fq(p, *Hp(alpha, 1))
+def map2curve_osswu(alpha, dst=None):
+    t1 = Fq(p, *Hp(alpha, 0, dst))
+    t2 = Fq(p, *Hp(alpha, 1, dst))
     return opt_swu_map(t1, t2)
 
 if __name__ == "__main__":

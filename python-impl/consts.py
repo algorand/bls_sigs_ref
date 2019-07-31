@@ -14,5 +14,5 @@ q = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
 k_final = (p ** 4 - p ** 2 + 1) // q
 
 # ciphersuite numbers
-g1suite = 1
-g2suite = 2
+g1suite = b'\x01'
+g2suite = b'\x02'

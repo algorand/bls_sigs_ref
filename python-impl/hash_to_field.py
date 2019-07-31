@@ -62,19 +62,16 @@ def hash_to_base(msg, ctr, dst, modulus, degree, blen, hash_fn):
         rets[i] = OS2IP(t) % modulus
     return rets
 
-# TODO add DST as arg to this fn?
-def Hp(msg, ctr):
+def Hp(msg, ctr, dst):
     if not isinstance(msg, bytes):
         raise ValueError("Hp can't hash anything but bytes")
-    return hash_to_base(msg, ctr, b'', p, 1, 64, hashlib.sha256)
+    return hash_to_base(msg, ctr, dst, p, 1, 64, hashlib.sha256)
 
-# TODO add DST as arg to this fn?
-def Hp2(msg, ctr):
+def Hp2(msg, ctr, dst):
     if not isinstance(msg, bytes):
         raise ValueError("Hp2 can't hash anything but bytes")
-    return hash_to_base(msg, ctr, b'', p, 2, 64, hashlib.sha256)
+    return hash_to_base(msg, ctr, dst, p, 2, 64, hashlib.sha256)
 
-# TODO add DST to this fn?
 def Hr(msg):
     if not isinstance(msg, bytes):
         raise ValueError("Hr can't hash anything but bytes")

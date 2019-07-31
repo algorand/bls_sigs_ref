@@ -87,10 +87,6 @@ def print_g2_hex(P, margin=8):
     print_f2_hex(P[0], 'x', margin)
     print_f2_hex(P[1], 'y', margin)
 
-def prepare_msg(msg, ciphersuite):
-    assert isinstance(msg, bytes) and isinstance(ciphersuite, int)
-    return ciphersuite.to_bytes(1, "big") + msg
-
 def print_value(iv, indent=8, skip_first=False):
     max_line_length = 111
     if isinstance(iv, str):
@@ -120,7 +116,7 @@ def print_tv_hash(hash_in, ciphersuite, hash_fn, print_pt_fn, quiet):
         msg = hash_in[0]
         hash_expect = None
     # hash to point
-    P = hash_fn(prepare_msg(msg, ciphersuite))
+    P = hash_fn(msg, ciphersuite)
 
     if hash_expect is not None:
         if serialize(P) != hash_expect:

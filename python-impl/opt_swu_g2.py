@@ -127,9 +127,9 @@ def opt_swu2_map(t, t2=None):
 ###
 ## map from bytes() to point in G2 subgroup of Ell2
 ###
-def map2curve_osswu2(alpha):
-    t1 = Fq2(p, *Hp2(alpha, 0))
-    t2 = Fq2(p, *Hp2(alpha, 1))
+def map2curve_osswu2(alpha, dst=None):
+    t1 = Fq2(p, *Hp2(alpha, 0, dst))
+    t2 = Fq2(p, *Hp2(alpha, 1, dst))
     return opt_swu2_map(t1, t2)
 
 if __name__ == "__main__":
