@@ -40,11 +40,11 @@ def sgn0(x):
         sign = select_sign(-2 * (xi > thresh) + (xi > 0))
     return select_sign(1)
 
-def Hp(msg, ctr):
-    return hash_to_base(msg, ctr, '', p, 1, 64, hashlib.sha256)
+def Hp(msg, ctr, dst=None):
+    return hash_to_base(msg, ctr, dst, p, 1, 64, hashlib.sha256)
 
-def Hp2(msg, ctr):
-    return hash_to_base(msg, ctr, '', p, 2, 64, hashlib.sha256)
+def Hp2(msg, ctr, dst=None):
+    return hash_to_base(msg, ctr, dst, p, 2, 64, hashlib.sha256)
 
 def Hr(msg):
     prk = hkdf_extract(None, msg, hashlib.sha256)

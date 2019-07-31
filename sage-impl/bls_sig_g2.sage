@@ -8,7 +8,7 @@ import sys
 
 from util import print_iv, get_cmdline_options
 try:
-    from __sage__bls_sig_common import g1gen, g2suite, print_test_vector, prepare_msg
+    from __sage__bls_sig_common import g1gen, g2suite, print_test_vector
     from __sage__g1_common import Hr, print_g1_hex
     from __sage__g2_common import print_g2_hex, print_iv_g2
     from __sage__opt_sswu_g2 import map2curve_osswu2
@@ -30,7 +30,7 @@ def sign(x_prime, msg, ciphersuite):
     print_iv(msg, "input msg", "sign")
 
     # hash the concatenation of the (one-byte) ciphersuite and the message
-    P = map2curve_osswu2(prepare_msg(msg, ciphersuite))
+    P = map2curve_osswu2(msg, ciphersuite)
     print_iv_g2(P, "hash to E2", "sign")
 
     # output the signature x' * P

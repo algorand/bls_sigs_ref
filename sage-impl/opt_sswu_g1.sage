@@ -74,9 +74,9 @@ def osswu_help(t):
     return EllP(x, y)
 
 # map from a string
-def map2curve_osswu(alpha):
-    t1 = F(Hp(alpha, 0)[0])
-    t2 = F(Hp(alpha, 1)[0])
+def map2curve_osswu(alpha, dst):
+    t1 = F(Hp(alpha, 0, dst)[0])
+    t2 = F(Hp(alpha, 1, dst)[0])
     P = osswu_help(t1)
     P2 = osswu_help(t2)
     ret = (1 - ell_u) * iso(P + P2)

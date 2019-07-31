@@ -85,9 +85,9 @@ def from_vec(v):
     return F2(v[0] + X * v[1])
 
 # map from a string
-def map2curve_osswu2(alpha):
-    t1 = from_vec(Hp2(alpha, 0))
-    t2 = from_vec(Hp2(alpha, 1))
+def map2curve_osswu2(alpha, dst):
+    t1 = from_vec(Hp2(alpha, 0, dst))
+    t2 = from_vec(Hp2(alpha, 1, dst))
     P = osswu2_help(t1)
     P2 = osswu2_help(t2)
     return clear_h2(iso2(P + P2))
