@@ -9,7 +9,6 @@
 # see the comment at the top of ../sage-impl/serdes.sage for more information
 
 import struct
-import sys
 
 from consts import p
 from curve_ops import from_jacobian, point_eq
@@ -220,6 +219,7 @@ def _deserialize_ell2(data, tag):
 if __name__ == "__main__":
     import binascii
     import random
+    import sys
 
     from opt_swu_g1 import opt_swu_map
     from opt_swu_g2 import opt_swu2_map
