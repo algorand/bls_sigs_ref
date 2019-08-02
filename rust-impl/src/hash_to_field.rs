@@ -75,7 +75,7 @@ impl FromRO for Fq2 {
 }
 
 /// Implements the loop body of hash_to_base from hash-to-curve draft.
-pub trait BaseFromRO: Field + PrimeField {
+pub trait BaseFromRO: Field {
     /// The length of the HKDF output used to hash to a field element.
     type Length: ArrayLength<u8>;
 
