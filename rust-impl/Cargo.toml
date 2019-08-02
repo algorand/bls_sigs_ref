@@ -11,7 +11,7 @@ repository = "https://github.com/kwantam/bls_sigs_ref"
 [dependencies]
 ff = "0.4"
 hkdf = "0.8.0"
-pairing = { version = "0.14.7", git = "https://github.com/kwantam/pairing", features = [ "transmutable" ] }
+pairing = { version = "0.14.8", git = "https://github.com/kwantam/pairing", features = [ "transmutable" ] }
 sha2 = "0.8.0"
 
 [dev-dependencies]

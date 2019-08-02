@@ -6,4 +6,4 @@ license = "Apache-2.0"
 
 [dependencies]
 bls_sigs_ref-rs = { path = "../" }
-pairing = { version = "0.14.7", git = "https://github.com/kwantam/pairing", features = [ "transmutable" ] }
+pairing = { version = "0.14.8", git = "https://github.com/kwantam/pairing", features = [ "transmutable" ] }

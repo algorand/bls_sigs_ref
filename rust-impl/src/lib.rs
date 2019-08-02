@@ -23,18 +23,16 @@ extern crate rand;
 extern crate sha2;
 
 use pairing::hash_to_field::{FromRO, HashToField};
-use pairing::bls12_381::{IsogenyMap, OSSWUMap};
+use pairing::bls12_381::{ClearH, IsogenyMap, OSSWUMap};
 use pairing::CurveProjective;
 
 /// Alias for the coordinate type corresponding to a CurveProjective type
 type CoordT<PtT> = <PtT as CurveProjective>::Base;
 
 mod chain;
-mod cofactor;
 mod serdes;
 mod signature;
 
-pub use cofactor::ClearH;
 pub use serdes::SerDes;
 pub use signature::BLSSignature;
 
