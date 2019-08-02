@@ -1,6 +1,6 @@
 [package]
 name = "bls_sigs_ref-rs"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["kwantam <kwantam@gmail.com>"]
 license = "Apache-2.0"
 
@@ -11,7 +11,7 @@ repository = "https://github.com/kwantam/bls_sigs_ref"
 [dependencies]
 ff = "0.4"
 hkdf = "0.8.0"
-pairing = { version = "0.14.3", git = "https://github.com/kwantam/pairing", features = [ "transmutable" ], rev = "ee7ce86" }
+pairing = { version = "0.14.4", git = "https://github.com/kwantam/pairing", features = [ "transmutable" ] }
 sha2 = "0.8.0"
 
 [dev-dependencies]

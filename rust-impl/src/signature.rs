@@ -4,9 +4,22 @@ BLS signatures
 
 use super::HashToCurve;
 use ff::Field;
-use hash_to_field::xprime_from_sk;
+use hkdf::Hkdf;
 use pairing::bls12_381::{Bls12, Fq12, Fr, G1, G2};
+use pairing::hash_to_field::BaseFromRO;
 use pairing::{CurveAffine, CurveProjective, Engine};
+use sha2::digest::generic_array::typenum::U48;
+use sha2::digest::generic_array::GenericArray;
+use sha2::Sha256;
+
+/// Hash a secret key sk to the secret exponent x'; then (PK, SK) = (g^{x'}, x').
+pub fn xprime_from_sk<B: AsRef<[u8]>>(msg: B) -> Fr {
+    let mut result = GenericArray::<u8, U48>::default();
+    Hkdf::<Sha256>::new(None, msg.as_ref())
+        .expand(&[], &mut result)
+        .unwrap();
+    Fr::from_okm(&result)
+}
 
 /// Alias for the scalar type corresponding to a CurveProjective type
 type ScalarT<PtT> = <PtT as CurveProjective>::Scalar;
@@ -92,8 +105,9 @@ impl BLSSignature for G2 {
 
 #[cfg(test)]
 mod tests {
-    use super::BLSSignature;
-    use pairing::bls12_381::{G1, G2};
+    use super::{BLSSignature, xprime_from_sk};
+    use ff::PrimeField;
+    use pairing::bls12_381::{Fr, FrRepr, G1, G2};
 
     fn test_sig<T: BLSSignature>(ciphersuite: u8) {
         let msg = "this is the message";
@@ -111,5 +125,17 @@ mod tests {
     #[test]
     fn test_g2() {
         test_sig::<G2>(2u8);
+    }
+
+    #[test]
+    fn test_xprime_from_sk() {
+        let fr_val = xprime_from_sk("hello world (it's a secret!)");
+        let expect = FrRepr([
+            0x73f15a42979430a4u64,
+            0xc26ed5c294f7cbb5u64,
+            0xa98ec5b569484e7du64,
+            0x77cf27e14db0de2u64,
+        ]);
+        assert_eq!(fr_val, Fr::from_repr(expect).unwrap());
     }
 }
