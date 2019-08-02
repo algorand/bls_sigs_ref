@@ -10,7 +10,8 @@
 extern crate bls_sigs_ref_rs;
 extern crate pairing;
 
-use bls_sigs_ref_rs::{BLSSignature, HashToCurve, SerDes};
+use bls_sigs_ref_rs::{BLSSignature, SerDes};
+use pairing::hash_to_curve::HashToCurve;
 use pairing::CurveProjective;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Cursor, Result};

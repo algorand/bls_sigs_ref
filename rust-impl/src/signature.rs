@@ -2,11 +2,11 @@
 BLS signatures
 */
 
-use super::HashToCurve;
 use ff::Field;
 use hkdf::Hkdf;
 use pairing::bls12_381::{Bls12, Fq12, Fr, G1, G2};
 use pairing::hash_to_field::BaseFromRO;
+use pairing::hash_to_curve::HashToCurve;
 use pairing::{CurveAffine, CurveProjective, Engine};
 use sha2::digest::generic_array::typenum::U48;
 use sha2::digest::generic_array::GenericArray;
