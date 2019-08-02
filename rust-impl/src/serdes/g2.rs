@@ -50,7 +50,83 @@ fn deser_fq2(mut cur: Cursor<&[u8]>) -> Result<Fq2> {
 }
 
 fn sqrt_fq2(gx: &Fq2) -> Option<Fq2> {
-    use osswu_map::g2::ROOTS_OF_UNITY;
+    const ROOTS_OF_UNITY: [Fq2; 4] = unsafe {
+        [
+            Fq2 {
+                c0: fq(FqRepr([
+                    0x760900000002fffdu64,
+                    0xebf4000bc40c0002u64,
+                    0x5f48985753c758bau64,
+                    0x77ce585370525745u64,
+                    0x5c071a97a256ec6du64,
+                    0x15f65ec3fa80e493u64,
+                ])),
+                c1: fq(FqRepr([
+                    0x0000000000000000u64,
+                    0x0000000000000000u64,
+                    0x0000000000000000u64,
+                    0x0000000000000000u64,
+                    0x0000000000000000u64,
+                    0x0000000000000000u64,
+                ])),
+            },
+            Fq2 {
+                c0: fq(FqRepr([
+                    0x0000000000000000u64,
+                    0x0000000000000000u64,
+                    0x0000000000000000u64,
+                    0x0000000000000000u64,
+                    0x0000000000000000u64,
+                    0x0000000000000000u64,
+                ])),
+                c1: fq(FqRepr([
+                    0x760900000002fffdu64,
+                    0xebf4000bc40c0002u64,
+                    0x5f48985753c758bau64,
+                    0x77ce585370525745u64,
+                    0x5c071a97a256ec6du64,
+                    0x15f65ec3fa80e493u64,
+                ])),
+            },
+            Fq2 {
+                c0: fq(FqRepr([
+                    0x7bcfa7a25aa30fdau64,
+                    0xdc17dec12a927e7cu64,
+                    0x2f088dd86b4ebef1u64,
+                    0xd1ca2087da74d4a7u64,
+                    0x2da2596696cebc1du64,
+                    0x0e2b7eedbbfd87d2u64,
+                ])),
+                c1: fq(FqRepr([
+                    0x7bcfa7a25aa30fdau64,
+                    0xdc17dec12a927e7cu64,
+                    0x2f088dd86b4ebef1u64,
+                    0xd1ca2087da74d4a7u64,
+                    0x2da2596696cebc1du64,
+                    0x0e2b7eedbbfd87d2u64,
+                ])),
+            },
+            Fq2 {
+                c0: fq(FqRepr([
+                    0x7bcfa7a25aa30fdau64,
+                    0xdc17dec12a927e7cu64,
+                    0x2f088dd86b4ebef1u64,
+                    0xd1ca2087da74d4a7u64,
+                    0x2da2596696cebc1du64,
+                    0x0e2b7eedbbfd87d2u64,
+                ])),
+                c1: fq(FqRepr([
+                    0x3e2f585da55c9ad1u64,
+                    0x4294213d86c18183u64,
+                    0x382844c88b623732u64,
+                    0x92ad2afd19103e18u64,
+                    0x1d794e4fac7cf0b9u64,
+                    0x0bd592fc7d825ec8u64,
+                ])),
+            },
+        ]
+    };
+
     let sqrt_candidate = {
         let mut tmp = *gx;
         chain_p2m9div16(&mut tmp, gx); // gx ^ ((p^2 - 9) // 16)
