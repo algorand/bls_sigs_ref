@@ -7,8 +7,8 @@ use chain::chain_p2m9div16;
 use ff::{Field, PrimeField, PrimeFieldRepr};
 use pairing::bls12_381::transmute::{fq, g2_affine};
 use pairing::bls12_381::{Fq, Fq2, FqRepr, G2Affine, G2};
+use pairing::signum::{Sgn0Result, Signum0};
 use pairing::{CurveAffine, CurveProjective};
-use signum::{Sgn0Result, Signum0};
 use std::io::{Cursor, Error, ErrorKind, Read, Result, Write};
 
 fn gx2(x: &Fq2) -> Fq2 {

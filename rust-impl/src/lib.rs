@@ -22,8 +22,8 @@ extern crate pairing;
 extern crate rand;
 extern crate sha2;
 
-use pairing::CurveProjective;
 use pairing::hash_to_field::{FromRO, HashToField};
+use pairing::CurveProjective;
 
 /// Alias for the coordinate type corresponding to a CurveProjective type
 type CoordT<PtT> = <PtT as CurveProjective>::Base;
@@ -34,7 +34,6 @@ mod isogeny;
 mod osswu_map;
 mod serdes;
 mod signature;
-mod signum;
 
 pub use cofactor::ClearH;
 pub use isogeny::IsogenyMap;

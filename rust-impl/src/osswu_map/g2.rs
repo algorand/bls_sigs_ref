@@ -7,7 +7,7 @@ use chain::chain_p2m9div16;
 use ff::Field;
 use pairing::bls12_381::transmute::{fq, g2_projective};
 use pairing::bls12_381::{Fq2, FqRepr, G2};
-use signum::Signum0;
+use pairing::signum::Signum0;
 
 pub(super) const ELLP_A: Fq2 = unsafe {
     Fq2 {

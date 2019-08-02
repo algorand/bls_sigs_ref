@@ -105,7 +105,7 @@ impl BLSSignature for G2 {
 
 #[cfg(test)]
 mod tests {
-    use super::{BLSSignature, xprime_from_sk};
+    use super::{xprime_from_sk, BLSSignature};
     use ff::PrimeField;
     use pairing::bls12_381::{Fr, FrRepr, G1, G2};
 
