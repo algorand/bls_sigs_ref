@@ -5,6 +5,7 @@
 # utilities for BLS sigs Python ref impl
 
 from binascii import unhexlify
+from enum import Enum, unique
 import getopt
 import os
 import struct
@@ -14,11 +15,18 @@ from consts import q
 from curve_ops import g1gen, g2gen, from_jacobian
 from serdes import serialize, deserialize, SerError, DeserError
 
+@unique
+class SigType(Enum):
+    basic = 1
+    message_augmentation = 2
+    proof_of_possession = 3
+
 class Options(object):
     run_tests = False
     test_inputs = None
     verify = False
     quiet = False
+    sigtype = SigType.basic
 
     def __init__(self):
         self.test_inputs = []
@@ -36,11 +44,11 @@ def get_cmdline_options():
 
     # process cmdline args with getopt
     try:
-        (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:T:tvq")
+        (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:T:tvqBAP")
 
     except getopt.GetoptError as err:
         print("Usage: %s [-t]" % sys.argv[0])
-        print("       %s [-v] [-q] [-k key] [-T test_file] [msg ...]" % sys.argv[0])
+        print("       %s [-v] [-q] [-k key] [-T test_file] [-B | -A | -P] [msg ...]" % sys.argv[0])
         sys.exit(str(err))
 
     for (opt, arg) in opts:
@@ -58,6 +66,15 @@ def get_cmdline_options():
 
         elif opt == "-q":
             ret.quiet = True
+
+        elif opt == "-B":
+            ret.sigtype = SigType.basic
+
+        elif opt == "-A":
+            ret.sigtype = SigType.message_augmentation
+
+        elif opt == "-P":
+            ret.sigtype = SigType.proof_of_possession
 
         else:
             raise RuntimeError("got unexpected option %s from getopt" % opt)
