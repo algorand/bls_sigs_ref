@@ -34,6 +34,7 @@ if __name__ == "__main__":
     def main():
         opts = get_cmdline_options()
         ver_fn = verify if opts.verify else None
+        csuite = g1suite(opts.sigtype)
         for sig_in in opts.test_inputs:
-            print_tv_sig(sig_in, g1suite, sign, keygen, print_g2_hex, print_g1_hex, ver_fn, opts.quiet)
+            print_tv_sig(sig_in, csuite, sign, keygen, print_g2_hex, print_g1_hex, ver_fn, opts.quiet)
     main()

@@ -14,5 +14,9 @@ q = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
 k_final = (p ** 4 - p ** 2 + 1) // q
 
 # ciphersuite numbers
-g1suite = b'\x01'
-g2suite = b'\x02'
+_gsuite = lambda stype, group, stag: b'BLS_' + stype + b'_BLS12381G' + group + \
+                                     b'-SHA256-SSWU-RO-_' + bytes(stag) + b'_'
+g1suite = lambda stag: _gsuite(b'SIG', b'1', stag)
+g1pop = lambda stag: _gsuite(b'POP', b'1', stag)
+g2suite = lambda stag: _gsuite(b'SIG', b'2', stag)
+g2pop = lambda stag: _gsuite(b'POP', b'2', stag)

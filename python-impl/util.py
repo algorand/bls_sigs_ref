@@ -21,6 +21,15 @@ class SigType(Enum):
     message_augmentation = 2
     proof_of_possession = 3
 
+    def __bytes__(self):
+        if self is SigType.basic:
+            return b'NUL'
+        if self is SigType.message_augmentation:
+            return b'AUG'
+        if self is SigType.proof_of_possession:
+            return b'POP'
+        raise RuntimeError("unknown SigType")
+
 class Options(object):
     run_tests = False
     test_inputs = None
