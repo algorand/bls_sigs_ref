@@ -3,7 +3,7 @@
 # (C) Riad S. Wahby <rsw@cs.stanford.edu>
 
 from consts import g1suite
-from curve_ops import g2gen, point_mul, point_neg
+from curve_ops import g2gen, point_mul, point_neg, subgroup_check_g2
 from hash_to_field import Hr
 from opt_swu_g1 import map2curve_osswu
 from pairing import multi_pairing
@@ -26,7 +26,9 @@ def sign(x_prime, msg, ciphersuite):
 # returns True if the signature is correct, False otherwise
 def verify(pk, sig, msg, ciphersuite):
     P = map2curve_osswu(msg, ciphersuite)
-    return multi_pairing((P, sig), (pk, point_neg(g2gen))) == 1
+    pk_ok = subgroup_check_g2(pk)
+    sig_ok = multi_pairing((P, sig), (pk, point_neg(g2gen))) == 1
+    return pk_ok and sig_ok
 
 if __name__ == "__main__":
     def main():
