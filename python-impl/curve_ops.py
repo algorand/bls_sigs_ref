@@ -107,13 +107,38 @@ def point_neg(P):
     return (P[0], -P[1], P[2])
 
 # Addition chain for multiplication by 0xd201000000010000 == -x, the BLS parameter
-def x_chain(P):
+def mx_chain(P):
     Q = point_double(P)
     for ndoubles in (2, 3, 9, 32, 16):
         Q = point_add(Q, P)
         for _ in range(0, ndoubles):
             Q = point_double(Q)
     return Q
+
+# addition chain for multiplication by (1 - x) // 3, for x the BLS parameter
+def mxp1ov3_chain(P):
+    Q = point_double(P)
+    Q = point_double(Q)
+    S = point_add(Q, P)
+    Q = point_double(S)
+    R = point_add(Q, P)
+    T = point_add(Q, S)
+    Q = point_double(Q)
+    Q = point_add(Q, T)
+    Q = point_double(Q)
+    T = point_add(Q, T)
+    for (ndoubles, addvar) in ((16, T), (8, T), (8, T), (8, T), (7, T), (4, S), (5, R)):
+        for _ in range(0, ndoubles):
+            Q = point_double(Q)
+        Q = point_add(Q, addvar)
+    return Q
+
+# addition chain for multiplication by (x**2 - 1) // 3, for x the BLS parameter
+def xSqm1_chain(P):
+    Q = mxp1ov3_chain(P)            # mul by (1 - z) // 3
+    R = mx_chain(Q)                 # mul by -z
+    R = point_add(R, point_neg(Q))  # (-z - 1) * (1 - z) // 3
+    return R
 
 ###
 ## Point multiplication routines
@@ -217,7 +242,7 @@ def point_mul(k, P):
 ## Fast cofactor clearing for Ell1
 ###
 def clear_h(P):
-    xP = x_chain(P)
+    xP = mx_chain(P)
     return point_add(xP, P)
 
 ###
@@ -299,13 +324,58 @@ def psi(P):
     return (X, Y, Z)
 
 def clear_h2(P):
-    work = x_chain(P)                           # -x * P
+    work = mx_chain(P)                          # -x * P
     work = point_add(work, P)                   # (-x + 1) P
     minus_psi_P = point_neg(psi(P))             # -psi(P)
     work = point_add(work, minus_psi_P)         # (-x + 1) P - psi(P)
-    work = x_chain(work)                        # (x^2 - x) P + x psi(P)
+    work = mx_chain(work)                       # (x^2 - x) P + x psi(P)
     work = point_add(work, minus_psi_P)         # (x^2 - x) P + (x - 1) psi(P)
     work = point_add(work, point_neg(P))        # (x^2 - x - 1) P + (x - 1) psi(P)
     psi_psi_2P = psi(psi(point_double(P)))      # psi(psi(2P))
     work = point_add(work, psi_psi_2P)          # (x^2 - x - 1) P + (x - 1) psi(P) + psi(psi(2P))
     return work
+
+###
+## Fast subgroup checks via Bowe19
+###
+def _on_curve(P, b):
+    (x, y, z) = P
+    ySq = y ** 2
+
+    xSq = x ** 2
+    xCu = x * xSq
+
+    z2 = z ** 2
+    z4 = z2 ** 2
+    z6 = z4 * z2
+
+    infty = x == 0 and y != 0 and z == 0
+    match = ySq == xCu + b * z6
+    return infty or match
+on_curve_g1 = lambda P: _on_curve(P, Fq(p, 4))
+on_curve_g2 = lambda P: _on_curve(P, Fq2(p, 4, 4))
+
+# fast subgroup check for G2: [z]psi^3(P) - psi^2(P) + P == infty
+def subgroup_check_g2(P):
+    if not on_curve_g2(P):
+        return False
+    psi2 = psi(psi(P))                          # psi^2(P)
+    mzpsi3 = mx_chain(psi(psi2))                # [-z] psi^3(P)
+    lhs = point_add(psi2, mzpsi3)               # [-z] psi^3(P) + psi^2(P)
+    return point_eq(lhs, P)                     # ==? P
+
+_beta = Fq(p, 0x1a0111ea397fe699ec02408663d4de85aa0d857d89759ad4897d29650fb85f9b409427eb4f49fffd8bfd00000000aaac)
+def sigma(P):
+    (x, y, z) = P
+    return (_beta * x, y, z)
+
+def subgroup_check_g1(P):
+    if not on_curve_g1(P):
+        return False
+    sigP = sigma(P)                             # sigma(P)
+    sigSqP = sigma(sigP)                        # sigma^2(P)
+    sigPx2 = point_double(sigP)                 # 2 sigma(P)
+    tmp = point_add(sigSqP, P)                  # sigma^2(P) + P
+    tmp = point_add(sigPx2, point_neg(tmp))     # 2 sigma(P) - sigma^2(P) - P
+    tmp = xSqm1_chain(tmp)                      # [(z**2 - 1)//3] (2 sigma(P) - sigma^2(P) - P)
+    return point_eq(tmp, sigSqP)                # ==? sigma^2(P)
