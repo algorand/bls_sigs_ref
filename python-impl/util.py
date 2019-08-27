@@ -146,7 +146,8 @@ def print_tv_hash(hash_in, ciphersuite, hash_fn, print_pt_fn, quiet):
 
     print("=============== begin hash test vector ==================")
 
-    print("ciphersuite: 0x%x" % ciphersuite)
+    sys.stdout.write("ciphersuite: ")
+    print_value(ciphersuite, 13, True)
 
     sys.stdout.write("message:     ")
     print_value(msg, 13, True)
@@ -188,7 +189,8 @@ def print_tv_sig(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig
     print_g2_hex(g2gen)
 
     print("group order: 0x%x" % q)
-    print("ciphersuite: 0x%x" % ciphersuite)
+    sys.stdout.write("ciphersuite: ")
+    print_value(ciphersuite, 13, True)
 
     sys.stdout.write("message:     ")
     print_value(msg, 13, True)
