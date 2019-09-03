@@ -1,0 +1,18 @@
+language: rust
+before_install:
+  - cd rust-impl
+
+rust:
+  - stable
+#  - beta
+#  - nightly
+
+before_script:
+  - rustup component add clippy
+
+script:
+  - cargo clippy --all-targets --all-features -- -D warnings
+  - cargo test
+  - cargo test -- --ignored
+  - cargo test --release
+  - cargo test --release -- --ignored
