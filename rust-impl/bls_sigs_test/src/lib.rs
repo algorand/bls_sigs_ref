@@ -10,9 +10,10 @@
 extern crate bls_sigs_ref_rs;
 extern crate pairing;
 
-use bls_sigs_ref_rs::{BLSSignature, SerDes};
+use bls_sigs_ref_rs::{BLSSignature};
 use pairing::hash_to_curve::HashToCurve;
 use pairing::CurveProjective;
+use pairing::serdes::SerDes;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Cursor, Result};
 
@@ -87,8 +88,9 @@ where
                 }
                 assert_eq!(e.as_ref() as &[u8], &buf[..len]);
 
-                let deser = G::deserialize(&mut Cursor::new(&e))?;
+                let (deser, compress) = G::deserialize(&mut Cursor::new(&e))?;
                 assert_eq!(result, deser);
+                assert_eq!(compress, true);
             }
         }
     }
@@ -114,8 +116,9 @@ where
                 }
                 assert_eq!(e.as_ref() as &[u8], &buf[..len]);
 
-                let deser = G::deserialize(&mut Cursor::new(&e))?;
+                let (deser, compress) = G::deserialize(&mut Cursor::new(&e))?;
                 assert_eq!(sig, deser);
+                assert_eq!(compress, true);
             }
         }
     }

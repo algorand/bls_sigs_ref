@@ -2,7 +2,7 @@
 SerDes tests
 */
 
-use super::SerDes;
+use pairing::serdes::SerDes;
 use pairing::bls12_381::{G1Affine, G2Affine, G1, G2};
 use pairing::CurveProjective;
 use rand::{thread_rng, Rand};
