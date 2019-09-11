@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/algorand/bls_sigs_ref.svg?branch=master)](https://travis-ci.com/algorand/bls_sigs_ref)
 
-Based on a [fork](https://github.com/algorand/pairing) of the [Rust pairing](https://github.com/zkcrypto/pairing) library.
+Based on a [fork](https://github.com/algorand/pairing-fork) of the [Rust pairing](https://github.com/zkcrypto/pairing) library.
 
 ## prerequisites
 
