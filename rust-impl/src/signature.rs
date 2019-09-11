@@ -5,8 +5,8 @@ BLS signatures
 use ff::Field;
 use hkdf::Hkdf;
 use pairing::bls12_381::{Bls12, Fq12, Fr, G1, G2};
-use pairing::hash_to_field::BaseFromRO;
 use pairing::hash_to_curve::HashToCurve;
+use pairing::hash_to_field::BaseFromRO;
 use pairing::{CurveAffine, CurveProjective, Engine};
 use sha2::digest::generic_array::typenum::U48;
 use sha2::digest::generic_array::GenericArray;
@@ -15,9 +15,10 @@ use sha2::Sha256;
 /// Hash a secret key sk to the secret exponent x'; then (PK, SK) = (g^{x'}, x').
 pub fn xprime_from_sk<B: AsRef<[u8]>>(msg: B) -> Fr {
     let mut result = GenericArray::<u8, U48>::default();
-    Hkdf::<Sha256>::new(None, msg.as_ref())
+    // `result` has enough length to hold the output from HKDF expansion
+    assert!(Hkdf::<Sha256>::new(None, msg.as_ref())
         .expand(&[], &mut result)
-        .unwrap();
+        .is_ok());
     Fr::from_okm(&result)
 }
 
@@ -30,12 +31,24 @@ pub trait BLSSignature: CurveProjective {
     type PKType: CurveProjective<Engine = <Self as CurveProjective>::Engine, Scalar = ScalarT<Self>>;
 
     /// Generate secret exponent and public key
+    /// * input: the secret key as bytes
+    /// * output: the actual secret key x_prime, a.k.a, the secret scala
+    /// * output: the public key g^x_prime
     fn keygen<B: AsRef<[u8]>>(sk: B) -> (ScalarT<Self>, Self::PKType);
 
     /// Sign a message
+    /// * input: the actual secret key x_prime
+    /// * input: the message as bytes
+    /// * input: the ciphersuite ID
+    /// * output: a signature
     fn sign<B: AsRef<[u8]>>(x_prime: ScalarT<Self>, msg: B, ciphersuite: u8) -> Self;
 
     /// Verify a signature
+    /// * input: public key, a group element
+    /// * input: signature, a group element
+    /// * input: the message as bytes
+    /// * input: ciphersuite ID
+    /// * output: if the signature is valid or not
     fn verify<B: AsRef<[u8]>>(pk: Self::PKType, sig: Self, msg: B, ciphersuite: u8) -> bool;
 }
 
@@ -62,12 +75,14 @@ impl BLSSignature for G1 {
             tmp.negate();
             tmp.into_affine().prepare()
         };
-        Fq12::one()
-            == Bls12::final_exponentiation(&Bls12::miller_loop(&[
-                (&p, &pk.into_affine().prepare()),
-                (&sig.into_affine().prepare(), &g2gen),
-            ]))
-            .unwrap()
+
+        match Bls12::final_exponentiation(&Bls12::miller_loop(&[
+            (&p, &pk.into_affine().prepare()),
+            (&sig.into_affine().prepare(), &g2gen),
+        ])) {
+            None => false,
+            Some(pairingproduct) => pairingproduct == Fq12::one(),
+        }
     }
 }
 
@@ -94,12 +109,14 @@ impl BLSSignature for G2 {
             tmp.negate();
             tmp.into_affine().prepare()
         };
-        Fq12::one()
-            == Bls12::final_exponentiation(&Bls12::miller_loop(&[
-                (&pk.into_affine().prepare(), &p),
-                (&g1gen, &sig.into_affine().prepare()),
-            ]))
-            .unwrap()
+
+        match Bls12::final_exponentiation(&Bls12::miller_loop(&[
+            (&pk.into_affine().prepare(), &p),
+            (&g1gen, &sig.into_affine().prepare()),
+        ])) {
+            None => false,
+            Some(pairingproduct) => pairingproduct == Fq12::one(),
+        }
     }
 }
 
