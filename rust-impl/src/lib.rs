@@ -13,8 +13,8 @@
 #[cfg(test)]
 extern crate byteorder;
 extern crate ff;
+
 #[cfg(test)]
-//#[macro_use]
 extern crate hex_literal;
 extern crate hkdf;
 extern crate pairing;
@@ -22,9 +22,9 @@ extern crate pairing;
 extern crate rand;
 extern crate sha2;
 
-//mod chain;
-//mod serdes;
 mod signature;
 
-//pub use serdes::SerDes;
 pub use signature::BLSSignature;
+
+#[cfg(test)]
+mod test;
