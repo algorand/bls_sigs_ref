@@ -4,9 +4,9 @@ version = "0.2.0"
 authors = ["kwantam <kwantam@gmail.com>"]
 license = "Apache-2.0"
 
-homepage = "https://github.com/kwantam/bls_sigs_ref"
+homepage = "https://github.com/algorand/bls_sigs_ref"
 description = "BLS signatures draft std, ref impl"
-repository = "https://github.com/kwantam/bls_sigs_ref"
+repository = "https://github.com/algorand/bls_sigs_ref"
 
 [dependencies]
 ff = "0.4"
