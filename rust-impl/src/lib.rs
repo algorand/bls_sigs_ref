@@ -23,9 +23,17 @@ extern crate rand;
 extern crate sha2;
 
 mod api;
+mod ffi;
 mod signature;
 
 pub use signature::BLSSignature;
 
 #[cfg(test)]
 mod test;
+
+/// length of secret key.
+pub const SK_LEN: usize = 33;
+/// length of public key.
+pub const PK_LEN: usize = 49;
+/// length of the signature.
+pub const SIG_LEN: usize = 97;

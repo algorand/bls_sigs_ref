@@ -13,8 +13,15 @@ ff = "0.4"
 hkdf = "0.8.0"
 pairing = { version = "0.15.0", git = "https://github.com/algorand/pairing-fork" }
 sha2 = "0.8.0"
+libc = { version = "0.2", features = ["align"] }
 
 [dev-dependencies]
 byteorder = "1"
 hex-literal = "0.1"
 rand = "0.4"
+
+
+[lib]
+# we need a rust lib for cargo bench
+# and a static lib for c-binder
+crate-type = ["lib", "staticlib"]

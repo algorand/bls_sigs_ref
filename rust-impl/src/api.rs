@@ -7,10 +7,13 @@ use pairing::serdes::SerDes;
 /// ciphersuite identifier
 type CSID = u8;
 /// Secret key structure
+#[derive(Debug, Clone)]
 pub struct BLSSK(CSID, Fr);
 /// Public key structure
+#[derive(Debug, Clone)]
 pub struct BLSPK(CSID, G1);
 /// Signature structure
+#[derive(Debug, Clone)]
 pub struct BLSSIG(CSID, G2);
 
 pub trait BLSAPI {
@@ -28,7 +31,7 @@ pub trait BLSAPI {
     /// * input: a secret key
     /// * input: a message blob
     /// * output: a signature
-    fn sign<B: AsRef<[u8]>>(sk: BLSSK, msg: B) -> BLSSIG {
+    fn sign<B: AsRef<[u8]>>(sk: &BLSSK, msg: B) -> BLSSIG {
         let sig = signature::BLSSignature::sign(sk.1, msg.as_ref(), sk.0);
         BLSSIG(sk.0, sig)
     }
@@ -48,14 +51,23 @@ pub trait BLSAPI {
     /// * input: a list of public keys
     /// * input: a list of signatures
     /// * output: the aggregated signature
-    fn aggregate_without_verify(sig_list: &[BLSSIG]) -> BLSSIG;
+    fn aggregate_without_verify(sig_list: &[BLSSIG]) -> BLSSIG {
+        // FIXME
+        sig_list[0].clone()
+    }
 
     /// * input: a list of public keys
     /// * input: a message blob
     /// * input: an aggregated signature
     /// * output: if the signature is valid w.r.t. the keys and message
-    fn verify_aggregated<B: AsRef<[u8]>>(pk_list: &[BLSPK], msg: B, sig: &BLSSIG) -> bool;
+    fn verify_aggregated<B: AsRef<[u8]>>(_pk_list: &[BLSPK], _msg: B, _sig: &BLSSIG) -> bool {
+        // FIXME
+        true
+    }
 }
+
+pub struct BLSPKInG1;
+impl BLSAPI for BLSPKInG1 {}
 
 type Compressed = bool;
 use std::io::{Read, Result, Write};
