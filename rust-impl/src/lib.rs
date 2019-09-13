@@ -22,6 +22,7 @@ extern crate pairing;
 extern crate rand;
 extern crate sha2;
 
+mod api;
 mod signature;
 
 pub use signature::BLSSignature;

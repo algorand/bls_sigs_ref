@@ -1,4 +1,3 @@
-
 use super::signature::{xprime_from_sk, BLSSignature};
 use ff::PrimeField;
 use pairing::bls12_381::{Fr, FrRepr, G1, G2};
@@ -31,4 +30,24 @@ fn test_xprime_from_sk() {
         0x77cf27e14db0de2u64,
     ]);
     assert_eq!(fr_val, Fr::from_repr(expect).unwrap());
+}
+
+#[test]
+fn test_must_fail() {
+    // place holder for some must fail tests
+    // * signature verification with a different public key
+    // * ill formated signature or public keys
+    // *
+}
+
+#[test]
+fn test_api() {
+    // place holder for some API tests
+
+}
+
+#[test]
+fn test_serdes() {
+    // place holder for some SerDes tests
+
 }
