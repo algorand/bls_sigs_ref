@@ -1,14 +1,15 @@
 
-use super::signature::{xprime_from_sk, BLSSignature};
+use super::signature::{xprime_from_sk, BLSSigCore};
 use ff::PrimeField;
 use pairing::bls12_381::{Fr, FrRepr, G1, G2};
+use pairing::CurveProjective;
 
-fn test_sig<T: BLSSignature>(ciphersuite: u8) {
+fn test_sig<T: CurveProjective + BLSSigCore>(ciphersuite: u8) {
     let msg = "this is the message";
     let sk = "this is the key";
     let (x_prime, pk) = T::keygen(sk);
-    let sig = T::sign(x_prime, msg, ciphersuite);
-    assert!(T::verify(pk, sig, msg, ciphersuite));
+    let sig = T::core_sign(x_prime, msg, ciphersuite);
+    assert!(T::core_verify(pk, sig, msg, ciphersuite));
 }
 
 #[test]
