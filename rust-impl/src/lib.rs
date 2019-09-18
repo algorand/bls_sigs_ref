@@ -26,7 +26,7 @@ mod api;
 mod ffi;
 mod signature;
 
-pub use signature::BLSSignature;
+pub use signature::{BLSSigCore, BLSSignatureBasic, BLSSignatureAug, BLSSignaturePop};
 
 #[cfg(test)]
 mod test;
