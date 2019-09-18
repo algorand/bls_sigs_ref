@@ -7,8 +7,8 @@ use hkdf::Hkdf;
 use pairing::bls12_381::{Bls12, Fq12, Fr, G1, G2};
 use pairing::hash_to_curve::HashToCurve;
 use pairing::hash_to_field::BaseFromRO;
-use pairing::{CurveAffine, CurveProjective, Engine};
 use pairing::serdes::SerDes;
+use pairing::{CurveAffine, CurveProjective, Engine};
 use sha2::digest::generic_array::typenum::U48;
 use sha2::digest::generic_array::GenericArray;
 use sha2::Sha256;
@@ -70,10 +70,15 @@ pub trait BLSSigCore: CurveProjective {
     }
 
     /// Verify an aggregated signature
-    fn core_aggregate_verify<B: AsRef<[u8]>>(pks: &[Self::PKType], msgs: &[B], sig: Self, ciphersuite: u8) -> bool;
+    fn core_aggregate_verify<B: AsRef<[u8]>>(
+        pks: &[Self::PKType],
+        msgs: &[B],
+        sig: Self,
+        ciphersuite: u8,
+    ) -> bool;
 }
 
-/// 'Basic' BLS signature 
+/// 'Basic' BLS signature
 pub trait BLSSignatureBasic: BLSSigCore {
     /// re-export from BLSSigCore
     fn sign<B: AsRef<[u8]>>(x_prime: ScalarT<Self>, msg: B, ciphersuite: u8) -> Self {
@@ -86,7 +91,12 @@ pub trait BLSSignatureBasic: BLSSigCore {
     }
 
     /// check for uniqueness of msgs, then invoke verify from BLSSigCore
-    fn aggregate_verify<B: AsRef<[u8]>>(pks: &[Self::PKType], msgs: &[B], sig: Self, ciphersuite: u8) -> bool {
+    fn aggregate_verify<B: AsRef<[u8]>>(
+        pks: &[Self::PKType],
+        msgs: &[B],
+        sig: Self,
+        ciphersuite: u8,
+    ) -> bool {
         // enforce uniqueness of messages
         let mut msg_set = HashSet::<&[u8]>::with_capacity(msgs.len());
         for msg in msgs {
@@ -125,8 +135,13 @@ pub trait BLSSignatureAug: BLSSigCore {
     }
 
     /// augment all messages and then invoke coreverify
-    fn aggregate_verify<B: AsRef<[u8]>>(pks: &[Self::PKType], msgs: &[B], sig: Self, ciphersuite: u8) -> bool {
-        let mut pks_msgs_vec = Vec::<Vec::<u8>>::with_capacity(msgs.len());
+    fn aggregate_verify<B: AsRef<[u8]>>(
+        pks: &[Self::PKType],
+        msgs: &[B],
+        sig: Self,
+        ciphersuite: u8,
+    ) -> bool {
+        let mut pks_msgs_vec = Vec::<Vec<u8>>::with_capacity(msgs.len());
         for (msg, pk) in msgs.as_ref().iter().zip(pks) {
             let mut pk_msg_vec = Self::pk_bytes(&pk, msg.as_ref().len());
             pk_msg_vec.extend_from_slice(msg.as_ref());
@@ -162,12 +177,22 @@ pub trait BLSSignaturePop: BLSSigCore {
     }
 
     /// just invoke verify from BLSSigCore
-    fn aggregate_verify<B: AsRef<[u8]>>(pks: &[Self::PKType], msgs: &[B], sig: Self, ciphersuite: u8) -> bool {
+    fn aggregate_verify<B: AsRef<[u8]>>(
+        pks: &[Self::PKType],
+        msgs: &[B],
+        sig: Self,
+        ciphersuite: u8,
+    ) -> bool {
         <Self as BLSSigCore>::core_aggregate_verify(pks, msgs, sig, ciphersuite)
     }
 
     /// verify a multisig
-    fn multisig_verify<B: AsRef<[u8]>>(pks: &[Self::PKType], sig: Self, msg: B, ciphersuite: u8) -> bool {
+    fn multisig_verify<B: AsRef<[u8]>>(
+        pks: &[Self::PKType],
+        sig: Self,
+        msg: B,
+        ciphersuite: u8,
+    ) -> bool {
         let apk = _agg_help(pks);
         <Self as BLSSigCore>::core_verify(apk, sig, msg, ciphersuite)
     }
@@ -212,9 +237,17 @@ impl BLSSigCore for G1 {
         }
     }
 
-    fn core_aggregate_verify<B: AsRef<[u8]>>(pks: &[G2], msgs: &[B], sig: G1, ciphersuite: u8) -> bool {
+    fn core_aggregate_verify<B: AsRef<[u8]>>(
+        pks: &[G2],
+        msgs: &[B],
+        sig: G1,
+        ciphersuite: u8,
+    ) -> bool {
         let pvec = {
-            let mut ret = Vec::<<<G1 as CurveProjective>::Affine as CurveAffine>::Prepared>::with_capacity(msgs.len() + 1);
+            let mut ret =
+                Vec::<<<G1 as CurveProjective>::Affine as CurveAffine>::Prepared>::with_capacity(
+                    msgs.len() + 1,
+                );
             for msg in msgs {
                 ret.push(G1::hash_to_curve(msg, ciphersuite).into_affine().prepare());
             }
@@ -222,7 +255,10 @@ impl BLSSigCore for G1 {
             ret
         };
         let qvec = {
-            let mut ret = Vec::<<<G2 as CurveProjective>::Affine as CurveAffine>::Prepared>::with_capacity(pks.len() + 1);
+            let mut ret =
+                Vec::<<<G2 as CurveProjective>::Affine as CurveAffine>::Prepared>::with_capacity(
+                    pks.len() + 1,
+                );
             for pk in pks {
                 ret.push(pk.into_affine().prepare());
             }
@@ -297,9 +333,17 @@ impl BLSSigCore for G2 {
         }
     }
 
-    fn core_aggregate_verify<B: AsRef<[u8]>>(pks: &[G1], msgs: &[B], sig: G2, ciphersuite: u8) -> bool {
+    fn core_aggregate_verify<B: AsRef<[u8]>>(
+        pks: &[G1],
+        msgs: &[B],
+        sig: G2,
+        ciphersuite: u8,
+    ) -> bool {
         let pvec = {
-            let mut ret = Vec::<<<G1 as CurveProjective>::Affine as CurveAffine>::Prepared>::with_capacity(pks.len() + 1);
+            let mut ret =
+                Vec::<<<G1 as CurveProjective>::Affine as CurveAffine>::Prepared>::with_capacity(
+                    pks.len() + 1,
+                );
             for pk in pks {
                 ret.push(pk.into_affine().prepare());
             }
@@ -309,7 +353,10 @@ impl BLSSigCore for G2 {
             ret
         };
         let qvec = {
-            let mut ret = Vec::<<<G2 as CurveProjective>::Affine as CurveAffine>::Prepared>::with_capacity(msgs.len() + 1);
+            let mut ret =
+                Vec::<<<G2 as CurveProjective>::Affine as CurveAffine>::Prepared>::with_capacity(
+                    msgs.len() + 1,
+                );
             for msg in msgs {
                 ret.push(G2::hash_to_curve(msg, ciphersuite).into_affine().prepare());
             }

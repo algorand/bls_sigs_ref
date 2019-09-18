@@ -111,11 +111,7 @@ pub unsafe extern "C" fn c_keygen(
 /// Input a secret key, and a message in the form of a byte string,
 /// output a signature.
 #[no_mangle]
-pub unsafe extern "C" fn c_sign(
-    sk: bls_sk,
-    msg: *const u8,
-    msg_len: libc::size_t,
-) -> bls_sig {
+pub unsafe extern "C" fn c_sign(sk: bls_sk, msg: *const u8, msg_len: libc::size_t) -> bls_sig {
     // convert a C array `msg` to a rust string `m`
     let m: &[u8] = std::slice::from_raw_parts(msg, msg_len as usize);
 
@@ -180,7 +176,7 @@ pub unsafe extern "C" fn c_verify(
 /// It does check that all the signatures are for the same time stamp.
 /// It panics if ciphersuite fails or time stamp is not consistent.
 #[no_mangle]
-pub unsafe extern "C" fn c_aggregation(sig_list: *mut bls_sig, sig_num: libc::size_t) -> bls_sig {
+pub unsafe extern "C" fn c_aggregation(sig_list: *mut bls_sig, sig_num: libc::size_t) -> Result<bls_sig, String> {
     let sig_list: &[bls_sig] = std::slice::from_raw_parts(sig_list as *mut bls_sig, sig_num);
 
     let mut sig_vec: Vec<BLSSIG> = vec![];
@@ -197,7 +193,7 @@ pub unsafe extern "C" fn c_aggregation(sig_list: *mut bls_sig, sig_num: libc::si
 
         sig_vec.push(s);
     }
-    let agg_sig = BLSPKInG1::aggregate_without_verify(&sig_vec[..]);
+    let agg_sig = BLSPKInG1::aggregate_without_verify(&sig_vec[..])?;
 
     let mut sig_buf: Vec<u8> = vec![];
     // serialize the updated sk
@@ -209,7 +205,7 @@ pub unsafe extern "C" fn c_aggregation(sig_list: *mut bls_sig, sig_num: libc::si
     // return the aggregated signature
     let mut sig_array = [0u8; SIG_LEN];
     sig_array.copy_from_slice(&sig_buf);
-    bls_sig { data: sig_array }
+    Ok(bls_sig { data: sig_array })
 }
 
 /// This function verifies the aggregated signature
