@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-use super::signature::{xprime_from_sk, BLSSignature};
-=======
-
 use super::signature::{xprime_from_sk, BLSSigCore};
->>>>>>> master
 use ff::PrimeField;
 use pairing::bls12_381::{Fr, FrRepr, G1, G2};
 use pairing::CurveProjective;

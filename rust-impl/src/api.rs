@@ -24,7 +24,7 @@ pub trait BLSAPI {
         if sk.as_ref().len() < 32 {
             panic!("seed is not long enough");
         }
-        let (x_prime, pk) = <G2 as signature::BLSSignature>::keygen(sk);
+        let (x_prime, pk) = <G2 as signature::BLSSigCore>::keygen(sk);
         (BLSSK(ciphersuite, x_prime), BLSPK(ciphersuite, pk))
     }
 
@@ -32,7 +32,7 @@ pub trait BLSAPI {
     /// * input: a message blob
     /// * output: a signature
     fn sign<B: AsRef<[u8]>>(sk: &BLSSK, msg: B) -> BLSSIG {
-        let sig = signature::BLSSignature::sign(sk.1, msg.as_ref(), sk.0);
+        let sig = signature::BLSSignaturePop::sign(sk.1, msg.as_ref(), sk.0);
         BLSSIG(sk.0, sig)
     }
 
@@ -45,7 +45,7 @@ pub trait BLSAPI {
             // the ciphersuite IDs do not match
             return false;
         }
-        signature::BLSSignature::verify(pk.1, sig.1, msg.as_ref(), pk.0)
+        signature::BLSSignaturePop::verify(pk.1, sig.1, msg.as_ref(), pk.0)
     }
 
     /// * input: a list of public keys
