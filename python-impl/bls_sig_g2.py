@@ -2,39 +2,67 @@
 #
 # (C) Riad S. Wahby <rsw@cs.stanford.edu>
 
+from functools import partial
+from itertools import chain
+
+from bls_sig_g1 import _agg_ver_nul, _agg_ver_aug, _keygen, _sign, _sign_aug, verify_aug
 from consts import g2suite
-from curve_ops import g1gen, point_mul, point_neg, subgroup_check_g1
-from hash_to_field import Hr
+from curve_ops import g1gen, point_mul, point_neg, subgroup_check_g1, subgroup_check_g2
 from opt_swu_g2 import map2curve_osswu2
 from pairing import multi_pairing
-from util import get_cmdline_options, print_g1_hex, print_g2_hex, print_tv_sig
+from serdes import serialize
+from util import get_cmdline_options, print_g1_hex, print_g2_hex, print_tv_sig, SigType
 
 # sk must be bytes()
-def keygen(sk):
-    x_prime = Hr(sk)
-    return (x_prime, point_mul(x_prime, g1gen))
+keygen = partial(_keygen, g1gen)
 
-# signing as in
-#     https://github.com/pairingwg/bls_standard/blob/master/minutes/spec-v1.md#basic-signature-in-g1
 # sign takes in x_prime (the output of keygen), a message, and a ciphersuite id
 # returns a signature in G1
-def sign(x_prime, msg, ciphersuite):
-    P = map2curve_osswu2(msg, ciphersuite)
-    return point_mul(x_prime, P)
+sign = partial(_sign, map_fn=map2curve_osswu2)
+
+# sign with message augmentation
+sign_aug = partial(_sign_aug, gen=g1gen)
 
 # verification corresponding to sign()
 # returns True if the signature is correct, False otherwise
+# NOTE: if pk has been verified to be in correct subgroup, do not need to recheck here
 def verify(pk, sig, msg, ciphersuite):
     P = map2curve_osswu2(msg, ciphersuite)
-    pk_ok = subgroup_check_g1(pk)
-    sig_ok = multi_pairing((pk, point_neg(g1gen)), (P, sig)) == 1
-    return pk_ok and sig_ok
+    if not (subgroup_check_g1(pk) and subgroup_check_g2(sig)):
+        return False
+    return multi_pairing((pk, point_neg(g1gen)), (P, sig)) == 1
+
+# aggregate verification
+def aggregate_verify(pks, msgs, sig, ciphersuite):
+    assert len(pks) == len(msgs), "FAIL: aggregate_verify needs same number of sigs and msgs"
+    if not subgroup_check_g2(sig):
+        return False
+    Qs = [None] * (1 + len(msgs))
+    for (idx, (msg, pk)) in enumerate(zip(msgs, pks)):
+        if not subgroup_check_g1(pk):
+            return False
+        Qs[idx] = map2curve_osswu2(msg, ciphersuite)
+    Qs[-1] = sig
+    Ps = chain(pks, (point_neg(g1gen),))
+    return multi_pairing(Ps, Qs) == 1
+
+# aggregate verification for the basic scheme --- must ensure unique messages
+aggregate_verify_basic = partial(_agg_ver_nul, ver_fn=aggregate_verify)
+
+# aggregate verification with message augmentation
+aggregate_verify_aug = partial(_agg_ver_aug, ver_fn=aggregate_verify)
 
 if __name__ == "__main__":
     def main():
         opts = get_cmdline_options()
-        ver_fn = verify if opts.verify else None
+        if opts.sigtype == SigType.message_augmentation:
+            sig_fn = sign_aug
+            ver_fn = verify_aug
+        else:
+            sig_fn = sign
+            ver_fn = verify
+        ver_fn = ver_fn if opts.verify else None
         csuite = g2suite(opts.sigtype)
         for sig_in in opts.test_inputs:
-            print_tv_sig(sig_in, csuite, sign, keygen, print_g1_hex, print_g2_hex, ver_fn, opts.quiet)
+            print_tv_sig(sig_in, csuite, sig_fn, keygen, print_g1_hex, print_g2_hex, ver_fn, opts.quiet)
     main()

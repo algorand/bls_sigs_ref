@@ -217,3 +217,52 @@ def print_tv_sig(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig
     print_sig_fn(sig)
 
     print("==================  end test vector  ====================")
+
+def print_tv_pop(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig_fn, ver_fn, quiet):
+    if len(sig_in) > 2:
+        (_, sk, sig_expect) = sig_in[:3]
+    else:
+        (_, sk) = sig_in
+        sig_expect = None
+    # generate key and signature
+    (x_prime, pk) = keygen_fn(sk)
+    sig = sign_fn(x_prime, pk, ciphersuite)
+
+    if sig_expect is not None:
+        if serialize(sig) != sig_expect:
+            raise SerError("serializing sig did not give sig_expect")
+        if from_jacobian(deserialize(sig_expect)) != from_jacobian(sig):
+            raise DeserError("deserializing sig_expect did not give sig")
+
+    if ver_fn is not None and not ver_fn(pk, sig, ciphersuite):
+        raise RuntimeError("verifying generated signature failed")
+
+    if quiet:
+        return
+
+    # output the test vector
+    print("================== begin test vector ====================")
+
+    print("g1 generator:")
+    print_g1_hex(g1gen)
+
+    print("g2 generator:")
+    print_g2_hex(g2gen)
+
+    print("group order: 0x%x" % q)
+    sys.stdout.write("ciphersuite: ")
+    print_value(ciphersuite, 13, True)
+
+    sys.stdout.write("sk:          ")
+    print_value(sk, 13, True)
+
+    sys.stdout.write("x_prime:     ")
+    print_value(x_prime, 13, True)
+
+    print("public key:")
+    print_pk_fn(pk)
+
+    print("signature:")
+    print_sig_fn(sig)
+
+    print("==================  end test vector  ====================")
