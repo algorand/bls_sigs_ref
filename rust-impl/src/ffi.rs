@@ -167,7 +167,7 @@ pub unsafe extern "C" fn c_verify(
     };
 
     // the length of signature is hardcoded, so it cannot be in the uncompressed form
-    if compressed == false {
+    if !compressed {
         return false;
     }
 
@@ -182,7 +182,7 @@ pub unsafe extern "C" fn c_verify(
     };
 
     // the length of public key is hardcoded, so it cannot be in the uncompressed form
-    if compressed == false {
+    if !compressed {
         return false;
     }
 
@@ -206,7 +206,7 @@ pub unsafe extern "C" fn c_aggregation(sig_list: *mut bls_sig, sig_num: libc::si
                 e
             ),
         };
-        if compressed == false {
+        if !compressed {
             panic!("C wrapper error: signature aggregation function: not all signatures are compressed");
         }
         sig_vec.push(s);
@@ -250,7 +250,7 @@ pub unsafe extern "C" fn c_verify_agg(
         };
 
         // the length of public key is hardcoded, so it cannot be in the uncompressed form
-        if compressed == false {
+        if !compressed {
             return false;
         }
 
@@ -270,7 +270,7 @@ pub unsafe extern "C" fn c_verify_agg(
     };
 
     // the length of signature is hardcoded, so it cannot be in the uncompressed form
-    if compressed == false {
+    if !compressed {
         return false;
     }
 
@@ -292,7 +292,7 @@ pub extern "C" fn c_verify_pop(pk: bls_pk, pop: bls_pop) -> bool {
     };
 
     // the length of pk is hardcoded, so it cannot be in the uncompressed form
-    if compressed == false {
+    if !compressed {
         return false;
     }
 
@@ -307,7 +307,7 @@ pub extern "C" fn c_verify_pop(pk: bls_pk, pop: bls_pop) -> bool {
         ),
     };
     // the length of pop is hardcoded, so it cannot be in the uncompressed form
-    if compressed == false {
+    if !compressed {
         return false;
     }
 
