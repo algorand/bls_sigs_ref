@@ -50,7 +50,6 @@ pub trait BLSAPI {
         signature::BLSSignaturePop::verify(pk.1, sig.1, msg.as_ref(), pk.0) && (pk.0 == sig.0)
     }
 
-
     fn pop_gen(_sk: &BLSSK, _pk: &BLSPK) -> Result<BLSPOP, String> {
         // FIXME
         Err("TBD".to_owned())
@@ -104,9 +103,6 @@ pub trait BLSAPI {
 
 pub struct BLSPKInG1;
 impl BLSAPI for BLSPKInG1 {}
-
-
-
 
 type Compressed = bool;
 use std::io::{Read, Write};
@@ -168,5 +164,25 @@ impl SerDes for BLSSIG {
 
         let (sig, compressed) = G2::deserialize(reader)?;
         Ok((BLSSIG(ciphersuite[0], sig), compressed))
+    }
+}
+
+impl SerDes for BLSPOP {
+    /// | ciphersuite | sig | -> bytes
+    fn serialize<W: Write>(&self, writer: &mut W, compressed: Compressed) -> std::io::Result<()> {
+        let mut buf: Vec<u8> = vec![self.0];
+        self.1.serialize(&mut buf, compressed)?;
+        // format the output
+        writer.write_all(&buf)?;
+        Ok(())
+    }
+
+    /// bytes -> | ciphersuite | sig |
+    fn deserialize<R: Read>(reader: &mut R) -> std::io::Result<(Self, Compressed)> {
+        let mut ciphersuite: [u8; 1] = [0u8; 1];
+        reader.read_exact(&mut ciphersuite)?;
+
+        let (sig, compressed) = G2::deserialize(reader)?;
+        Ok((BLSPOP(ciphersuite[0], sig), compressed))
     }
 }

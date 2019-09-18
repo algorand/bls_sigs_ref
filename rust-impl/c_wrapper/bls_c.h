@@ -9,6 +9,8 @@
 
 #define PK_LEN 49
 
+#define POP_LEN 49
+
 #define SIG_LEN 97
 
 #define SK_LEN 33
@@ -43,9 +45,15 @@ typedef struct bls_keys {
 } bls_keys;
 
 /**
+ * A wrapper of signature
+ */
+typedef struct bls_pop {
+  uint8_t data[POP_LEN];
+} bls_pop;
+
+/**
  * This function aggregates the signatures without checking if a signature is valid or not.
- * It does check that all the signatures are for the same time stamp.
- * It panics if ciphersuite fails or time stamp is not consistent.
+ * It panics if ciphersuite fails, or if signatures do not have same compressness
  */
 bls_sig c_aggregation(bls_sig *sig_list, size_t sig_num);
 
@@ -77,3 +85,8 @@ bool c_verify_agg(bls_pk *pk_list,
                   const uint8_t *msg,
                   size_t msglen,
                   bls_sig agg_sig);
+
+/**
+ * This function verifies the public key against the proof of possession
+ */
+bool c_verify_pop(bls_pk pk, bls_pop pop);

@@ -37,3 +37,5 @@ pub const SK_LEN: usize = 33;
 pub const PK_LEN: usize = 49;
 /// length of the signature.
 pub const SIG_LEN: usize = 97;
+/// length of the Pop
+pub const POP_LEN: usize = 49;
