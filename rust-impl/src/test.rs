@@ -55,9 +55,10 @@ fn test_api() {
     assert!(BLSPKInG1::verify(&pk, msg, &sig));
 
     // pop
-
-    
-
+    let res = BLSPKInG1::pop_gen(&sk, &pk);
+    assert!(res.is_ok());
+    let pop = res.unwrap();
+    assert!(BLSPKInG1::pop_verify(&pk, &pop));
 }
 
 #[test]

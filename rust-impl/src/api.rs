@@ -50,9 +50,14 @@ pub trait BLSAPI {
         signature::BLSSignaturePop::verify(pk.1, sig.1, msg.as_ref(), pk.0) && (pk.0 == sig.0)
     }
 
-    fn pop_gen(_sk: &BLSSK, _pk: &BLSPK) -> Result<BLSPOP, String> {
-        // FIXME
-        Err("TBD".to_owned())
+    fn pop_gen(sk: &BLSSK, pk: &BLSPK) -> Result<BLSPOP, String> {
+        if sk.0 != pk.0 {
+            return Err("ciphersuite IDs do not match".to_owned());
+        }
+        Ok(BLSPOP(
+            sk.0,
+            signature::BLSSignaturePop::pop_prove_with_both_keys(&sk.1, &pk.1, sk.0),
+        ))
     }
 
     /// * input: a public key

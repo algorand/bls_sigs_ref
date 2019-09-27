@@ -200,6 +200,13 @@ pub trait BLSSignaturePop: BLSSigCore {
     /// prove possession
     fn pop_prove<B: AsRef<[u8]>>(sk: B, ciphersuite: u8) -> Self;
 
+    /// prove possession where both keys are present
+    fn pop_prove_with_both_keys(
+        sk: &Fr,
+        pk: &<Self as BLSSigCore>::PKType,
+        ciphersuite: u8,
+    ) -> Self;
+
     /// check proof of possession
     fn pop_verify(pk: <Self as BLSSigCore>::PKType, sig: Self, ciphersuite: u8) -> bool;
 }
@@ -287,6 +294,16 @@ impl BLSSignaturePop for G1 {
             buf
         };
         G1::core_sign(x_prime, &pk_bytes[..], ciphersuite)
+    }
+
+    fn pop_prove_with_both_keys(sk: &Fr, pk: &G2, ciphersuite: u8) -> G1 {
+        let pk_bytes = {
+            let mut buf = [0u8; 96];
+            let mut cur = Cursor::new(&mut buf[..]);
+            assert!(pk.serialize(&mut cur, true).is_ok());
+            buf
+        };
+        G1::core_sign(*sk, &pk_bytes[..], ciphersuite)
     }
 
     fn pop_verify(pk: G2, sig: G1, ciphersuite: u8) -> bool {
@@ -383,6 +400,16 @@ impl BLSSignaturePop for G2 {
             buf
         };
         G2::core_sign(x_prime, &pk_bytes[..], ciphersuite)
+    }
+
+    fn pop_prove_with_both_keys(sk: &Fr, pk: &G1, ciphersuite: u8) -> G2 {
+        let pk_bytes = {
+            let mut buf = [0u8; 48];
+            let mut cur = Cursor::new(&mut buf[..]);
+            assert!(pk.serialize(&mut cur, true).is_ok());
+            buf
+        };
+        G2::core_sign(*sk, &pk_bytes[..], ciphersuite)
     }
 
     fn pop_verify(pk: G1, sig: G2, ciphersuite: u8) -> bool {
