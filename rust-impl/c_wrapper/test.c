@@ -41,6 +41,8 @@ int test()
   // verifies the signature
   assert(c_verify(key.pk, (void*)msg, sizeof(msg)-1, sig) == true);
 
+  // release memory of sk
+  c_free_sk(key.sk);
 
   int num_agg =5;
   bls_sig sig_list[num_agg];
@@ -66,6 +68,9 @@ int test()
 
     // verifies the signature
     assert(c_verify(key.pk, (void*)msg, sizeof(msg)-1, sig_list[i]) == true);
+
+    // release memory of sk
+    c_free_sk(key.sk);
   }
 
   bls_sig agg_sig =  c_aggregation(sig_list, num_agg);
@@ -73,6 +78,9 @@ int test()
 
   // verifies the aggregated signature
   assert(c_verify_agg(pk_list, num_agg, (void*)msg, sizeof(msg)-1, agg_sig) == true);
+
+
+
 
   return 0;
 }

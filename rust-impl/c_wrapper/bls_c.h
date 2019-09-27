@@ -23,18 +23,19 @@ typedef struct bls_sig {
 } bls_sig;
 
 /**
+ * A wrapper of sk
+ */
+typedef struct bls_sk {
+  uint8_t *data;
+  size_t len;
+} bls_sk;
+
+/**
  * A wrapper of pk
  */
 typedef struct bls_pk {
   uint8_t data[PK_LEN];
 } bls_pk;
-
-/**
- * A wrapper of sk
- */
-typedef struct bls_sk {
-  uint8_t data[SK_LEN];
-} bls_sk;
 
 /**
  * A wrapper that holds the output of key generation function.
@@ -56,6 +57,8 @@ typedef struct bls_pop {
  * It panics if ciphersuite fails, or if signatures do not have same compressness
  */
 bls_sig c_aggregation(bls_sig *sig_list, size_t sig_num);
+
+bool c_free_sk(bls_sk sk);
 
 /**
  * Input a pointer to the seed, and its length, and a ciphersuie id.

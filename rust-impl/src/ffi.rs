@@ -4,26 +4,19 @@
 // structures
 use crate::api::{BLSPKInG1, BLSPK, BLSPOP, BLSSIG, BLSSK};
 // constants
-use crate::{PK_LEN, POP_LEN, SIG_LEN, SK_LEN};
+use crate::{PK_LEN, POP_LEN, SIG_LEN};
 // traits
 use api::BLSAPI;
 use pairing::serdes::SerDes;
 
 /// A wrapper of sk
 #[repr(C)]
+#[derive(Debug)]
 pub struct bls_sk {
-    data: [u8; SK_LEN],
+    data: *mut u8,
+    len: libc::size_t
 }
-/// Implement Debug so clippy won't complain.
-/// Not really used anywhere.
-impl std::fmt::Debug for bls_sk {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        for (_i, e) in self.data.iter().enumerate() {
-            write!(f, "{:02x}, ", e)?;
-        }
-        writeln!(f)
-    }
-}
+
 
 /// A wrapper of pk
 #[repr(C)]
@@ -104,13 +97,27 @@ pub unsafe extern "C" fn c_keygen(
 
     let mut pk_array = [0u8; PK_LEN];
     pk_array.copy_from_slice(&pk_buf);
-    let mut sk_array = [0u8; SK_LEN];
-    sk_array.copy_from_slice(&sk_buf);
+
+
+    // shrink the vector sk_buf so that it is encoded
+    // as raw memory
+    sk_buf.shrink_to_fit();
+    assert!(sk_buf.len() == sk_buf.capacity());
+    let sk_ptr = sk_buf.as_mut_ptr();
+    let sk_len = sk_buf.len();
+    // remove the ownership of sk_buf
+    // so that when sk_ptr is passed to C
+    // rust will not clear the memory
+    std::mem::forget(sk_buf);
+
 
     // return the keys
     bls_keys {
         pk: bls_pk { data: pk_array },
-        sk: bls_sk { data: sk_array },
+        sk: bls_sk {
+            data: sk_ptr,
+            len: sk_len,
+        },
     }
 }
 
@@ -122,9 +129,9 @@ pub unsafe extern "C" fn c_sign(sk: bls_sk, msg: *const u8, msg_len: libc::size_
     let m: &[u8] = std::slice::from_raw_parts(msg, msg_len as usize);
 
     // load the secret key
-    let mut k_buf = sk.data.to_vec();
+    let mut sk_local = std::slice::from_raw_parts(sk.data, sk.len as usize);
 
-    let (k, _compressed) = match BLSSK::deserialize(&mut k_buf[..].as_ref()) {
+    let (k, _compressed) = match BLSSK::deserialize(&mut sk_local) {
         Ok(p) => p,
         Err(e) => panic!("C wrapper error: signing function: deserialize sk: {}", e),
     };
@@ -312,4 +319,16 @@ pub extern "C" fn c_verify_pop(pk: bls_pk, pop: bls_pop) -> bool {
     }
 
     BLSPKInG1::pop_verify(&k, &p)
+}
+
+/// This function release the rust stack allocated for bls sk 
+#[no_mangle]
+pub unsafe extern "C" fn c_free_sk(sk:bls_sk) -> bool {
+    if sk.data.is_null() {
+        return false
+    }
+
+    let sk_local = std::slice::from_raw_parts(sk.data, sk.len as usize);
+    std::mem::drop(sk_local);
+    true
 }
