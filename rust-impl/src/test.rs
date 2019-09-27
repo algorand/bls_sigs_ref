@@ -43,6 +43,102 @@ fn test_mustfail_short_seed_in_keygen() {
 }
 
 #[test]
+fn test_mustfail_pop() {
+    use crate::api::{BLSPKInG1, BLSAPI};
+    let seed = "this is the very very very long seed for testing";
+    let ciphersuite = 0;
+    let (sk1, pk1) = BLSPKInG1::keygen(seed, ciphersuite);
+
+    // inconsistent csids
+    let ciphersuite = 1;
+    let (sk2, pk2) = BLSPKInG1::keygen(seed, ciphersuite);
+    let res = BLSPKInG1::pop_gen(&sk1, &pk2);
+    assert!(res.is_err(), "ciphersuite IDs do not match");
+    let res = BLSPKInG1::pop_gen(&sk2, &pk1);
+    assert!(res.is_err(), "ciphersuite IDs do not match");
+
+    // invalid pop and pk pair
+    let ciphersuite = 0;
+    let seed = "this is another very very very long seed for testing";
+    let (sk2, pk2) = BLSPKInG1::keygen(seed, ciphersuite);
+
+    let res = BLSPKInG1::pop_gen(&sk1, &pk2);
+    assert!(res.is_ok());
+    let pop = res.unwrap();
+    assert!(!BLSPKInG1::pop_verify(&pk1, &pop));
+    assert!(!BLSPKInG1::pop_verify(&pk2, &pop));
+
+    let res = BLSPKInG1::pop_gen(&sk2, &pk1);
+    assert!(res.is_ok());
+    let pop = res.unwrap();
+    assert!(!BLSPKInG1::pop_verify(&pk1, &pop));
+    assert!(!BLSPKInG1::pop_verify(&pk2, &pop));
+}
+
+#[test]
+fn test_aggregate() {
+    use crate::api::{BLSPKInG1, BLSAPI, BLSPK, BLSSIG};
+    let ciphersuite = 0;
+    let msg = "message to sign";
+
+    let mut pk_list: Vec<BLSPK> = vec![];
+    let mut sig_list: Vec<BLSSIG> = vec![];
+    for i in 0..10 {
+        let key_gen_seed = format!("this is a very very long seed for testing #{}", i);
+        let (sk, pk) = BLSPKInG1::keygen(key_gen_seed, ciphersuite);
+        let sig = BLSPKInG1::sign(&sk, msg);
+        pk_list.push(pk);
+        sig_list.push(sig);
+    }
+
+    let res = BLSPKInG1::aggregate_without_verify(&sig_list);
+    assert!(res.is_ok());
+    let agg_sig = res.unwrap();
+    assert!(BLSPKInG1::verify_aggregated(&pk_list, msg, &agg_sig));
+}
+
+#[test]
+fn test_aggregate_must_fail() {
+    use crate::api::{BLSPKInG1, BLSAPI, BLSPK, BLSSIG};
+    let seed = "this is the very very very long seed for testing";
+    let ciphersuite = 0;
+    let msg = "message to sign";
+
+    let mut pk_list: Vec<BLSPK> = vec![];
+    let mut sig_list: Vec<BLSSIG> = vec![];
+    for i in 0..10 {
+        let key_gen_seed = format!("this is a very very long seed for testing #{}", i);
+        let (sk, pk) = BLSPKInG1::keygen(key_gen_seed, ciphersuite);
+        let sig = BLSPKInG1::sign(&sk, msg);
+        pk_list.push(pk);
+        sig_list.push(sig);
+    }
+
+    let res = BLSPKInG1::aggregate_without_verify(&sig_list);
+    assert!(res.is_ok());
+    let agg_sig = res.unwrap();
+    assert!(BLSPKInG1::verify_aggregated(&pk_list, msg, &agg_sig));
+
+    let ciphersuite = 1;
+    let (sk, pk) = BLSPKInG1::keygen(seed, ciphersuite);
+    let sig = BLSPKInG1::sign(&sk, msg);
+    let mut pk_list2 = pk_list.clone();
+    let mut sig_list2 = sig_list.clone();
+    pk_list2.push(pk);
+    sig_list2.push(sig);
+
+    // must fail: inconsistent csid
+    let res = BLSPKInG1::aggregate_without_verify(&sig_list2);
+    assert!(res.is_err(), "Ciphersuite IDs do not match");
+    assert!(!BLSPKInG1::verify_aggregated(&pk_list2, msg, &agg_sig));
+
+    // must fail: invalid signature/public keys
+    let mut pk_list2 = pk_list.clone();
+    pk_list2.pop();
+    assert!(!BLSPKInG1::verify_aggregated(&pk_list2, msg, &agg_sig));
+}
+
+#[test]
 fn test_api() {
     use crate::api::{BLSPKInG1, BLSAPI};
     let seed = "this is the very very very long seed for testing";
