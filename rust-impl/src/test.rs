@@ -34,21 +34,31 @@ fn test_xprime_from_sk() {
 }
 
 #[test]
-fn test_must_fail() {
-    // place holder for some must fail tests
-    // * signature verification with a different public key
-    // * ill formated signature or public keys
-    // *
+#[should_panic(expected = "seed is not long enough")]
+fn test_mustfail_short_seed_in_keygen() {
+    use crate::api::{BLSPKInG1, BLSAPI};
+    let seed = "a short seed";
+    let ciphersuite = 0;
+    BLSPKInG1::keygen(seed, ciphersuite);
 }
 
 #[test]
 fn test_api() {
-    // place holder for some API tests
+    use crate::api::{BLSPKInG1, BLSAPI};
+    let seed = "this is the very very very long seed for testing";
+    let ciphersuite = 0;
+
+    // simple key generation, signing and verification
+    let (sk, pk) = BLSPKInG1::keygen(seed, ciphersuite);
+    let msg = "message to sign";
+    let sig = BLSPKInG1::sign(&sk, msg);
+    assert!(BLSPKInG1::verify(&pk, msg, &sig));
+
+    // pop
+
+    
 
 }
 
 #[test]
-fn test_serdes() {
-    // place holder for some SerDes tests
-
-}
+fn test_serdes() {}

@@ -14,9 +14,8 @@ use pairing::serdes::SerDes;
 #[derive(Debug)]
 pub struct bls_sk {
     data: *mut u8,
-    len: libc::size_t
+    len: libc::size_t,
 }
-
 
 /// A wrapper of pk
 #[repr(C)]
@@ -98,7 +97,6 @@ pub unsafe extern "C" fn c_keygen(
     let mut pk_array = [0u8; PK_LEN];
     pk_array.copy_from_slice(&pk_buf);
 
-
     // shrink the vector sk_buf so that it is encoded
     // as raw memory
     sk_buf.shrink_to_fit();
@@ -109,7 +107,6 @@ pub unsafe extern "C" fn c_keygen(
     // so that when sk_ptr is passed to C
     // rust will not clear the memory
     std::mem::forget(sk_buf);
-
 
     // return the keys
     bls_keys {
@@ -321,11 +318,11 @@ pub extern "C" fn c_verify_pop(pk: bls_pk, pop: bls_pop) -> bool {
     BLSPKInG1::pop_verify(&k, &p)
 }
 
-/// This function release the rust stack allocated for bls sk 
+/// This function release the rust stack allocated for bls sk
 #[no_mangle]
-pub unsafe extern "C" fn c_free_sk(sk:bls_sk) -> bool {
+pub unsafe extern "C" fn c_free_sk(sk: bls_sk) -> bool {
     if sk.data.is_null() {
-        return false
+        return false;
     }
 
     let sk_local = std::slice::from_raw_parts(sk.data, sk.len as usize);
