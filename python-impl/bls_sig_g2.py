@@ -5,23 +5,22 @@
 from functools import partial
 from itertools import chain
 
-from bls_sig_g1 import _agg_ver_nul, _agg_ver_aug, _keygen, _sign, _sign_aug, verify_aug
+from bls_sig_g1 import _agg_ver_nul, _agg_ver_aug, _keygen, _sign, _sign_aug, _verify_aug
 from consts import g2suite
-from curve_ops import g1gen, point_mul, point_neg, subgroup_check_g1, subgroup_check_g2
+from curve_ops import g1gen, point_neg, subgroup_check_g1, subgroup_check_g2
 from opt_swu_g2 import map2curve_osswu2
 from pairing import multi_pairing
-from serdes import serialize
 from util import get_cmdline_options, print_g1_hex, print_g2_hex, print_tv_sig, SigType
 
 # sk must be bytes()
-keygen = partial(_keygen, g1gen)
+keygen = partial(_keygen, gen=g1gen)
 
 # sign takes in x_prime (the output of keygen), a message, and a ciphersuite id
 # returns a signature in G1
 sign = partial(_sign, map_fn=map2curve_osswu2)
 
 # sign with message augmentation
-sign_aug = partial(_sign_aug, gen=g1gen)
+sign_aug = partial(_sign_aug, gen=g1gen, sign_fn=sign)
 
 # verification corresponding to sign()
 # returns True if the signature is correct, False otherwise
@@ -31,6 +30,9 @@ def verify(pk, sig, msg, ciphersuite):
     if not (subgroup_check_g1(pk) and subgroup_check_g2(sig)):
         return False
     return multi_pairing((pk, point_neg(g1gen)), (P, sig)) == 1
+
+# verify with message augmentation
+verify_aug = partial(_verify_aug, ver_fn=verify)
 
 # aggregate verification
 def aggregate_verify(pks, msgs, sig, ciphersuite):
@@ -64,5 +66,5 @@ if __name__ == "__main__":
         ver_fn = ver_fn if opts.verify else None
         csuite = g2suite(opts.sigtype)
         for sig_in in opts.test_inputs:
-            print_tv_sig(sig_in, csuite, sig_fn, keygen, print_g1_hex, print_g2_hex, ver_fn, opts.quiet)
+            print_tv_sig(sig_in, csuite, sig_fn, keygen, print_g1_hex, print_g2_hex, ver_fn, True, opts)
     main()

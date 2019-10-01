@@ -4,7 +4,7 @@
 #
 # utilities for BLS sigs Python ref impl
 
-from binascii import unhexlify
+from binascii import hexlify, unhexlify
 from enum import Enum, unique
 import getopt
 import os
@@ -13,7 +13,7 @@ import sys
 
 from consts import q
 from curve_ops import g1gen, g2gen, from_jacobian
-from serdes import serialize, deserialize, SerError, DeserError
+from serdesZ import serialize, deserialize, SerError, DeserError
 
 @unique
 class SigType(Enum):
@@ -35,6 +35,7 @@ class Options(object):
     test_inputs = None
     verify = False
     quiet = False
+    gen_vectors = False
     sigtype = SigType.basic
 
     def __init__(self):
@@ -53,7 +54,7 @@ def get_cmdline_options():
 
     # process cmdline args with getopt
     try:
-        (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:T:tvqBAP")
+        (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:T:tvqBAPg")
 
     except getopt.GetoptError as err:
         print("Usage: %s [-t]" % sys.argv[0])
@@ -84,6 +85,9 @@ def get_cmdline_options():
 
         elif opt == "-P":
             ret.sigtype = SigType.proof_of_possession
+
+        elif opt == "-g":
+            ret.gen_vectors = True
 
         else:
             raise RuntimeError("got unexpected option %s from getopt" % opt)
@@ -135,7 +139,7 @@ def print_value(iv, indent=8, skip_first=False):
         line_length += len(out_str) + 1
     sys.stdout.write("\n")
 
-def print_tv_hash(hash_in, ciphersuite, hash_fn, print_pt_fn, quiet):
+def print_tv_hash(hash_in, ciphersuite, hash_fn, print_pt_fn, is_ell2, opts):
     if len(hash_in) > 2:
         (msg, _, hash_expect) = hash_in[:3]
     else:
@@ -144,13 +148,17 @@ def print_tv_hash(hash_in, ciphersuite, hash_fn, print_pt_fn, quiet):
     # hash to point
     P = hash_fn(msg, ciphersuite)
 
+    if opts.gen_vectors:
+        print(b' '.join( hexlify(v) for v in (msg, b'\x00', serialize(P)) ).decode('ascii'))
+        return
+
     if hash_expect is not None:
         if serialize(P) != hash_expect:
             raise SerError("serializing P did not give hash_expect")
-        if from_jacobian(deserialize(hash_expect)) != from_jacobian(P):
+        if from_jacobian(deserialize(hash_expect, is_ell2)) != from_jacobian(P):
             raise DeserError("deserializing hash_expect did not give P")
 
-    if quiet:
+    if opts.quiet:
         return
 
     print("=============== begin hash test vector ==================")
@@ -166,7 +174,7 @@ def print_tv_hash(hash_in, ciphersuite, hash_fn, print_pt_fn, quiet):
 
     print("===============  end hash test vector  ==================")
 
-def print_tv_sig(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig_fn, ver_fn, quiet):
+def print_tv_sig(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig_fn, ver_fn, is_ell2, opts):
     if len(sig_in) > 2:
         (msg, sk, sig_expect) = sig_in[:3]
     else:
@@ -176,16 +184,20 @@ def print_tv_sig(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig
     (x_prime, pk) = keygen_fn(sk)
     sig = sign_fn(x_prime, msg, ciphersuite)
 
-    if sig_expect is not None:
-        if serialize(sig) != sig_expect:
-            raise SerError("serializing sig did not give sig_expect")
-        if from_jacobian(deserialize(sig_expect)) != from_jacobian(sig):
-            raise DeserError("deserializing sig_expect did not give sig")
-
     if ver_fn is not None and not ver_fn(pk, sig, msg, ciphersuite):
         raise RuntimeError("verifying generated signature failed")
 
-    if quiet:
+    if opts.gen_vectors:
+        print(b' '.join( hexlify(v) for v in (msg, sk, serialize(sig)) ).decode('ascii'))
+        return
+
+    if sig_expect is not None:
+        if serialize(sig) != sig_expect:
+            raise SerError("serializing sig did not give sig_expect")
+        if from_jacobian(deserialize(sig_expect, is_ell2)) != from_jacobian(sig):
+            raise DeserError("deserializing sig_expect did not give sig")
+
+    if opts.quiet:
         return
 
     # output the test vector
@@ -218,7 +230,7 @@ def print_tv_sig(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig
 
     print("==================  end test vector  ====================")
 
-def print_tv_pop(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig_fn, ver_fn, quiet):
+def print_tv_pop(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig_fn, ver_fn, is_ell2, opts):
     if len(sig_in) > 2:
         (_, sk, sig_expect) = sig_in[:3]
     else:
@@ -228,16 +240,20 @@ def print_tv_pop(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig
     (x_prime, pk) = keygen_fn(sk)
     sig = sign_fn(x_prime, pk, ciphersuite)
 
-    if sig_expect is not None:
-        if serialize(sig) != sig_expect:
-            raise SerError("serializing sig did not give sig_expect")
-        if from_jacobian(deserialize(sig_expect)) != from_jacobian(sig):
-            raise DeserError("deserializing sig_expect did not give sig")
-
     if ver_fn is not None and not ver_fn(pk, sig, ciphersuite):
         raise RuntimeError("verifying generated signature failed")
 
-    if quiet:
+    if opts.gen_vectors:
+        print(b' '.join( hexlify(v) for v in (b'\x00', sk, serialize(sig)) ).decode('ascii'))
+        return
+
+    if sig_expect is not None:
+        if serialize(sig) != sig_expect:
+            raise SerError("serializing sig did not give sig_expect")
+        if from_jacobian(deserialize(sig_expect, is_ell2)) != from_jacobian(sig):
+            raise DeserError("deserializing sig_expect did not give sig")
+
+    if opts.quiet:
         return
 
     # output the test vector

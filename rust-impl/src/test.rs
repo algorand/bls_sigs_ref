@@ -1,10 +1,9 @@
-
 use super::signature::{xprime_from_sk, BLSSigCore};
 use ff::PrimeField;
 use pairing::bls12_381::{Fr, FrRepr, G1, G2};
 use pairing::CurveProjective;
 
-fn test_sig<T: CurveProjective + BLSSigCore>(ciphersuite: u8) {
+fn test_sig<T: CurveProjective + BLSSigCore>(ciphersuite: &[u8]) {
     let msg = "this is the message";
     let sk = "this is the key";
     let (x_prime, pk) = T::keygen(sk);
@@ -14,12 +13,12 @@ fn test_sig<T: CurveProjective + BLSSigCore>(ciphersuite: u8) {
 
 #[test]
 fn test_g1() {
-    test_sig::<G1>(1u8);
+    test_sig::<G1>(&[1u8]);
 }
 
 #[test]
 fn test_g2() {
-    test_sig::<G2>(2u8);
+    test_sig::<G2>(&[2u8]);
 }
 
 #[test]

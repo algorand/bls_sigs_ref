@@ -10,7 +10,7 @@ from curve_ops import g2gen, point_add, point_mul, point_neg, subgroup_check_g1,
 from hash_to_field import Hr
 from opt_swu_g1 import map2curve_osswu
 from pairing import multi_pairing
-from serdes import serialize
+from serdesZ import serialize
 from util import get_cmdline_options, print_g1_hex, print_g2_hex, print_tv_sig, SigType
 
 # sk must be bytes()
@@ -27,12 +27,12 @@ def _sign(x_prime, msg, ciphersuite, map_fn):
 sign = partial(_sign, map_fn=map2curve_osswu)
 
 # sign with message augmentation
-def _sign_aug(x_prime, msg, ciphersuite, pk=None, gen):
+def _sign_aug(x_prime, msg, ciphersuite, pk=None, gen=None, sign_fn=sign):
     if pk is None:
         pk = point_mul(x_prime, gen)
     pk_bytes = serialize(pk, True)  # serialize in compressed form
-    return sign(x_prime, pk_bytes + msg, ciphersuite)
-sign_aug = partial(_sign_aug, gen=g2gen)
+    return sign_fn(x_prime, pk_bytes + msg, ciphersuite)
+sign_aug = partial(_sign_aug, gen=g2gen, sign_fn=sign)
 
 # verification corresponding to sign()
 # returns True if the signature is correct, False otherwise
@@ -44,9 +44,10 @@ def verify(pk, sig, msg, ciphersuite):
     return multi_pairing((P, sig), (pk, point_neg(g2gen))) == 1
 
 # verification with message augmentation
-def verify_aug(pk, sig, msg, ciphersuite):
+def _verify_aug(pk, sig, msg, ciphersuite, ver_fn=verify):
     pk_bytes = serialize(pk, True)  # serialize in compressed form
-    return verify(pk, sig, pk_bytes + msg, ciphersuite)
+    return ver_fn(pk, sig, pk_bytes + msg, ciphersuite)
+verify_aug = partial(_verify_aug, ver_fn=verify)
 
 # signature aggregation
 def aggregate(sigs):
@@ -95,5 +96,5 @@ if __name__ == "__main__":
         ver_fn = ver_fn if opts.verify else None
         csuite = g1suite(opts.sigtype)
         for sig_in in opts.test_inputs:
-            print_tv_sig(sig_in, csuite, sig_fn, keygen, print_g2_hex, print_g1_hex, ver_fn, opts.quiet)
+            print_tv_sig(sig_in, csuite, sig_fn, keygen, print_g2_hex, print_g1_hex, ver_fn, False, opts)
     main()

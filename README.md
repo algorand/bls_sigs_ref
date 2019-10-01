@@ -34,13 +34,16 @@ The main differences are:
 Please see the READMEs in each subdirectory for information on particular
 implementations. In brief,
 
+- The [Python](python-impl/) and [Rust](rust-impl/)
+  implementations include all functionality currently specified in the
+  standard, plus serialization and deserialization based on
+  [the ZCash spec](https://github.com/zkcrypto/pairing/blob/master/src/bls12_381/README.md).
+
 - The [C implementation](c-impl/) *only* implements hash-to-curve, and not
   signing, verification, serialization, or deserialization.
 
-- The [Python](python-impl/), [Rust](rust-impl/), and [Sage](sage-impl/)
-  implementations include all functionality currently specified in the
-  standard, plus serialization and deserialization based on
-  [my proposal](https://github.com/pairingwg/bls_standard/issues/16).
+- The [Sage implementation](sage-impl/) is **out of date**. Please use the
+  Python or Rust implementations instead.
 
 - The Python implementation uses the Python finite field implementation
   from [Chia's BLS library](https://github.com/chia-network/bls-signatures).

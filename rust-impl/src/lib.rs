@@ -24,7 +24,7 @@ extern crate sha2;
 
 mod signature;
 
-pub use signature::{BLSSigCore, BLSSignatureBasic, BLSSignatureAug, BLSSignaturePop};
+pub use signature::{BLSSigCore, BLSSignatureAug, BLSSignatureBasic, BLSSignaturePop};
 
 #[cfg(test)]
 mod test;

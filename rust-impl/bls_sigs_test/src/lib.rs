@@ -10,10 +10,10 @@
 extern crate bls_sigs_ref_rs;
 extern crate pairing;
 
-use bls_sigs_ref_rs::{BLSSignature};
+use bls_sigs_ref_rs::{BLSSignatureAug, BLSSignatureBasic, BLSSignaturePop};
 use pairing::hash_to_curve::HashToCurve;
-use pairing::CurveProjective;
 use pairing::serdes::SerDes;
+use pairing::CurveProjective;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Cursor, Result};
 
@@ -72,7 +72,7 @@ pub fn proc_testvec_file(filename: &str) -> Result<Vec<TestVector>> {
 }
 
 /// Test hash function
-pub fn test_hash<G>(tests: Vec<TestVector>, ciphersuite: u8, len: usize) -> Result<()>
+pub fn test_hash<G>(tests: Vec<TestVector>, ciphersuite: &[u8], len: usize) -> Result<()>
 where
     G: CurveProjective + HashToCurve + SerDes,
 {
@@ -97,15 +97,99 @@ where
     Ok(())
 }
 
-/// Test sign functionality
-pub fn test_sig<G>(tests: Vec<TestVector>, ciphersuite: u8, len: usize) -> Result<()>
+/// Test sign functionality for Basic
+pub fn test_sig_basic<G>(tests: Vec<TestVector>, len: usize) -> Result<()>
 where
-    G: BLSSignature + CurveProjective + SerDes,
+    G: BLSSignatureBasic + CurveProjective + SerDes,
 {
     for TestVector { msg, sk, expect } in tests {
         let (x_prime, pk) = G::keygen(sk);
-        let sig = G::sign(x_prime, &msg, ciphersuite);
-        assert!(G::verify(pk, sig, &msg, ciphersuite));
+        let sig = G::sign(x_prime, &msg);
+        assert!(G::verify(pk, sig, &msg));
+        match expect {
+            None => println!("{:?}", sig),
+            Some(e) => {
+                let mut buf = [0u8; 96];
+                {
+                    let mut cur = Cursor::new(&mut buf[..]);
+                    sig.serialize(&mut cur, true)?;
+                }
+                assert_eq!(e.as_ref() as &[u8], &buf[..len]);
+
+                let (deser, compress) = G::deserialize(&mut Cursor::new(&e))?;
+                assert_eq!(sig, deser);
+                assert_eq!(compress, true);
+            }
+        }
+    }
+    Ok(())
+}
+
+/// Test sign functionality for Augmented
+pub fn test_sig_aug<G>(tests: Vec<TestVector>, len: usize) -> Result<()>
+where
+    G: BLSSignatureAug + CurveProjective + SerDes,
+{
+    for TestVector { msg, sk, expect } in tests {
+        let (x_prime, pk) = G::keygen(sk);
+        let sig = G::sign(x_prime, &msg);
+        assert!(G::verify(pk, sig, &msg));
+        match expect {
+            None => println!("{:?}", sig),
+            Some(e) => {
+                let mut buf = [0u8; 96];
+                {
+                    let mut cur = Cursor::new(&mut buf[..]);
+                    sig.serialize(&mut cur, true)?;
+                }
+                assert_eq!(e.as_ref() as &[u8], &buf[..len]);
+
+                let (deser, compress) = G::deserialize(&mut Cursor::new(&e))?;
+                assert_eq!(sig, deser);
+                assert_eq!(compress, true);
+            }
+        }
+    }
+    Ok(())
+}
+
+/// Test sign functionality for Pop
+pub fn test_sig_pop<G>(tests: Vec<TestVector>, len: usize) -> Result<()>
+where
+    G: BLSSignaturePop + CurveProjective + SerDes,
+{
+    for TestVector { msg, sk, expect } in tests {
+        let (x_prime, pk) = G::keygen(sk);
+        let sig = G::sign(x_prime, &msg);
+        assert!(G::verify(pk, sig, &msg));
+        match expect {
+            None => println!("{:?}", sig),
+            Some(e) => {
+                let mut buf = [0u8; 96];
+                {
+                    let mut cur = Cursor::new(&mut buf[..]);
+                    sig.serialize(&mut cur, true)?;
+                }
+                assert_eq!(e.as_ref() as &[u8], &buf[..len]);
+
+                let (deser, compress) = G::deserialize(&mut Cursor::new(&e))?;
+                assert_eq!(sig, deser);
+                assert_eq!(compress, true);
+            }
+        }
+    }
+    Ok(())
+}
+
+/// Test sign functionality for Pop
+pub fn test_pop<G>(tests: Vec<TestVector>, len: usize) -> Result<()>
+where
+    G: BLSSignaturePop + CurveProjective + SerDes,
+{
+    for TestVector { sk, expect, .. } in tests {
+        let (_, pk) = G::keygen(&sk[..]);
+        let sig = G::pop_prove(&sk[..]);
+        assert!(G::pop_verify(pk, sig));
         match expect {
             None => println!("{:?}", sig),
             Some(e) => {

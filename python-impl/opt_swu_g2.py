@@ -4,7 +4,7 @@
 #
 # pure Python implementation of optimized simplified SWU map to BLS12-381 G2
 
-from consts import g2suite, p
+from consts import p
 from curve_ops import clear_h2, eval_iso, from_jacobian, point_add
 from fields import Fq2, sgn0, roots_of_unity
 from hash_to_field import Hp2
@@ -169,6 +169,6 @@ if __name__ == "__main__":
             run_tests()
         else:
             for hash_in in opts.test_inputs:
-                print_tv_hash(hash_in, g2suite, map2curve_osswu2, print_g2_hex, opts.quiet)
+                print_tv_hash(hash_in, b'\x02', map2curve_osswu2, print_g2_hex, True, opts)
 
     main()

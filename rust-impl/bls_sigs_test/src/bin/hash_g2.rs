@@ -9,7 +9,7 @@ use std::io::Result;
 
 fn main() -> Result<()> {
     for arg in args().skip(1) {
-        test_hash::<G2>(proc_testvec_file(arg.as_ref())?, 2u8, 96)?;
+        test_hash::<G2>(proc_testvec_file(arg.as_ref())?, &[2u8], 96)?;
     }
     Ok(())
 }
