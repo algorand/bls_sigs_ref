@@ -26,7 +26,7 @@ typedef struct bls_sig {
  * A wrapper of sk
  */
 typedef struct bls_sk {
-  uint8_t *data;
+  void *data;
   size_t len;
 } bls_sk;
 
@@ -55,33 +55,43 @@ typedef struct bls_pop {
 /**
  * This function aggregates the signatures without checking if a signature is valid or not.
  * It panics if ciphersuite fails, or if signatures do not have same compressness
+ * # Safety
  */
 bls_sig c_aggregation(bls_sig *sig_list, size_t sig_num);
 
-bool c_free_sk(bls_sk sk);
+/**
+ * This function release the rust stack allocated for bls sk
+ * # Safety
+ * whipe out the `sk.len` bytes of memory pointed by `sk.data`
+ */
+void c_free_sk(bls_sk sk);
 
 /**
  * Input a pointer to the seed, and its length, and a ciphersuie id.
  * The seed needs to be at least
  * 32 bytes long. Output the key pair.
  * Generate a pair of public keys and secret keys.
+ * # Safety
  */
 bls_keys c_keygen(const uint8_t *seed, size_t seed_len, uint8_t ciphersuite);
 
 /**
  * Input a secret key, and a message in the form of a byte string,
  * output a signature.
+ * # Safety
  */
 bls_sig c_sign(bls_sk sk, const uint8_t *msg, size_t msg_len);
 
 /**
  * Input a public key, a message in the form of a byte string,
  * and a signature, outputs true if signature is valid w.r.t. the inputs.
+ * # Safety
  */
 bool c_verify(bls_pk pk, const uint8_t *msg, size_t msglen, bls_sig sig);
 
 /**
  * This function verifies the aggregated signature
+ * # Safety
  */
 bool c_verify_agg(bls_pk *pk_list,
                   size_t pk_num,

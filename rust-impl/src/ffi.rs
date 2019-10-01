@@ -4,16 +4,17 @@
 // structures
 use crate::api::{BLSPKInG1, BLSPK, BLSPOP, BLSSIG, BLSSK};
 // constants
-use crate::{PK_LEN, POP_LEN, SIG_LEN};
+use crate::{PK_LEN, POP_LEN, SIG_LEN, SK_LEN};
 // traits
 use api::BLSAPI;
 use pairing::serdes::SerDes;
+use std::ffi;
 
 /// A wrapper of sk
 #[repr(C)]
 #[derive(Debug)]
 pub struct bls_sk {
-    data: *mut u8,
+    data: *mut ffi::c_void,
     len: libc::size_t,
 }
 
@@ -69,6 +70,7 @@ impl std::fmt::Debug for bls_sig {
 /// The seed needs to be at least
 /// 32 bytes long. Output the key pair.
 /// Generate a pair of public keys and secret keys.
+/// # Safety
 #[no_mangle]
 pub unsafe extern "C" fn c_keygen(
     seed: *const u8,
@@ -97,36 +99,30 @@ pub unsafe extern "C" fn c_keygen(
     let mut pk_array = [0u8; PK_LEN];
     pk_array.copy_from_slice(&pk_buf);
 
-    // shrink the vector sk_buf so that it is encoded
-    // as raw memory
-    sk_buf.shrink_to_fit();
-    assert!(sk_buf.len() == sk_buf.capacity());
-    let sk_ptr = sk_buf.as_mut_ptr();
-    let sk_len = sk_buf.len();
-    // remove the ownership of sk_buf
-    // so that when sk_ptr is passed to C
-    // rust will not clear the memory
-    std::mem::forget(sk_buf);
+    let mut sk_array = [0u8; SK_LEN];
+    sk_array.copy_from_slice(&sk_buf);
+    let box_sk = Box::new(sk_array);
 
     // return the keys
     bls_keys {
         pk: bls_pk { data: pk_array },
         sk: bls_sk {
-            data: sk_ptr,
-            len: sk_len,
+            data: Box::into_raw(box_sk) as *mut ffi::c_void,
+            len: SK_LEN,
         },
     }
 }
 
 /// Input a secret key, and a message in the form of a byte string,
 /// output a signature.
+/// # Safety
 #[no_mangle]
 pub unsafe extern "C" fn c_sign(sk: bls_sk, msg: *const u8, msg_len: libc::size_t) -> bls_sig {
     // convert a C array `msg` to a rust string `m`
     let m: &[u8] = std::slice::from_raw_parts(msg, msg_len as usize);
 
     // load the secret key
-    let mut sk_local = std::slice::from_raw_parts(sk.data, sk.len as usize);
+    let mut sk_local = std::slice::from_raw_parts(sk.data as *mut u8, sk.len as usize);
 
     let (k, _compressed) = match BLSSK::deserialize(&mut sk_local) {
         Ok(p) => p,
@@ -149,6 +145,7 @@ pub unsafe extern "C" fn c_sign(sk: bls_sk, msg: *const u8, msg_len: libc::size_
 
 /// Input a public key, a message in the form of a byte string,
 /// and a signature, outputs true if signature is valid w.r.t. the inputs.
+/// # Safety
 #[no_mangle]
 pub unsafe extern "C" fn c_verify(
     pk: bls_pk,
@@ -195,6 +192,7 @@ pub unsafe extern "C" fn c_verify(
 
 /// This function aggregates the signatures without checking if a signature is valid or not.
 /// It panics if ciphersuite fails, or if signatures do not have same compressness
+/// # Safety
 #[no_mangle]
 pub unsafe extern "C" fn c_aggregation(sig_list: *mut bls_sig, sig_num: libc::size_t) -> bls_sig {
     let sig_list: &[bls_sig] = std::slice::from_raw_parts(sig_list as *mut bls_sig, sig_num);
@@ -232,6 +230,7 @@ pub unsafe extern "C" fn c_aggregation(sig_list: *mut bls_sig, sig_num: libc::si
 }
 
 /// This function verifies the aggregated signature
+/// # Safety
 #[no_mangle]
 pub unsafe extern "C" fn c_verify_agg(
     pk_list: *mut bls_pk,
@@ -319,13 +318,11 @@ pub extern "C" fn c_verify_pop(pk: bls_pk, pop: bls_pop) -> bool {
 }
 
 /// This function release the rust stack allocated for bls sk
+/// # Safety
+/// whipe out the `sk.len` bytes of memory pointed by `sk.data`
 #[no_mangle]
-pub unsafe extern "C" fn c_free_sk(sk: bls_sk) -> bool {
-    if sk.data.is_null() {
-        return false;
-    }
-
-    let sk_local = std::slice::from_raw_parts(sk.data, sk.len as usize);
-    std::mem::drop(sk_local);
-    true
+pub unsafe extern "C" fn c_free_sk(sk: bls_sk) {
+    let t = Box::from_raw(sk.data);
+    let p = Box::leak(t);
+    std::ptr::write_bytes(p, 0, sk.len);
 }
