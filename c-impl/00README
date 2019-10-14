@@ -1,0 +1,4 @@
+The C implementation of hash-to-curve has been removed from this repo.
+
+You can find the most up-to-date version of this code at
+	https://github.com/kwantam/bls12-381_hash
