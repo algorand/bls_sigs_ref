@@ -8,7 +8,7 @@ import sys
 from util import get_cmdline_options, print_iv
 try:
     from __sage__g1_common import Ell, F, Hp, ell_u, p, q, sgn0, print_g1_hex
-    from __sage__bls_sig_common import print_hash_test_vector, g1suite
+    from __sage__bls_sig_common import print_hash_test_vector
 except ImportError:
     sys.exit("Error loading preprocessed sage files. Try running `make clean pyfiles`")
 
@@ -27,6 +27,7 @@ EllP = EllipticCurve(F, [EllP_a, EllP_b])
 # since this takes a while to compute, save it in a file and reload it from disk
 try:
     iso = load("iso_g1")
+    assert iso.codomain() == Ell
 except:
     iso = EllipticCurveIsogeny(EllP, kpoly, codomain=Ell, degree=11)
     iso.switch_sign()  # we use the isogeny with the opposite sign for y; the choice is arbitrary
@@ -84,5 +85,6 @@ def map2curve_osswu(alpha, dst):
     return ret
 
 if __name__ == "__main__":
-    for hash_in in get_cmdline_options():
-        print_hash_test_vector(hash_in, g1suite, map2curve_osswu, print_g1_hex)
+    (_, sig_inputs) = get_cmdline_options()
+    for hash_in in sig_inputs:
+        print_hash_test_vector(hash_in, '\x01', map2curve_osswu, print_g1_hex, Ell)

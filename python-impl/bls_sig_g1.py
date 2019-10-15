@@ -7,7 +7,7 @@ from itertools import chain
 
 from consts import g1suite
 from curve_ops import g2gen, point_add, point_mul, point_neg, subgroup_check_g1, subgroup_check_g2
-from hash_to_field import Hr
+from hash_to_field import xprime_from_sk
 from opt_swu_g1 import map2curve_osswu
 from pairing import multi_pairing
 from serdesZ import serialize
@@ -15,7 +15,7 @@ from util import get_cmdline_options, print_g1_hex, print_g2_hex, print_tv_sig, 
 
 # sk must be bytes()
 def _keygen(sk, gen):
-    x_prime = Hr(sk)
+    x_prime = xprime_from_sk(sk)
     return (x_prime, point_mul(x_prime, gen))
 keygen = partial(_keygen, gen=g2gen)
 

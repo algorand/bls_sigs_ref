@@ -8,68 +8,18 @@
 */
 
 extern crate bls_sigs_ref_rs;
-extern crate pairing;
+extern crate pairing_fork;
+
+#[cfg(test)]
+mod test;
+mod testvec;
 
 use bls_sigs_ref_rs::{BLSSignatureAug, BLSSignatureBasic, BLSSignaturePop};
-use pairing::hash_to_curve::HashToCurve;
-use pairing::serdes::SerDes;
-use pairing::CurveProjective;
-use std::fs::File;
-use std::io::{BufRead, BufReader, Cursor, Result};
-
-fn hexnum(c: u8) -> u8 {
-    match c {
-        b'0'..=b'9' => c - b'0',
-        b'a'..=b'f' => c - b'a' + 10,
-        b'A'..=b'F' => c - b'A' + 10,
-        _ => panic!("not a hex digit"),
-    }
-}
-
-// ASCII hexstring to bytes
-fn hexstring_to_bytes(input: &str) -> Vec<u8> {
-    let input = input.as_bytes();
-    assert!(input.len() % 2 == 0);
-    let ret_len = input.len() / 2;
-    let mut ret = Vec::<u8>::with_capacity(ret_len);
-
-    for idx in 0..ret_len {
-        ret.push(16 * hexnum(input[2 * idx]) + hexnum(input[2 * idx + 1]));
-    }
-    ret
-}
-
-#[derive(Debug)]
-/// One processed line of a test vector
-pub struct TestVector {
-    /// The message being tested
-    pub msg: Vec<u8>,
-    /// The secret key being tested
-    pub sk: Vec<u8>,
-    /// The expected result, if any
-    pub expect: Option<Vec<u8>>,
-}
-
-// Process one line of a test vector
-fn proc_testvec_line(input: &str) -> TestVector {
-    let mut result: Vec<Vec<u8>> = input
-        .split_ascii_whitespace()
-        .take(3)
-        .map(|s| hexstring_to_bytes(s))
-        .collect();
-    let expect = if result.len() > 2 { result.pop() } else { None };
-    let sk = result.pop().unwrap();
-    let msg = result.pop().unwrap();
-    TestVector { msg, sk, expect }
-}
-
-/// Process a test vector file into a vector of `TestVector`s
-pub fn proc_testvec_file(filename: &str) -> Result<Vec<TestVector>> {
-    BufReader::new(File::open(filename)?)
-        .lines()
-        .map(|x| x.map(|xx| proc_testvec_line(xx.as_ref())))
-        .collect()
-}
+use pairing_fork::hash_to_curve::HashToCurve;
+use pairing_fork::serdes::SerDes;
+use pairing_fork::CurveProjective;
+use std::io::{Cursor, Result};
+pub use testvec::{get_dflt_vecs, get_vecs, TestVector};
 
 /// Test hash function
 pub fn test_hash<G>(tests: Vec<TestVector>, ciphersuite: &[u8], len: usize) -> Result<()>
@@ -88,9 +38,8 @@ where
                 }
                 assert_eq!(e.as_ref() as &[u8], &buf[..len]);
 
-                let (deser, compress) = G::deserialize(&mut Cursor::new(&e))?;
+                let deser = G::deserialize(&mut Cursor::new(&e), true)?;
                 assert_eq!(result, deser);
-                assert_eq!(compress, true);
             }
         }
     }
@@ -116,9 +65,8 @@ where
                 }
                 assert_eq!(e.as_ref() as &[u8], &buf[..len]);
 
-                let (deser, compress) = G::deserialize(&mut Cursor::new(&e))?;
+                let deser = G::deserialize(&mut Cursor::new(&e), true)?;
                 assert_eq!(sig, deser);
-                assert_eq!(compress, true);
             }
         }
     }
@@ -144,9 +92,8 @@ where
                 }
                 assert_eq!(e.as_ref() as &[u8], &buf[..len]);
 
-                let (deser, compress) = G::deserialize(&mut Cursor::new(&e))?;
+                let deser = G::deserialize(&mut Cursor::new(&e), true)?;
                 assert_eq!(sig, deser);
-                assert_eq!(compress, true);
             }
         }
     }
@@ -172,9 +119,8 @@ where
                 }
                 assert_eq!(e.as_ref() as &[u8], &buf[..len]);
 
-                let (deser, compress) = G::deserialize(&mut Cursor::new(&e))?;
+                let deser = G::deserialize(&mut Cursor::new(&e), true)?;
                 assert_eq!(sig, deser);
-                assert_eq!(compress, true);
             }
         }
     }
@@ -200,9 +146,8 @@ where
                 }
                 assert_eq!(e.as_ref() as &[u8], &buf[..len]);
 
-                let (deser, compress) = G::deserialize(&mut Cursor::new(&e))?;
+                let deser = G::deserialize(&mut Cursor::new(&e), true)?;
                 assert_eq!(sig, deser);
-                assert_eq!(compress, true);
             }
         }
     }

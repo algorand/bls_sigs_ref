@@ -61,13 +61,14 @@ def get_cmdline_options():
     sk = "11223344556677889900112233445566"
     msg_dflt = "the message to be signed"
     ret = []
+    sig_type = "NUL"
 
     # go through the commandline arguments
     try:
-        (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:dgT:")
+        (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:dgT:BAP")
 
     except getopt.GetoptError as err:
-        print "Usage: %s [-d] [-k key] [-T test_file] [msg ...]" % sys.argv[0]
+        print "Usage: %s [-B | -A | -P] [-g] [-d] [-k key] [-T test_file] [msg ...]" % sys.argv[0]
         sys.exit(str(err))
 
     for (opt, arg) in opts:
@@ -86,6 +87,15 @@ def get_cmdline_options():
                                 for val in line.strip().split(' ') ) \
                          for line in test_file.readlines() ]
 
+        elif opt == "-B":
+            sig_type = "NUL"
+
+        elif opt == "-A":
+            sig_type = "AUG"
+
+        elif opt == "-P":
+            sig_type = "POP"
+
         else:
             raise RuntimeError("got unexpected option %s from getopt" % opt)
 
@@ -94,4 +104,4 @@ def get_cmdline_options():
     if not ret:
         ret = [ (msg_dflt, sk) ]
 
-    return ret
+    return (sig_type, ret)

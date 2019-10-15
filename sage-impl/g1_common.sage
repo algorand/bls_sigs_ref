@@ -46,8 +46,8 @@ def Hp(msg, ctr, dst=None):
 def Hp2(msg, ctr, dst=None):
     return hash_to_base(msg, ctr, dst, p, 2, 64, hashlib.sha256)
 
-def Hr(msg):
-    prk = hkdf_extract(None, msg, hashlib.sha256)
+def xprime_from_sk(msg):
+    prk = hkdf_extract("BLS-SIG-KEYGEN-SALT-", msg, hashlib.sha256)
     okm = hkdf_expand(prk, None, 48, hashlib.sha256)
     return OS2IP(okm) % q
 

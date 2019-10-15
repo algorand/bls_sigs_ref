@@ -30,7 +30,6 @@ if __name__ == "__main__":
     def main():
         opts = get_cmdline_options()
         ver_fn = pop_verify if opts.verify else None
-        csuite = g2pop(opts.sigtype)
         for sig_in in opts.test_inputs:
-            print_tv_pop(sig_in, csuite, pop_prove, keygen, print_g1_hex, print_g2_hex, ver_fn, True, opts)
+            print_tv_pop(sig_in, g2pop, pop_prove, keygen, print_g1_hex, print_g2_hex, ver_fn, True, opts)
     main()

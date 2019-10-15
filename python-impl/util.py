@@ -57,8 +57,7 @@ def get_cmdline_options():
         (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:T:tvqBAPg")
 
     except getopt.GetoptError as err:
-        print("Usage: %s [-t]" % sys.argv[0])
-        print("       %s [-v] [-q] [-k key] [-T test_file] [-B | -A | -P] [msg ...]" % sys.argv[0])
+        print("Usage: %s [-gqtv] [-k key] [-T test_file] [-B | -A | -P] [msg ...]" % sys.argv[0])
         sys.exit(str(err))
 
     for (opt, arg) in opts:

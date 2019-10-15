@@ -4,40 +4,37 @@
 # (C) Riad S. Wahby <rsw@cs.stanford.edu>
 # based on an implementation by Zhenfei Zhang <zhenfei@algorand.com>
 
+from functools import partial
 import sys
 
-from util import print_iv, get_cmdline_options
+from util import get_cmdline_options
 try:
     from __sage__bls_sig_common import g1gen, g2suite, print_test_vector
-    from __sage__g1_common import Hr, print_g1_hex
-    from __sage__g2_common import print_g2_hex, print_iv_g2
+    from __sage__bls_sig_g1 import _keygen, _sign, _sign_aug
+    from __sage__g1_common import print_g1_hex
+    from __sage__g2_common import Ell2, print_g2_hex, print_iv_g2
     from __sage__opt_sswu_g2 import map2curve_osswu2
 except ImportError:
     sys.exit("Error loading preprocessed sage files. Try running `make clean pyfiles`")
 
 # keygen takes in sk as byte[32] and outputs the secret exponent and the public key in G1
-def keygen(sk, output_pk=True):
-    # https://github.com/pairingwg/bls_standard/blob/master/minutes/spec-v1.md#basic-signature-in-g2
-    x_prime = Hr(sk)
-    print_iv(x_prime, "x'", "keygen")
-    return (x_prime, (x_prime * g1gen) if output_pk else None)
+keygen = partial(_keygen, gen=g1gen)
 
-# signing algorithm as in
-#     https://github.com/pairingwg/bls_standard/blob/master/minutes/spec-v1.md#basic-signature-in-g2
 # sign takes in x_prime (the output of keygen), a message, and a ciphersuite id
 # returns a signature in G2
-def sign(x_prime, msg, ciphersuite):
-    print_iv(msg, "input msg", "sign")
+sign = partial(_sign, map_fn=map2curve_osswu2, print_fn=print_iv_g2)
 
-    # hash the concatenation of the (one-byte) ciphersuite and the message
-    P = map2curve_osswu2(msg, ciphersuite)
-    print_iv_g2(P, "hash to E2", "sign")
-
-    # output the signature x' * P
-    return x_prime * P
+# sign with message augmentation
+sign_aug = partial(_sign_aug, gen=g1gen, sign_fn=sign)
 
 if __name__ == "__main__":
     def main():
-        for sig_in in get_cmdline_options():
-            print_test_vector(sig_in, g2suite, sign, keygen, print_g1_hex, print_g2_hex)
+        (sig_type, sig_inputs) = get_cmdline_options()
+        if sig_type == 'AUG':
+            sign_fn = sign_aug
+        else:
+            sign_fn = sign
+        csuite = g2suite(sig_type)
+        for sig_in in sig_inputs:
+            print_test_vector(sig_in, csuite, sign_fn, keygen, print_g1_hex, print_g2_hex, Ell2)
     main()

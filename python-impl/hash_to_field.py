@@ -55,7 +55,8 @@ def hkdf_expand(prk, info, length, hash_fn):
 # hash_to_base as defined in draft-irtf-cfrg-hash-to-curve-04
 def hash_to_base(msg, ctr, dst, modulus, degree, blen, hash_fn):
     rets = [None] * degree
-    m_prime = hkdf_extract(dst, msg, hash_fn)
+    msg_hashed = hash_fn(msg).digest()
+    m_prime = hkdf_extract(dst, msg_hashed, hash_fn)
     info = b'H2C' + I2OSP(ctr, 1)
     for i in range(0, degree):
         t = hkdf_expand(m_prime, info + I2OSP(i + 1, 1), blen, hash_fn)
@@ -72,10 +73,10 @@ def Hp2(msg, ctr, dst):
         raise ValueError("Hp2 can't hash anything but bytes")
     return hash_to_base(msg, ctr, dst, p, 2, 64, hashlib.sha256)
 
-def Hr(msg):
+def xprime_from_sk(msg):
     if not isinstance(msg, bytes):
-        raise ValueError("Hr can't hash anything but bytes")
-    prk = hkdf_extract(None, msg, hashlib.sha256)
+        raise ValueError("xprime_from_sk can't hash anything but bytes")
+    prk = hkdf_extract(b"BLS-SIG-KEYGEN-SALT-", msg, hashlib.sha256)
     okm = hkdf_expand(prk, None, 48, hashlib.sha256)
     return OS2IP(okm) % q
 

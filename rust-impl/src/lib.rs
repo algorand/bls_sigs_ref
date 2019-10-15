@@ -17,7 +17,7 @@ extern crate ff;
 #[cfg(test)]
 extern crate hex_literal;
 extern crate hkdf;
-extern crate pairing;
+extern crate pairing_fork;
 #[cfg(test)]
 extern crate rand;
 extern crate sha2;

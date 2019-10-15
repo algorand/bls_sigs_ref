@@ -1,15 +1,14 @@
 extern crate bls_sigs_ref_rs;
 extern crate bls_sigs_test;
-extern crate pairing;
+extern crate pairing_fork;
 
-use bls_sigs_test::{proc_testvec_file, test_sig_aug};
-use pairing::bls12_381::G2;
-use std::env::args;
+use bls_sigs_test::{get_vecs, test_sig_aug};
+use pairing_fork::bls12_381::G2;
 use std::io::Result;
 
 fn main() -> Result<()> {
-    for arg in args().skip(1) {
-        test_sig_aug::<G2>(proc_testvec_file(arg.as_ref())?, 96)?;
+    for vec in get_vecs("sig_g2_aug")? {
+        test_sig_aug::<G2>(vec?, 96)?;
     }
     Ok(())
 }

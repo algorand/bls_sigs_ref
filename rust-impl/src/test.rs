@@ -1,7 +1,7 @@
 use super::signature::{xprime_from_sk, BLSSigCore};
 use ff::PrimeField;
-use pairing::bls12_381::{Fr, FrRepr, G1, G2};
-use pairing::CurveProjective;
+use pairing_fork::bls12_381::{Fr, FrRepr, G1, G2};
+use pairing_fork::CurveProjective;
 
 fn test_sig<T: CurveProjective + BLSSigCore>(ciphersuite: &[u8]) {
     let msg = "this is the message";
@@ -25,10 +25,10 @@ fn test_g2() {
 fn test_xprime_from_sk() {
     let fr_val = xprime_from_sk("hello world (it's a secret!)");
     let expect = FrRepr([
-        0x73f15a42979430a4u64,
-        0xc26ed5c294f7cbb5u64,
-        0xa98ec5b569484e7du64,
-        0x77cf27e14db0de2u64,
+        0x12760642e26dd0b2u64,
+        0x577f0ddcee74cc5fu64,
+        0xd6b63edfcad22ccu64,
+        0x55b3719e3864a1acu64,
     ]);
     assert_eq!(fr_val, Fr::from_repr(expect).unwrap());
 }

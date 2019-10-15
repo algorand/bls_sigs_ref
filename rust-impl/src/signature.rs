@@ -4,11 +4,11 @@ BLS signatures
 
 use ff::Field;
 use hkdf::Hkdf;
-use pairing::bls12_381::{Bls12, Fq12, Fr, G1, G2};
-use pairing::hash_to_curve::HashToCurve;
-use pairing::hash_to_field::BaseFromRO;
-use pairing::serdes::SerDes;
-use pairing::{CurveAffine, CurveProjective, Engine};
+use pairing_fork::bls12_381::{Bls12, Fq12, Fr, G1, G2};
+use pairing_fork::hash_to_curve::HashToCurve;
+use pairing_fork::hash_to_field::BaseFromRO;
+use pairing_fork::serdes::SerDes;
+use pairing_fork::{CurveAffine, CurveProjective, Engine};
 use sha2::digest::generic_array::typenum::{U48, U96};
 use sha2::digest::generic_array::{ArrayLength, GenericArray};
 use sha2::Sha256;
@@ -18,9 +18,13 @@ use std::vec::Vec;
 
 /// Hash a secret key sk to the secret exponent x'; then (PK, SK) = (g^{x'}, x').
 pub fn xprime_from_sk<B: AsRef<[u8]>>(msg: B) -> Fr {
+    // "BLS-SIG-KEYGEN-SALT-"
+    const SALT: &[u8] = &[
+        66, 76, 83, 45, 83, 73, 71, 45, 75, 69, 89, 71, 69, 78, 45, 83, 65, 76, 84, 45,
+    ];
     let mut result = GenericArray::<u8, U48>::default();
     // `result` has enough length to hold the output from HKDF expansion
-    assert!(Hkdf::<Sha256>::new(None, msg.as_ref())
+    assert!(Hkdf::<Sha256>::new(Some(SALT), msg.as_ref())
         .expand(&[], &mut result)
         .is_ok());
     Fr::from_okm(&result)
@@ -303,6 +307,7 @@ impl BLSSigCore for G1 {
     }
 }
 
+// XXX: once str::as_bytes() is stabilized as a const function, don't need to do this anymore
 impl BLSSignatureBasic for G1 {
     // BLS_SIG_BLS12381G1-SHA256-SSWU-RO-_NUL_
     const CSUITE: &'static [u8] = &[

@@ -2,6 +2,14 @@
 
 This directory contains a Sage implementation of the BLS signatures draft.
 
+**Note**: this implementation supports only signing, *not* verifying signatures.
+It can be used to generate signatures for testing against the Python and Rust
+implementations.
+
+(This is mostly because Sage has known performance issues with field extension
+towers. It should be possible with a bit of effort to sidestep these issues,
+but I have not yet put in the work to do so. Sorry!)
+
 ## prerequisites
 
 You will need SageMath (tested with 8.7) and Make to run this code.
@@ -29,6 +37,11 @@ after which you can execute any of the four programs.
 - `-T` can be used multiple times to specify test input files (see `../test_vectors`).
 
 - `-k` sets the secret key to be used when signing messages from the commandline.
+
+- `-g` enables (machine-readable) test vector generation mode
+
+- When signing, `-B`, `-A`, and `-P` select Basic, Augmented, or Proof-of-possession signatures.
+  The default is Basic.
 
 - All other arguments are interpreted as messages to be hashed or signed.
 

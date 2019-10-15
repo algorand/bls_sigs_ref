@@ -11,7 +11,7 @@ repository = "https://github.com/algorand/bls_sigs_ref"
 [dependencies]
 ff = "0.4"
 hkdf = "0.8.0"
-pairing = { version = "0.16.0", git = "https://github.com/algorand/pairing-fork" }
+pairing-fork = { version = "0.17.0", git = "https://github.com/algorand/pairing-fork", branch = "release-0.17.0" }
 sha2 = "0.8.0"
 
 [dev-dependencies]
