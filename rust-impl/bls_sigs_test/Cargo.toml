@@ -6,4 +6,4 @@ license = "Apache-2.0"
 
 [dependencies]
 bls_sigs_ref-rs = { path = "../" }
-pairing-fork = { version = "0.17.0", git = "https://github.com/algorand/pairing-fork", branch = "release-0.17.0" }
+pairing-plus = { version = "0.17.0", git = "https://github.com/algorand/pairing-plus", branch = "release-0.17.0" }

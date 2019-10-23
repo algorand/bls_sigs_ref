@@ -1,9 +1,9 @@
 extern crate bls_sigs_ref_rs;
 extern crate bls_sigs_test;
-extern crate pairing_fork;
+extern crate pairing_plus;
 
 use bls_sigs_test::{get_vecs, test_sig_pop};
-use pairing_fork::bls12_381::G1;
+use pairing_plus::bls12_381::G1;
 use std::io::Result;
 
 fn main() -> Result<()> {

@@ -1,5 +1,5 @@
 use super::{get_dflt_vecs, test_hash, test_pop, test_sig_aug, test_sig_basic, test_sig_pop};
-use pairing_fork::bls12_381::{G1, G2};
+use pairing_plus::bls12_381::{G1, G2};
 
 #[test]
 fn test_hash_g1() {

@@ -8,16 +8,16 @@
 */
 
 extern crate bls_sigs_ref_rs;
-extern crate pairing_fork;
+extern crate pairing_plus;
 
 #[cfg(test)]
 mod test;
 mod testvec;
 
 use bls_sigs_ref_rs::{BLSSignatureAug, BLSSignatureBasic, BLSSignaturePop};
-use pairing_fork::hash_to_curve::HashToCurve;
-use pairing_fork::serdes::SerDes;
-use pairing_fork::CurveProjective;
+use pairing_plus::hash_to_curve::HashToCurve;
+use pairing_plus::serdes::SerDes;
+use pairing_plus::CurveProjective;
 use std::io::{Cursor, Result};
 pub use testvec::{get_dflt_vecs, get_vecs, TestVector};
 

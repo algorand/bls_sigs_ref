@@ -1,7 +1,7 @@
 use super::signature::{xprime_from_sk, BLSSigCore};
 use ff::PrimeField;
-use pairing_fork::bls12_381::{Fr, FrRepr, G1, G2};
-use pairing_fork::CurveProjective;
+use pairing_plus::bls12_381::{Fr, FrRepr, G1, G2};
+use pairing_plus::CurveProjective;
 
 fn test_sig<T: CurveProjective + BLSSigCore>(ciphersuite: &[u8]) {
     let msg = "this is the message";

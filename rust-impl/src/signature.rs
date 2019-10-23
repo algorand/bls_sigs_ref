@@ -4,11 +4,11 @@ BLS signatures
 
 use ff::Field;
 use hkdf::Hkdf;
-use pairing_fork::bls12_381::{Bls12, Fq12, Fr, G1, G2};
-use pairing_fork::hash_to_curve::HashToCurve;
-use pairing_fork::hash_to_field::BaseFromRO;
-use pairing_fork::serdes::SerDes;
-use pairing_fork::{CurveAffine, CurveProjective, Engine};
+use pairing_plus::bls12_381::{Bls12, Fq12, Fr, G1, G2};
+use pairing_plus::hash_to_curve::HashToCurve;
+use pairing_plus::hash_to_field::BaseFromRO;
+use pairing_plus::serdes::SerDes;
+use pairing_plus::{CurveAffine, CurveProjective, Engine};
 use sha2::digest::generic_array::typenum::{U48, U96};
 use sha2::digest::generic_array::{ArrayLength, GenericArray};
 use sha2::Sha256;
