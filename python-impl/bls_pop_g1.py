@@ -4,7 +4,7 @@
 
 from bls_sig_g1 import keygen
 from consts import g1pop
-from curve_ops import g2gen, point_mul, point_neg, subgroup_check_g2
+from curve_ops import g2gen, point_mul, point_neg, subgroup_check_g1, subgroup_check_g2
 from opt_swu_g1 import map2curve_osswu
 from pairing import multi_pairing
 from serdesZ import serialize
@@ -22,9 +22,9 @@ def pop_prove(x_prime, pk, ciphersuite):
 def pop_verify(pk, proof, ciphersuite):
     pk_bytes = serialize(pk, True)  # serialize in compressed form
     P = map2curve_osswu(pk_bytes, ciphersuite)
-    pk_ok = subgroup_check_g2(pk)
-    proof_ok = multi_pairing((P, proof), (pk, point_neg(g2gen))) == 1
-    return pk_ok and proof_ok
+    if not (subgroup_check_g2(pk) and subgroup_check_g1(proof)):
+        return False
+    return multi_pairing((P, proof), (pk, point_neg(g2gen))) == 1
 
 if __name__ == "__main__":
     def main():

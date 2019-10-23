@@ -106,6 +106,290 @@ def point_double(P):
 def point_neg(P):
     return (P[0], -P[1], P[2])
 
+# Addition chain for q, the subgroup order
+# pragma pylint: disable=multiple-statements
+def q_chain(tmpvar0):
+    tmpvar2 = point_double(tmpvar0)
+    tmpvar4 = point_double(tmpvar2)
+    tmpvar3 = point_add(tmpvar4, tmpvar2)
+    tmpvar5 = point_double(tmpvar3)
+    tmpvar1 = point_add(tmpvar5, tmpvar3)
+    tmpvar13 = point_add(tmpvar1, tmpvar0)
+    tmpvar10 = point_add(tmpvar13, tmpvar2)
+    tmpvar11 = point_add(tmpvar10, tmpvar3)
+    tmpvar16 = point_add(tmpvar11, tmpvar2)
+    tmpvar2 = point_add(tmpvar13, tmpvar5)
+    tmpvar12 = point_add(tmpvar10, tmpvar5)
+    tmpvar9 = point_add(tmpvar10, tmpvar1)
+    tmpvar7 = point_add(tmpvar16, tmpvar5)
+    tmpvar5 = point_add(tmpvar11, tmpvar1)
+    tmpvar6 = point_add(tmpvar16, tmpvar1)
+    tmpvar15 = point_add(tmpvar12, tmpvar1)
+    tmpvar4 = point_add(tmpvar15, tmpvar4)
+    tmpvar14 = point_add(tmpvar9, tmpvar1)
+    tmpvar8 = point_add(tmpvar4, tmpvar3)
+    tmpvar3 = point_add(tmpvar5, tmpvar1)
+    tmpvar1 = point_double(tmpvar14)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar8)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar5)
+    for _ in range(0, 7): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar16)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar13)
+    for _ in range(0, 8): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar7)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar9)
+    for _ in range(0, 7): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar6)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar10)
+    for _ in range(0, 3): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar0)
+    for _ in range(0, 11): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar15)
+    for _ in range(0, 8): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar14)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar11)
+    for _ in range(0, 8): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar0)
+    for _ in range(0, 12): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar13)
+    for _ in range(0, 7): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar12)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar11)
+    for _ in range(0, 13): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar10)
+    for _ in range(0, 7): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar9)
+    for _ in range(0, 7): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar8)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar7)
+    for _ in range(0, 14): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar6)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar2)
+    for _ in range(0, 8): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar5)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar4)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar2)
+    for _ in range(0, 32): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar0)
+    return tmpvar1
+
+# Addition chain for multiplication by the E2 cofactor
+def h2_chain(tmpvar0):
+    # Bos-Coster (win=4) : 604 links, 16 variables
+    tmpvar1 = point_double(tmpvar0)
+    tmpvar4 = point_add(tmpvar1, tmpvar0)
+    tmpvar2 = point_add(tmpvar4, tmpvar1)
+    tmpvar3 = point_add(tmpvar2, tmpvar1)
+    tmpvar11 = point_add(tmpvar3, tmpvar1)
+    tmpvar9 = point_add(tmpvar11, tmpvar1)
+    tmpvar10 = point_add(tmpvar9, tmpvar1)
+    tmpvar5 = point_add(tmpvar10, tmpvar1)
+    tmpvar7 = point_add(tmpvar5, tmpvar1)
+    tmpvar15 = point_add(tmpvar7, tmpvar1)
+    tmpvar13 = point_add(tmpvar15, tmpvar1)
+    tmpvar6 = point_add(tmpvar13, tmpvar1)
+    tmpvar14 = point_add(tmpvar6, tmpvar1)
+    tmpvar12 = point_add(tmpvar14, tmpvar1)
+    tmpvar8 = point_add(tmpvar12, tmpvar1)
+    tmpvar1 = point_double(tmpvar6)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar13)
+    for _ in range(0, 2): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar0)
+    for _ in range(0, 9): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar8)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar11)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar13)
+    for _ in range(0, 8): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar2)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 4): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar5)
+    for _ in range(0, 4): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar0)
+    for _ in range(0, 8): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar11)
+    for _ in range(0, 8): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar8)
+    for _ in range(0, 4): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar2)
+    for _ in range(0, 9): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar5)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar11)
+    for _ in range(0, 2): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar0)
+    for _ in range(0, 9): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar8)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar13)
+    for _ in range(0, 4): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar0)
+    for _ in range(0, 11): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar9)
+    for _ in range(0, 7): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar12)
+    for _ in range(0, 7): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar7)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar12)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar14)
+    for _ in range(0, 8): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar13)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar0)
+    for _ in range(0, 8): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar9)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar13)
+    for _ in range(0, 4): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar10)
+    for _ in range(0, 4): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar2)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar10)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar2)
+    for _ in range(0, 4): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar0)
+    for _ in range(0, 10): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar9)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar14)
+    for _ in range(0, 4): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar9)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar15)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar8)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar12)
+    for _ in range(0, 4): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar5)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar15)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar2)
+    for _ in range(0, 7): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar5)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar9)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar15)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar14)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar8)
+    for _ in range(0, 10): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar6)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar5)
+    for _ in range(0, 3): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar0)
+    for _ in range(0, 9): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar13)
+    for _ in range(0, 7): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar12)
+    for _ in range(0, 4): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar5)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar2)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar11)
+    for _ in range(0, 4): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar10)
+    for _ in range(0, 4): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar4)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar10)
+    for _ in range(0, 7): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar7)
+    for _ in range(0, 3): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar2)
+    for _ in range(0, 4): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 8): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar9)
+    for _ in range(0, 8): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar9)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar8)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar7)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar6)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar5)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar4)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar5)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar4)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar4)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar5)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 7): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar4)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 3): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar0)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 6): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar3)
+    for _ in range(0, 5): tmpvar1 = point_double(tmpvar1)
+    tmpvar1 = point_add(tmpvar1, tmpvar2)
+    return tmpvar1
+# pragma pylint: enable=multiple-statements
+
 # Addition chain for multiplication by 0xd201000000010000 == -x, the BLS parameter
 def mx_chain(P):
     Q = point_double(P)
@@ -288,56 +572,23 @@ def eval_iso(P, map_coeffs):
     Y = mapvals[2] * mapvals[1] * Z * Z
     return (X, Y, Z)
 
-###
-## Fast cofactor clearing using the untwist-Frobenius-twist Endomorphism
-###
-# We use the version given in section 4.1 of
+## Cofactor clearing
+# For G2, the cofactor clearing method is compatible with the one given in Section 4.1 of
 #    Budroni and Pintore, "Efficient hash maps to G2 on BLS curves,"
 #    ePrint 2017/419 https://eprint.iacr.org/2017/419
-# NOTE: this impl works for Jacobian projective coordinates without computing an inversion.
 #
-# constants for Psi, the untwist-Frobenius-twist endomorphism
-iwsc = 0xd0088f51cbff34d258dd3db21a5d66bb23ba5c279c2895fb39869507b587b120f55ffff58a9ffffdcff7fffffffd556
-iwsc = Fq2(p, iwsc, iwsc - 1)
-k_qi_x = Fq(p, 0x1a0111ea397fe699ec02408663d4de85aa0d857d89759ad4897d29650fb85f9b409427eb4f49fffd8bfd00000000aaad)
-k_qi_y = Fq(p, 0x6af0e0437ff400b6831e36d6bd17ffe48395dabc2d3435e77f76e17009241c5ee67992f72ec05f4c81084fbede3cc09)
-k_cx = Fq2(p, 0, 0x1a0111ea397fe699ec02408663d4de85aa0d857d89759ad4897d29650fb85f9b409427eb4f49fffd8bfd00000000aaad)
-k_cy = Fq2(p, 0x135203e60180a68ee2e9c448d77a2cd91c3dedd930b1cf60ef396489f61eb45e304466cf3e67fa0af1ee7b04121bdea2,
-              0x6af0e0437ff400b6831e36d6bd17ffe48395dabc2d3435e77f76e17009241c5ee67992f72ec05f4c81084fbede3cc09)
-# shortcut Frobenius evaluations that avoid going all the way to Fq12
-def qi_x(x):
-    return Fq2(p, k_qi_x * x[0], p - k_qi_x * x[1])
-
-def qi_y(y):
-    return Fq2(p, k_qi_y * (y[0] + y[1]), k_qi_y * (y[0] - y[1]))
-
-def psi(P):
-    (x, y, z) = P
-    z2 = pow(z, 2)
-    px = k_cx * qi_x(iwsc * x)      # x numerator
-    pz2 = qi_x(iwsc * z2)           # x denominator
-    py = k_cy * qi_y(iwsc * y)      # y numerator
-    pz3 = qi_y(iwsc * z2 * z)       # y denominator
-    Z = pz2 * pz3
-    X = px * pz3 * Z
-    Y = py * pz2 * Z * Z
-    return (X, Y, Z)
-
+# This implementation avoids using the endomorphism because of US patent 7110538
+#
 def clear_h2(P):
-    work = mx_chain(P)                          # -x * P
-    work = point_add(work, P)                   # (-x + 1) P
-    minus_psi_P = point_neg(psi(P))             # -psi(P)
-    work = point_add(work, minus_psi_P)         # (-x + 1) P - psi(P)
-    work = mx_chain(work)                       # (x^2 - x) P + x psi(P)
-    work = point_add(work, minus_psi_P)         # (x^2 - x) P + (x - 1) psi(P)
-    work = point_add(work, point_neg(P))        # (x^2 - x - 1) P + (x - 1) psi(P)
-    psi_psi_2P = psi(psi(point_double(P)))      # psi(psi(2P))
-    work = point_add(work, psi_psi_2P)          # (x^2 - x - 1) P + (x - 1) psi(P) + psi(psi(2P))
+    work = h2_chain(P)                          # h2
+    work2 = point_double(work)                  # 2 * h2
+    work2 = point_add(work, work2)              # 3 * h2
+    work = mx_chain(work2)                      # 3 * z * h2
+    work = mx_chain(work)                       # 3 * z^2 * h2
+    work = point_add(work, point_neg(work2))    # 3 * z^2 * h2 - 3 * h2 = 3 * (z^2 - 1) * h2
     return work
 
-###
-## Fast subgroup checks via Bowe19
-###
+## Subgroup checks
 def _on_curve(P, b):
     (x, y, z) = P
     ySq = y ** 2
@@ -355,27 +606,14 @@ def _on_curve(P, b):
 on_curve_g1 = lambda P: _on_curve(P, Fq(p, 4))
 on_curve_g2 = lambda P: _on_curve(P, Fq2(p, 4, 4))
 
-# fast subgroup check for G2: [z]psi^3(P) - psi^2(P) + P == infty
-def subgroup_check_g2(P):
-    if not on_curve_g2(P):
+def _subgroup_check(P, on_curve_fn, id_pt):
+    if not on_curve_fn(P):
         return False
-    psi2 = psi(psi(P))                          # psi^2(P)
-    mzpsi3 = mx_chain(psi(psi2))                # [-z] psi^3(P)
-    lhs = point_add(psi2, mzpsi3)               # [-z] psi^3(P) + psi^2(P)
-    return point_eq(lhs, P)                     # ==? P
+    Q = q_chain(P)
+    return point_eq(Q, id_pt)
 
-_beta = Fq(p, 0x1a0111ea397fe699ec02408663d4de85aa0d857d89759ad4897d29650fb85f9b409427eb4f49fffd8bfd00000000aaac)
-def sigma(P):
-    (x, y, z) = P
-    return (_beta * x, y, z)
+id_g1 = (Fq.zero(p), Fq.one(p), Fq.zero(p))
+subgroup_check_g1 = lambda P: _subgroup_check(P, on_curve_g1, id_g1)
 
-def subgroup_check_g1(P):
-    if not on_curve_g1(P):
-        return False
-    sigP = sigma(P)                             # sigma(P)
-    sigSqP = sigma(sigP)                        # sigma^2(P)
-    sigPx2 = point_double(sigP)                 # 2 sigma(P)
-    tmp = point_add(sigSqP, P)                  # sigma^2(P) + P
-    tmp = point_add(sigPx2, point_neg(tmp))     # 2 sigma(P) - sigma^2(P) - P
-    tmp = xSqm1_chain(tmp)                      # [(z**2 - 1)//3] (2 sigma(P) - sigma^2(P) - P)
-    return point_eq(tmp, sigSqP)                # ==? sigma^2(P)
+id_g2 = (Fq2.zero(p), Fq2.one(p), Fq2.zero(p))
+subgroup_check_g2 = lambda P: _subgroup_check(P, on_curve_g2, id_g2)

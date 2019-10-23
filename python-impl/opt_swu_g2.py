@@ -137,7 +137,6 @@ if __name__ == "__main__":
 
     def run_tests():
         import random
-        from curve_ops import psi
         for _ in range(0, 128):
             t1 = Fq2(p, random.getrandbits(380), random.getrandbits(380))
             t2 = Fq2(p, random.getrandbits(380), random.getrandbits(380))
@@ -147,9 +146,6 @@ if __name__ == "__main__":
                 Pp = from_jacobian(P)
                 assert Pp[0] ** 3 + Ell2p_a * Pp[0] + Ell2p_b == Pp[1] ** 2
                 P = iso3(P)
-                Pp = from_jacobian(P)
-                assert Pp[0] ** 3 + Fq2(p, 4, 4) == Pp[1] ** 2
-                P = psi(P)
                 Pp = from_jacobian(P)
                 assert Pp[0] ** 3 + Fq2(p, 4, 4) == Pp[1] ** 2
                 P = clear_h2(P)
