@@ -11,7 +11,8 @@ from hash_to_field import Hp
 from util import get_cmdline_options, print_g1_hex, print_tv_hash
 
 # distinguished non-square in Fp for SWU map
-xi_1 = Fq(p, -1)
+xi_1 = Fq(p, 11)
+sqrt_mxi_1_cubed = (- xi_1 ** 3) ** ((p + 1) // 4)
 
 # 11-isogenous curve parameters
 EllP_a = Fq(p, 0x144698a3b8e9433d693a02c96d4982b0ea985383ee66a8d8e8981aefd881ac98936f8da0e0f97f5cf428082d584c1d)
@@ -51,7 +52,7 @@ def osswu_help(t):
 
     else:
         x1_num = xi_1 * t ** 2 * x0_num
-        y1 = sqrt_candidate * t ** 3
+        y1 = sqrt_candidate * t ** 3 * sqrt_mxi_1_cubed
         (x_num, y) = (x1_num, y1)
 
     # set sign of y equal to sign of t
