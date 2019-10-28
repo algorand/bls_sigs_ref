@@ -34,7 +34,8 @@ except:
     iso.dump("iso_g1", True)
 
 # xi is the distinguished non-square for the SWU map
-xi_1 = F(-1)
+xi_1 = F(11)
+sqrt_m_xi_1_cubed = sqrt(-xi_1 ** 3)
 
 # y^2 = g1p(x) is the curve equation for EllP
 def g1p(x):
@@ -65,7 +66,7 @@ def osswu_help(t):
         # X1(t) == xi t^2 X0(t)
         x1 = F(xi_1 * t ** 2 * x0)
         # if g(X0(t)) is not square, then sqrt(g(X1(t))) == t^3 * g(X0(t)) ^ ((p+1)/4)
-        y1 = sqrt_candidate * t ** 3
+        y1 = sqrt_candidate * t ** 3 * sqrt_m_xi_1_cubed
         (x, y) = (x1, y1)
 
     # set sign of y equal to sign of t
