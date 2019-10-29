@@ -55,11 +55,10 @@ def hkdf_expand(prk, info, length, hash_fn):
 # hash_to_base as defined in draft-irtf-cfrg-hash-to-curve-04
 def hash_to_base(msg, ctr, dst, modulus, degree, blen, hash_fn):
     rets = [None] * degree
-    msg_hashed = hash_fn(msg).digest()
-    m_prime = hkdf_extract(dst, msg_hashed, hash_fn)
-    info = b'H2C' + I2OSP(ctr, 1)
+    msg_prime = hkdf_extract(dst, msg + b'\x00', hash_fn)
+    info_pfx = b'H2C' + I2OSP(ctr, 1)
     for i in range(0, degree):
-        t = hkdf_expand(m_prime, info + I2OSP(i + 1, 1), blen, hash_fn)
+        t = hkdf_expand(msg_prime, info_pfx + I2OSP(i + 1, 1), blen, hash_fn)
         rets[i] = OS2IP(t) % modulus
     return rets
 

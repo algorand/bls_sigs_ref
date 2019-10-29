@@ -11,17 +11,20 @@ from hash_to_field import Hp2
 from util import get_cmdline_options, print_g2_hex, print_tv_hash
 
 # distinguished non-square in Fp2 for SWU map
-xi_2 = Fq2(p, 1, 1)
+xi_2 = Fq2(p, -2, -1)
 
 # 3-isogenous curve parameters
 Ell2p_a = Fq2(p, 0, 240)
 Ell2p_b = Fq2(p, 1012, 1012)
 
 # eta values, used for computing sqrt(g(X1(t)))
-ev1 = 0x2c4a7244a026bd3e305cc456ad9e235ed85f8b53954258ec8186bb3d4eccef7c4ee7b8d4b9e063a6c88d0aa3e03ba01
-ev2 = 0x85fa8cd9105715e641892a0f9a4bb2912b58b8d32f26594c60679cc7973076dc6638358daf3514d6426a813ae01f51a
-etas = (Fq2(p, ev1, 0), Fq2(p, 0, ev1), Fq2(p, ev2, ev2), Fq2(p, ev2, p - ev2))
-del ev1, ev2
+# For details on how to compute, see ../sage-impl/opt_sswu_g2.sage
+ev1 = 0x699be3b8c6870965e5bf892ad5d2cc7b0e85a117402dfd83b7f4a947e02d978498255a2aaec0ac627b5afbdf1bf1c90
+ev2 = 0x8157cd83046453f5dd0972b6e3949e4288020b5b8a9cc99ca07e27089a2ce2436d965026adad3ef7baba37f2183e9b5
+ev3 = 0xab1c2ffdd6c253ca155231eb3e71ba044fd562f6f72bc5bad5ec46a0b7a3b0247cf08ce6c6317f40edbc653a72dee17
+ev4 = 0xaa404866706722864480885d68ad0ccac1967c7544b447873cc37e0181271e006df72162a3d3e0287bf597fbf7f8fc1
+etas = (Fq2(p, ev1, ev2), Fq2(p, p - ev2, ev1), Fq2(p, ev3, ev4), Fq2(p, p - ev4, ev3))
+del ev1, ev2, ev3, ev4
 
 ###
 ## Simplified SWU map, optimized and adapted to Ell2'

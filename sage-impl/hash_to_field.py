@@ -62,10 +62,7 @@ def hkdf_expand(prk, info, length, hash_fn):
 def hash_to_base(msg, ctr, dst, modulus, degree, blen, hash_fn):
     print_iv(msg, "msg to hash", "hash_to_base")
 
-    msg_hashed = hash_fn(msg).digest()
-    print_iv(msg_hashed, "msg_hashed", "hash_to_base")
-
-    msg_prime = hkdf_extract(dst, msg_hashed, hash_fn)
+    msg_prime = hkdf_extract(dst, msg + '\x00', hash_fn)
     print_iv(msg_prime, "m'", "hash_to_base")
 
     rets = [None] * degree
