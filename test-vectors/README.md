@@ -23,14 +23,28 @@ These files are extracted from the NIST CAVP ECDSA test vectors, available from
     https://csrc.nist.gov/Projects/Cryptographic-Algorithm-Validation-Program/Digital-Signatures
     https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/dss/186-3ecdsatestvectors.zip
 
-## `sig_g1`, `sig_g2` subdirectories
+## `sig_g1_X`, `sig_g2_X` subdirectories
 
 The files in these subdirs correspond to the above, except that the lines in each
 file are space-separated tuples (msg, sk, sig).
 
-- In `sig_g1`, sig is the signature on msg under sk in the G1 group.
+- In `sig_g1_X`, sig is the signature on msg under sk in the G1 group.
 
-- In `sig_g2`, the signature is in the G2 group instead.
+- In `sig_g2_X`, the signature is in the G2 group instead.
+
+`X` is one of `aug`, `basic`, or `pop`, indicating signatures made with the
+augmented, basic, or proof-of-possession schemes, respectively.
+
+## `pop_g1`, `pop_g2` subdirectories
+
+The files in these subdirs correspond to the above, except that the lines in each
+file are space-separated tuples ("00", sk, proof). The literal string "00" helps
+to avoid confusion with files containing (msg, sk).
+
+- In `pop_g1`, proof is a proof of possession of the public key corresponding to sk
+  in the G1 group.
+
+- In `pop_g2`, the proof is in the G2 group instead.
 
 ## `hash_g1`, `hash_g2` subdirectories
 

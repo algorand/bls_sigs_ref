@@ -1,7 +1,5 @@
 #!/usr/bin/env sage
 # vim: syntax=python
-#
-# (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
 
 import sys
 

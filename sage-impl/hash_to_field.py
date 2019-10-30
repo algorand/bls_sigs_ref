@@ -1,7 +1,5 @@
 #!/usr/bin/python2
 #
-# (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
-#
 # Python2/Sage implementation of hash-to-field as specified in
 #     https://github.com/pairingwg/bls_standard/blob/master/minutes/spec-v1.md
 

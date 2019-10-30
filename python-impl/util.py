@@ -1,7 +1,5 @@
 #!/usr/bin/python
 #
-# (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
-#
 # utilities for BLS sigs Python ref impl
 
 from binascii import hexlify, unhexlify

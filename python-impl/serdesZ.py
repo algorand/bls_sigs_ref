@@ -5,7 +5,6 @@
 # using the ZCash format
 #   https://github.com/zkcrypto/pairing/blob/master/src/bls12_381/README.md
 #   https://github.com/zcash/zcash/issues/2517
-# (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
 #
 # see the comment at the top of ../sage-impl/serdesZ.sage for more info
 
@@ -14,9 +13,17 @@ import struct
 from consts import p
 from curve_ops import from_jacobian, point_eq
 from fields import Fq, Fq2, sgn0, sqrt_F2
-from serdes import DeserError, SerError, _to_bytes_F1, _to_bytes_F2, \
-                   _from_bytes_F1, _from_bytes_F2, _gx1, _gx2, \
-                   F1_zero, F1_one, F2_zero, F2_one
+
+F1_one = Fq.one(p)
+F1_zero = Fq.zero(p)
+F2_one = Fq2.one(p)
+F2_zero = Fq2.zero(p)
+
+class DeserError(Exception):
+    pass
+
+class SerError(Exception):
+    pass
 
 def serialize(P, compressed=True):
     if isinstance(P[0], Fq):
@@ -94,6 +101,41 @@ def _deserialize_help(sp, from_bytes, clen, g, sqrt_fn, zero, one):
         return (x, y, one)
 
     raise DeserError("invalid tag %d" % tag)
+
+def _to_bytes_F1(elm):
+    if not isinstance(elm, Fq):
+        raise SerError("value must be an element of Fq")
+    ret = [0] * 48
+    val = elm
+    for idx in reversed(range(0, 48)):
+        ret[idx] = val & 0xff
+        val = val >> 8
+    return ret
+
+def _to_bytes_F2(elm):
+    if not isinstance(elm, Fq2):
+        raise SerError("value must be an element of Fq2")
+    return _to_bytes_F1(elm[1]) + _to_bytes_F1(elm[0])
+
+def _from_bytes_F1(data):
+    assert len(data) == 48
+    ret = 0
+    for d in data:
+        ret = ret << 8
+        ret += d
+    if ret >= p:
+        raise DeserError("invalid encoded value: not a residue mod p")
+    return Fq(p, ret)
+
+def _from_bytes_F2(data):
+    assert len(data) == 96
+    return Fq2(p, _from_bytes_F1(data[48:]), _from_bytes_F1(data[:48]))
+
+def _gx1(x):
+    return pow(x, 3) + 4
+
+def _gx2(x):
+    return pow(x, 3) + Fq2(p, 4, 4)
 
 if __name__ == "__main__":
     import binascii

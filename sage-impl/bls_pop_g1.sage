@@ -1,8 +1,5 @@
 #!/usr/bin/env sage
 # vim: syntax=python
-#
-# (C) Riad S. Wahby <rsw@cs.stanford.edu>
-# based on an implementation by Zhenfei Zhang <zhenfei@algorand.com>
 
 from functools import partial
 import sys

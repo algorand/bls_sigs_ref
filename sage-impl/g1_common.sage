@@ -1,8 +1,6 @@
 #!/usr/bin/env sage
 # vim: syntax=python
 #
-# (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
-#
 # common routines and definitions for G1
 
 import hashlib

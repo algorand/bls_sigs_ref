@@ -1,6 +1,4 @@
 #!/usr/bin/python
-#
-# (C) Riad S. Wahby <rsw@cs.stanford.edu>
 
 from bls_sig_g1 import keygen
 from consts import g1pop
