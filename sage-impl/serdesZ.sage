@@ -47,12 +47,16 @@ import struct
 import sys
 
 try:
-    from __sage__g1_common import Ell, p, sgn0
-    from __sage__g2_common import Ell2, sqrt_F2
-    from __sage__serdes import DeserError, SerError, _to_bytes_F1, _to_bytes_F2, \
-                               _from_bytes_F1, _from_bytes_F2, _gx1, _gx2
+    from __sage__g1_common import Ell, F, ZZR, p, sgn0
+    from __sage__g2_common import Ell2, F2, X, sqrt_F2
 except ImportError:
     sys.exit("Error loading preprocessed sage files. Try running `make clean pyfiles`")
+
+class DeserError(Exception):
+    pass
+
+class SerError(Exception):
+    pass
 
 def serialize(P, compressed=True):
     if P.curve() == Ell:
@@ -128,6 +132,42 @@ def _deserialize_help(sp, from_bytes, clen, g, ell, sqrt_fn):   # pylint: disabl
         return ell(x, y)
 
     raise DeserError("invalid tag %d" % tag)
+
+def _to_bytes_F1(elm):
+    if elm.parent() != F:
+        raise SerError("value must be an element of F1")
+    val = int(elm)
+    ret = [0] * 48
+    for idx in reversed(xrange(0, 48)):
+        ret[idx] = val & 0xff
+        val = val >> 8
+    return ret
+
+def _to_bytes_F2(elm):
+    if elm.parent() != F2:
+        raise SerError("value must be an element of F2")
+    zzelm = ZZR(elm)
+    return _to_bytes_F1(F(zzelm[1])) + _to_bytes_F1(F(zzelm[0]))
+
+def _from_bytes_F1(data):
+    assert len(data) == 48
+    ret = 0
+    for d in data:
+        ret = ret << 8
+        ret += d
+    if ret >= p:
+        raise DeserError("invalid encoded value: not a residue mod p")
+    return F(ret)
+
+def _from_bytes_F2(data):
+    assert len(data) == 96
+    return F2(X * _from_bytes_F1(data[:48]) + _from_bytes_F1(data[48:]))
+
+def _gx1(x):
+    return x ** 3 + F(4)
+
+def _gx2(x):
+    return x ** 3 + 4 * (X + 1)
 
 if __name__ == "__main__":
     import binascii
