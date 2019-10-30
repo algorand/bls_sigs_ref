@@ -10,8 +10,6 @@
 # * uses curve impl from curve_ops
 # * only supports BLS12-381
 # * Miller loop implementation avoids computing inversions
-#
-# (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
 
 from functools import reduce
 from operator import mul

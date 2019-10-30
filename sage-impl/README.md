@@ -59,6 +59,4 @@ file. There are two relevant commandline flags for these targets:
 
 # license
 
-(C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
-
 See the license in the toplevel directory of this repository.

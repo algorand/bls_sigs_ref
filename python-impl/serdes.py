@@ -4,7 +4,6 @@
 # point serialization / deserialization
 # using the "enhanced ZCash" format proposed in
 #     https://github.com/pairingwg/bls_standard/issues/16
-# (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
 #
 # see the comment at the top of ../sage-impl/serdes.sage for more information
 

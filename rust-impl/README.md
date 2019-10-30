@@ -33,6 +33,4 @@ otherwise things will be quite slow.
 
 # License
 
-(C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
-
 See the license in the toplevel directory of this repository.

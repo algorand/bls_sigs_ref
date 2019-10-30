@@ -1,7 +1,5 @@
 #!/usr/bin/python
 #
-# (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
-#
 # pure Python implementation of curve ops for Ell2 on BLS12-381
 
 import sys

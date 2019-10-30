@@ -4,7 +4,6 @@
 # point serialization / deserialization
 # using the "enhanced ZCash" format proposed in
 #     https://github.com/pairingwg/bls_standard/issues/16
-# (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
 #
 # - Elements of Fp are serialized into 48 bytes, MSB to LSB. The 3 most significant bits must be 0,
 #   and the serialized value must be strictly less than p.

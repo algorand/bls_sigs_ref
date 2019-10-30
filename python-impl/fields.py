@@ -12,8 +12,6 @@
 # * added trivial __reversed__ method to Fq to support generic sgn0 impl
 # * q -> p in frob_coeffs for consistency with the rest of this library
 # * moved sgn0 and sqrt_F2 into this file
-#
-# Changes (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
 
 from copy import deepcopy
 from consts import p

@@ -1,6 +1,4 @@
 #!/usr/bin/python
-#
-# (C) Riad S. Wahby <rsw@cs.stanford.edu>
 
 from functools import partial
 from itertools import chain

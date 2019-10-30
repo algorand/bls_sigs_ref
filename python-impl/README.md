@@ -42,10 +42,6 @@ The following hashes a single string and outputs the result:
 
 # license
 
-All files in the subdirectory other than `fields.py` are
-
-(C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
-
 See the license in the toplevel directory of this repository.
 
 `fields.py` is derived from the

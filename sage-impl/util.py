@@ -1,7 +1,5 @@
 #!/usr/bin/python2
 #
-# (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
-#
 # Utilities for BLS signatures Sage reference impl
 
 import binascii

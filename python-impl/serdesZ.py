@@ -5,7 +5,6 @@
 # using the ZCash format
 #   https://github.com/zkcrypto/pairing/blob/master/src/bls12_381/README.md
 #   https://github.com/zcash/zcash/issues/2517
-# (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
 #
 # see the comment at the top of ../sage-impl/serdesZ.sage for more info
 

@@ -1,8 +1,6 @@
 #!/usr/bin/env sage
 # vim: syntax=python
 #
-# (C) Riad S. Wahby <rsw@cs.stanford.edu>
-#
 # consts for BLS signatures, adapted from Zhenfei Zhang's 'poc_v1' implementation
 
 from binascii import hexlify

@@ -1,7 +1,5 @@
 #!/usr/bin/python
 #
-# (C) 2019 Riad S. Wahby <rsw@cs.stanford.edu>
-#
 # pure Python implementation of optimized simplified SWU map to BLS12-381 G1
 
 from consts import p

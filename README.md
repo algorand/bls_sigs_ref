@@ -28,9 +28,13 @@ implementations. In brief,
 
 - The Rust implementation is based on the [Rust `pairing_fork` library](https://github.com/algorand/pairing-fork).
 
+# Authors
+
+Riad S. Wahby, Zhenfei Zhang
+
 # License
 
-This software is (C) 2019 Riad S. Wahby
+This software is (C) 2019 Algorand, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
