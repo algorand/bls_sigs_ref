@@ -1,6 +1,6 @@
 [package]
 name = "bls_sigs_ref-rs"
-version = "0.3.0"
+version = "0.1.0"
 authors = ["kwantam <kwantam@gmail.com>"]
 license = "MIT"
 
