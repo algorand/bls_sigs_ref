@@ -2,7 +2,7 @@
 name = "bls_sigs_ref-rs"
 version = "0.3.0"
 authors = ["kwantam <kwantam@gmail.com>"]
-license = "Apache-2.0"
+license = "MIT"
 
 homepage = "https://github.com/algorand/bls_sigs_ref"
 description = "BLS signatures draft std, ref impl"
