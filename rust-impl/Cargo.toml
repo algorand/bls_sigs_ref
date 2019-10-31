@@ -18,3 +18,7 @@ sha2 = "0.8.0"
 byteorder = "1"
 hex-literal = "0.1"
 rand = "0.4"
+
+
+[lib]
+crate-type = ["rlib", "staticlib"]
