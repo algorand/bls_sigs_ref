@@ -7,6 +7,8 @@ license = "MIT"
 homepage = "https://github.com/algorand/bls_sigs_ref"
 description = "BLS signatures draft std, ref impl"
 repository = "https://github.com/algorand/bls_sigs_ref"
+documentation = "https://docs.rs/bls_sigs_ref"
+
 
 [dependencies]
 ff = "0.4"
