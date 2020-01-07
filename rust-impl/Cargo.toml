@@ -11,8 +11,10 @@ documentation = "https://docs.rs/bls_sigs_ref"
 
 
 [dependencies]
-ff = "0.4"
+#ff = {path = "../../ff2"}
+ff = { git = "https://github.com/algorand/ff"}
 hkdf = "0.8.0"
+#pairing-plus = {path = "../../pairing-plus"}
 pairing-plus = { git = "https://github.com/algorand/pairing-plus", branch = "master" }
 sha2 = "0.8.0"
 
