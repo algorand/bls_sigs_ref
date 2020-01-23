@@ -45,8 +45,8 @@ def clear_h2(P):
 def print_F2_hex(vv, name, margin=8):
     vv = ZZR(vv)
     indent_str = " " * margin
-    print indent_str + name + "0 = 0x%x" % int(vv[0])
-    print indent_str + name + "1 = 0x%x" % int(vv[1])
+    print(indent_str + name + "0 = 0x%x" % int(vv[0]))
+    print(indent_str + name + "1 = 0x%x" % int(vv[1]))
 
 # print out a point on g2
 def print_g2_hex(P, margin=8):

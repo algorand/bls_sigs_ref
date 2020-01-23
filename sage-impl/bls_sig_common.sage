@@ -43,7 +43,7 @@ def print_test_vector(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, prin
     sig = sign_fn(x_prime, msg, ciphersuite)
 
     if is_genvec():
-        print hexlify(msg), hexlify(sk), hexlify(serialize(sig))
+        print(hexlify(msg), hexlify(sk), hexlify(serialize(sig)))
         return
 
     if sig_expect is not None:
@@ -53,15 +53,15 @@ def print_test_vector(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, prin
             raise DeserError("deserializing sig_expect did not give sig")
 
     # output the test vector
-    print "================== begin test vector ===================="
+    print("================== begin test vector ====================")
 
-    print "g1 generator:"
+    print("g1 generator:")
     print_g1_hex(g1gen)
 
-    print "g2 generator:"
+    print("g2 generator:")
     print_g2_hex(g2gen)
 
-    print "group order: 0x%x" % q
+    print("group order: 0x%x" % q)
 
     sys.stdout.write("ciphersuite: ")
     print_value(ciphersuite, 13, True)
@@ -72,13 +72,13 @@ def print_test_vector(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, prin
     sys.stdout.write("sk:          ")
     print_value(sk, 13, True)
 
-    print "public key:"
+    print("public key:")
     print_pk_fn(pk)
 
-    print "signature:"
+    print("signature:")
     print_sig_fn(sig)
 
-    print "==================  end test vector  ===================="
+    print("==================  end test vector  ====================")
 
 def print_pop_test_vector(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, print_sig_fn, curve):
     if len(sig_in) > 2:
@@ -92,7 +92,7 @@ def print_pop_test_vector(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, 
     sig = sign_fn(x_prime, pk, ciphersuite)
 
     if is_genvec():
-        print '00', hexlify(sk), hexlify(serialize(sig))
+        print('00', hexlify(sk), hexlify(serialize(sig)))
         return
 
     if sig_expect is not None:
@@ -102,15 +102,15 @@ def print_pop_test_vector(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, 
             raise DeserError("deserializing sig_expect did not give sig")
 
     # output the test vector
-    print "================== begin test vector ===================="
+    print("================== begin test vector ====================")
 
-    print "g1 generator:"
+    print("g1 generator:")
     print_g1_hex(g1gen)
 
-    print "g2 generator:"
+    print("g2 generator:")
     print_g2_hex(g2gen)
 
-    print "group order: 0x%x" % q
+    print("group order: 0x%x" % q)
 
     sys.stdout.write("ciphersuite: ")
     print_value(ciphersuite, 13, True)
@@ -118,13 +118,13 @@ def print_pop_test_vector(sig_in, ciphersuite, sign_fn, keygen_fn, print_pk_fn, 
     sys.stdout.write("sk:          ")
     print_value(sk, 13, True)
 
-    print "public key:"
+    print("public key:")
     print_pk_fn(pk)
 
-    print "signature:"
+    print("signature:")
     print_sig_fn(sig)
 
-    print "==================  end test vector  ===================="
+    print("==================  end test vector  ====================")
 
 def print_hash_test_vector(hash_in, ciphersuite, hash_fn, print_pt_fn, curve):
     if len(hash_in) > 2:
@@ -136,7 +136,7 @@ def print_hash_test_vector(hash_in, ciphersuite, hash_fn, print_pt_fn, curve):
     P = hash_fn(msg, ciphersuite)
 
     if is_genvec():
-        print hexlify(msg), '00', hexlify(serialize(P))
+        print(hexlify(msg), '00', hexlify(serialize(P)))
         return
 
     if hash_expect is not None:
@@ -145,7 +145,7 @@ def print_hash_test_vector(hash_in, ciphersuite, hash_fn, print_pt_fn, curve):
         if deserialize(hash_expect, curve) != P:
             raise DeserError("deserializing hash_expect did not give P")
 
-    print "=============== begin hash test vector =================="
+    print("=============== begin hash test vector ==================")
 
     sys.stdout.write("ciphersuite: ")
     print_value(ciphersuite, 13, True)
@@ -153,7 +153,7 @@ def print_hash_test_vector(hash_in, ciphersuite, hash_fn, print_pt_fn, curve):
     sys.stdout.write("message:     ")
     print_value(msg, 13, True)
 
-    print "result:"
+    print("result:")
     print_pt_fn(P)
 
-    print "===============  end hash test vector  =================="
+    print("===============  end hash test vector  ==================")

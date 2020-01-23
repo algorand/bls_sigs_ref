@@ -45,6 +45,8 @@
 
 import struct
 import sys
+if sys.version_info[0] == 3:
+    xrange = range
 
 try:
     from __sage__g1_common import Ell, F, ZZR, p, sgn0

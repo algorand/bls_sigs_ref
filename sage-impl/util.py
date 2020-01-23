@@ -6,8 +6,10 @@ import binascii
 import getopt
 import struct
 import sys
-if sys.version_info[0] != 2:
-    raise RuntimeError("this code is geared toward Python2/Sage, not Python3")
+if sys.version_info[0] == 3:
+    as_bytes = lambda x: bytes(x, "utf-8") if isinstance(x, str) else x
+else:
+    as_bytes = lambda x: x
 
 DEBUG = False
 GENVEC = False
@@ -36,8 +38,8 @@ def print_iv(iv, name, fn, indent=8):
 def print_value(iv, indent=8, skip_first=False):
     max_line_length = 111
     if isinstance(iv, str):
-        cs = struct.unpack("=" + "B" * len(iv), iv)
-    elif isinstance(iv, list):
+        cs = struct.unpack("=" + "B" * len(iv), as_bytes(iv))
+    elif isinstance(iv, (list, bytes)):
         cs = iv
     else:
         cs = [iv]
@@ -47,6 +49,8 @@ def print_value(iv, indent=8, skip_first=False):
     if not skip_first:
         sys.stdout.write(indent_string)
     for c in cs:
+        if isinstance(c, bytes):
+            c = ord(c)
         out_str = "0x%02x" % c
         if line_length + len(out_str) > max_line_length:
             sys.stdout.write("\n%s" % indent_string)
@@ -66,7 +70,7 @@ def get_cmdline_options():
         (opts, args) = getopt.gnu_getopt(sys.argv[1:], "k:dgT:BAP")
 
     except getopt.GetoptError as err:
-        print "Usage: %s [-B | -A | -P] [-g] [-d] [-k key] [-T test_file] [msg ...]" % sys.argv[0]
+        print("Usage: %s [-B | -A | -P] [-g] [-d] [-k key] [-T test_file] [msg ...]" % sys.argv[0])
         sys.exit(str(err))
 
     for (opt, arg) in opts:
