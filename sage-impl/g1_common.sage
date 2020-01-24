@@ -6,7 +6,7 @@
 import hashlib
 
 from hash_to_field import hash_to_base, hkdf_extract, hkdf_expand, OS2IP
-from util import print_iv, is_debug
+from util import as_bytes, print_iv, is_debug
 
 # BLS12-381 G1 curve
 ell_u = -0xd201000000010000
@@ -45,14 +45,14 @@ def Hp2(msg, ctr, dst=None):
     return hash_to_base(msg, ctr, dst, p, 2, 64, hashlib.sha256)
 
 def xprime_from_sk(msg):
-    prk = hkdf_extract("BLS-SIG-KEYGEN-SALT-", msg, hashlib.sha256)
+    prk = hkdf_extract(as_bytes("BLS-SIG-KEYGEN-SALT-"), as_bytes(msg), hashlib.sha256)
     okm = hkdf_expand(prk, None, 48, hashlib.sha256)
     return OS2IP(okm) % q
 
 # print out a point on g1
 def print_g1_hex(P, margin=8):
-    print " " * margin + " x = 0x%x" % int(P[0])
-    print " " * margin + " y = 0x%x" % int(P[1])
+    print(" " * margin + " x = 0x%x" % int(P[0]))
+    print(" " * margin + " y = 0x%x" % int(P[1]))
 
 # print an intermediate value comprising a point on g1
 def print_iv_g1(P, name, fn):
