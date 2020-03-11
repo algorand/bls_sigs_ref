@@ -5,6 +5,7 @@
 
 import hashlib
 import hmac
+from random import randint
 
 from consts import p, q
 
@@ -50,97 +51,77 @@ def hkdf_expand(prk, info, length, hash_fn):
         okm += last
     return okm[:length]
 
-# hash_to_base as defined in draft-irtf-cfrg-hash-to-curve-04
-def hash_to_base(msg, ctr, dst, modulus, degree, blen, hash_fn):
-    rets = [None] * degree
-    msg_prime = hkdf_extract(dst, msg + b'\x00', hash_fn)
-    info_pfx = b'H2C' + I2OSP(ctr, 1)
-    for i in range(0, degree):
-        t = hkdf_expand(msg_prime, info_pfx + I2OSP(i + 1, 1), blen, hash_fn)
-        rets[i] = OS2IP(t) % modulus
-    return rets
+# expand_message_xmd from draft-irtf-cfrg-hash-to-curve-06
+_strxor = lambda str1, str2: bytes( s1 ^ s2 for (s1, s2) in zip(str1, str2) )
+def expand_message_xmd(msg, DST, len_in_bytes, hash_fn):
+    # input and output lengths for hash_fn
+    b_in_bytes = hash_fn().digest_size
+    r_in_bytes = hash_fn().block_size
 
-def Hp(msg, ctr, dst):
+    # ell, DST_prime, etc
+    ell = (len_in_bytes + b_in_bytes - 1) // b_in_bytes
+    if ell > 255:
+        raise ValueError("expand_message_xmd: ell=%d out of range" % ell)
+    DST_prime = I2OSP(len(DST), 1) + DST
+    Z_pad = I2OSP(0, r_in_bytes)
+    l_i_b_str = I2OSP(len_in_bytes, 2)
+
+    b_0 = hash_fn(Z_pad + msg + l_i_b_str + I2OSP(0, 1) + DST_prime).digest()
+    b_vals = [None] * ell
+    b_vals[0] = hash_fn(b_0 + I2OSP(1, 1) + DST_prime).digest()
+    for idx in range(1, ell):
+        b_vals[idx] = hash_fn(_strxor(b_0, b_vals[idx - 1]) + I2OSP(idx + 1, 1) + DST_prime).digest()
+    pseudo_random_bytes = b''.join(b_vals)
+    return pseudo_random_bytes[0 : len_in_bytes]
+
+# hash_to_field from draft-irtf-cfrg-hash-to-curve-06
+def hash_to_field(msg, count, DST, modulus, degree, blen, expand_fn, hash_fn):
+    # get pseudorandom bytes
+    len_in_bytes = count * degree * blen
+    pseudo_random_bytes = expand_fn(msg, DST, len_in_bytes, hash_fn)
+
+    u_vals = [None] * count
+    for idx in range(0, count):
+        e_vals = [None] * degree
+        for jdx in range(0, degree):
+            elm_offset = blen * (jdx + idx * degree)
+            tv = pseudo_random_bytes[elm_offset : elm_offset + blen]
+            e_vals[jdx] = OS2IP(tv) % modulus
+        u_vals[idx] = e_vals
+    return u_vals
+
+def Hp(msg, count, dst):
     if not isinstance(msg, bytes):
         raise ValueError("Hp can't hash anything but bytes")
-    return hash_to_base(msg, ctr, dst, p, 1, 64, hashlib.sha256)
+    return hash_to_field(msg, count, dst, p, 1, 64, expand_message_xmd, hashlib.sha256)
 
-def Hp2(msg, ctr, dst):
+def Hp2(msg, count, dst):
     if not isinstance(msg, bytes):
         raise ValueError("Hp2 can't hash anything but bytes")
-    return hash_to_base(msg, ctr, dst, p, 2, 64, hashlib.sha256)
+    return hash_to_field(msg, count, dst, p, 2, 64, expand_message_xmd, hashlib.sha256)
 
-def xprime_from_sk(msg):
+def xprime_from_sk(msg, key_info=None):
     if not isinstance(msg, bytes):
         raise ValueError("xprime_from_sk can't hash anything but bytes")
-    prk = hkdf_extract(b"BLS-SIG-KEYGEN-SALT-", msg, hashlib.sha256)
-    okm = hkdf_expand(prk, None, 48, hashlib.sha256)
+    if key_info is None:
+        key_info = b''
+    prk = hkdf_extract(b"BLS-SIG-KEYGEN-SALT-", msg + I2OSP(0, 1), hashlib.sha256)
+    okm = hkdf_expand(prk, key_info + I2OSP(48, 2), 48, hashlib.sha256)
     return OS2IP(okm) % q
 
-def test():
-    # test cases from RFC5869
-    test_cases = [ ( hashlib.sha256
-                   , b'\x0b' * 22
-                   , int(0x000102030405060708090a0b0c).to_bytes(13, 'big')
-                   , int(0xf0f1f2f3f4f5f6f7f8f9).to_bytes(10, 'big')
-                   , 42
-                   , int(0x077709362c2e32df0ddc3f0dc47bba6390b6c73bb50f9c3122ec844ad7c2b3e5).to_bytes(32, 'big')
-                   , int(0x3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865).to_bytes(42, 'big')
-                   ),
-                   ( hashlib.sha256
-                   , int(0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f).to_bytes(80, 'big')
-                   , int(0x606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeaf).to_bytes(80, 'big')
-                   , int(0xb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff).to_bytes(80, 'big')
-                   , 82
-                   , int(0x06a6b88c5853361a06104c9ceb35b45cef760014904671014a193f40c15fc244).to_bytes(32, 'big')
-                   , int(0xb11e398dc80327a1c8e7f78c596a49344f012eda2d4efad8a050cc4c19afa97c59045a99cac7827271cb41c65e590e09da3275600c2f09b8367793a9aca3db71cc30c58179ec3e87c14c01d5c1f3434f1d87).to_bytes(82, 'big')
-                   ),
-                   ( hashlib.sha256
-                   , b'\x0b' * 22
-                   , b''
-                   , b''
-                   , 42
-                   , int(0x19ef24a32c717b167f33a91d6f648bdf96596776afdb6377ac434c1c293ccb04).to_bytes(32, 'big')
-                   , int(0x8da4e775a563c18f715f802a063c5a31b8a11f5c5ee1879ec3454e5f3c738d2d9d201395faa4b61a96c8).to_bytes(42, 'big')
-                   ),
-                   ( hashlib.sha1
-                   , b'\x0b' * 11
-                   , int(0x000102030405060708090a0b0c).to_bytes(13, 'big')
-                   , int(0xf0f1f2f3f4f5f6f7f8f9).to_bytes(10, 'big')
-                   , 42
-                   , int(0x9b6c18c432a7bf8f0e71c8eb88f4b30baa2ba243).to_bytes(20, 'big')
-                   , int(0x085a01ea1b10f36933068b56efa5ad81a4f14b822f5b091568a9cdd4f155fda2c22e422478d305f3f896).to_bytes(42, 'big')
-                   ),
-                   ( hashlib.sha1
-                   , int(0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f).to_bytes(80, 'big')
-                   , int(0x606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeaf).to_bytes(80, 'big')
-                   , int(0xb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff).to_bytes(80, 'big')
-                   , 82
-                   , int(0x8adae09a2a307059478d309b26c4115a224cfaf6).to_bytes(20, 'big')
-                   , int(0x0bd770a74d1160f7c9f12cd5912a06ebff6adcae899d92191fe4305673ba2ffe8fa3f1a4e5ad79f3f334b3b202b2173c486ea37ce3d397ed034c7f9dfeb15c5e927336d0441f4c4300e2cff0d0900b52d3b4).to_bytes(82, 'big')
-                   ),
-                   ( hashlib.sha1
-                   , b'\x0b' * 22
-                   , b''
-                   , b''
-                   , 42
-                   , int(0xda8c8a73c7fa77288ec6f5e7c297786aa0d32d01).to_bytes(20, 'big')
-                   , int(0x0ac1af7002b3d761d1e55298da9d0506b9ae52057220a306e07b6b87e8df21d0ea00033de03984d34918).to_bytes(42, 'big')
-                   ),
-                   ( hashlib.sha1
-                   , b'\x0c' * 22
-                   , None
-                   , b''
-                   , 42
-                   , int(0x2adccada18779e7c2077ad2eb19d3f3e731385dd).to_bytes(20, 'big')
-                   , int(0x2c91117204d745f3500d636a62f64f0ab3bae548aa53d423b0d1f27ebba6f5e5673a081d70cce7acfc48).to_bytes(42, 'big')
-                   )
-                 ]
-    for (h, i, s, n, l, px, o) in test_cases:
-        pp = hkdf_extract(s, i, h)
-        op = hkdf_expand(pp, n, l, h)
-        assert pp == px, "prk mismatch"
-        assert op == o, "okm mismatch"
+def _random_string(strlen):
+    return bytes( randint(65, 65 + 25) for _ in range(0, strlen) )
+
+def test_xmd():
+    msg = _random_string(48)
+    dst = _random_string(16)
+    ress = {}
+    for l in range(16, 8192):
+        result = expand_message_xmd(msg, dst, l, hashlib.sha512)
+        assert l == len(result)
+        key = result[:16]
+        ress[key] = ress.get(key, 0) + 1
+    assert all( x == 1 for x in ress.values() )
 
 if __name__ == "__main__":
-    test()
+    test_xmd()
