@@ -25,7 +25,7 @@ del g_x, g_y
 
 # ciphersuite tags
 def _gsuite(s_type, group, s_tag):
-    return "BLS_" + s_type + "_BLS12381G" + str(group) + "-SHA256-SSWU-RO-_" + str(s_tag) + "_"
+    return "BLS_" + s_type + "_BLS12381G" + str(group) + "_XMD:SHA-256_SSWU_RO_" + str(s_tag) + "_"
 g1suite = lambda s_tag: _gsuite("SIG", 1, s_tag)
 g1pop = _gsuite("POP", 1, "POP")
 g2suite = lambda s_tag: _gsuite("SIG", 2, s_tag)

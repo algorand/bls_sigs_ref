@@ -13,7 +13,7 @@ k_final = (p ** 4 - p ** 2 + 1) // q
 
 # ciphersuite numbers
 _gsuite = lambda stype, group, stag: b'BLS_' + stype + b'_BLS12381G' + group + \
-                                     b'-SHA256-SSWU-RO-_' + bytes(stag) + b'_'
+                                     b'_XMD:SHA-256_SSWU_RO_' + bytes(stag) + b'_'
 g1suite = lambda stag: _gsuite(b'SIG', b'1', stag)
 g1pop = _gsuite(b'POP', b'1', b'POP')
 g2suite = lambda stag: _gsuite(b'SIG', b'2', stag)
