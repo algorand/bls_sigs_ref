@@ -74,6 +74,11 @@ def expand_message_xmd(msg, DST, len_in_bytes, hash_fn):
     pseudo_random_bytes = b''.join(b_vals)
     return pseudo_random_bytes[0 : len_in_bytes]
 
+def expand_message_xof(msg, DST, len_in_bytes, hash_fn):
+    DST_prime = I2OSP(len(DST), 1) + DST
+    msg_prime = msg + I2OSP(len_in_bytes, 2) + DST_prime
+    return hash_fn(msg_prime).digest(len_in_bytes)
+
 # hash_to_field from draft-irtf-cfrg-hash-to-curve-06
 def hash_to_field(msg, count, DST, modulus, degree, blen, expand_fn, hash_fn):
     # get pseudorandom bytes
@@ -89,6 +94,16 @@ def hash_to_field(msg, count, DST, modulus, degree, blen, expand_fn, hash_fn):
             e_vals[jdx] = OS2IP(tv) % modulus
         u_vals[idx] = e_vals
     return u_vals
+
+def Hp_shake(msg, count, dst):
+    if not isinstance(msg, bytes):
+        raise ValueError("Hp can't hash anything but bytes")
+    return hash_to_field(msg, count, dst, p, 1, 64, expand_message_xof, hashlib.shake_128)
+
+def Hp2_shake(msg, count, dst):
+    if not isinstance(msg, bytes):
+        raise ValueError("Hp2 can't hash anything but bytes")
+    return hash_to_field(msg, count, dst, p, 2, 64, expand_message_xof, hashlib.shake_128)
 
 def Hp(msg, count, dst):
     if not isinstance(msg, bytes):
