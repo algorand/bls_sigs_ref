@@ -17,15 +17,20 @@ use std::io::Cursor;
 use std::vec::Vec;
 
 /// Hash a secret key sk to the secret exponent x'; then (PK, SK) = (g^{x'}, x').
+// NOTE: this implementation leaves the key_info parameter as the default empty string
 pub fn xprime_from_sk<B: AsRef<[u8]>>(msg: B) -> Fr {
     // "BLS-SIG-KEYGEN-SALT-"
     const SALT: &[u8] = &[
         66, 76, 83, 45, 83, 73, 71, 45, 75, 69, 89, 71, 69, 78, 45, 83, 65, 76, 84, 45,
     ];
-    let mut result = GenericArray::<u8, U48>::default();
+    // copy of `msg` with appended zero byte
+    let mut msg_prime = Vec::<u8>::with_capacity(msg.as_ref().len() + 1);
+    msg_prime.extend_from_slice(msg.as_ref());
+    msg_prime.extend_from_slice(&[0]);
     // `result` has enough length to hold the output from HKDF expansion
-    assert!(Hkdf::<Sha256>::new(Some(SALT), msg.as_ref())
-        .expand(&[], &mut result)
+    let mut result = GenericArray::<u8, U48>::default();
+    assert!(Hkdf::<Sha256>::new(Some(SALT), &msg_prime[..])
+        .expand(&[0, 48], &mut result)
         .is_ok());
     Fr::from_okm(&result)
 }
