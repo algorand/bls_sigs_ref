@@ -1,9 +1,11 @@
 use super::signature::{xprime_from_sk, BLSSigCore};
 use ff::PrimeField;
 use pairing_plus::bls12_381::{Fr, FrRepr, G1, G2};
+use pairing_plus::hash_to_field::ExpandMsgXmd;
 use pairing_plus::CurveProjective;
+use sha2::Sha256;
 
-fn test_sig<T: CurveProjective + BLSSigCore>(ciphersuite: &[u8]) {
+fn test_sig<T: CurveProjective + BLSSigCore<ExpandMsgXmd<Sha256>>>(ciphersuite: &[u8]) {
     let msg = "this is the message";
     let sk = "this is the key";
     let (x_prime, pk) = T::keygen(sk);
