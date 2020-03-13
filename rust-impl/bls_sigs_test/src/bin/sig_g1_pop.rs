@@ -1,4 +1,4 @@
-extern crate bls_sigs_ref_rs;
+extern crate bls_sigs_ref;
 extern crate bls_sigs_test;
 extern crate pairing_plus;
 
