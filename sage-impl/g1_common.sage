@@ -5,7 +5,7 @@
 
 import hashlib
 
-from hash_to_field import hash_to_base, hkdf_extract, hkdf_expand, OS2IP
+from hash_to_field import expand_message_xmd, hash_to_field, hkdf_extract, hkdf_expand, I2OSP, OS2IP
 from util import as_bytes, print_iv, is_debug
 
 # BLS12-381 G1 curve
@@ -38,15 +38,17 @@ def sgn0(x):
         sign = select_sign(-2 * (xi > thresh) + (xi > 0))
     return select_sign(1)
 
-def Hp(msg, ctr, dst=None):
-    return hash_to_base(msg, ctr, dst, p, 1, 64, hashlib.sha256)
+def Hp(msg, count, dst):
+    return hash_to_field(msg, count, dst, 64, p, 1, expand_message_xmd, hashlib.sha256)
 
-def Hp2(msg, ctr, dst=None):
-    return hash_to_base(msg, ctr, dst, p, 2, 64, hashlib.sha256)
+def Hp2(msg, count, dst):
+    return hash_to_field(msg, count, dst, 64, p, 2, expand_message_xmd, hashlib.sha256)
 
-def xprime_from_sk(msg):
-    prk = hkdf_extract(as_bytes("BLS-SIG-KEYGEN-SALT-"), as_bytes(msg), hashlib.sha256)
-    okm = hkdf_expand(prk, None, 48, hashlib.sha256)
+def xprime_from_sk(msg, key_info=None):
+    prk = hkdf_extract(as_bytes("BLS-SIG-KEYGEN-SALT-"), as_bytes(msg) + I2OSP(0, 1), hashlib.sha256)
+    if key_info is None:
+        key_info = as_bytes('')
+    okm = hkdf_expand(prk, key_info + I2OSP(48, 2), 48, hashlib.sha256)
     return OS2IP(okm) % q
 
 # print out a point on g1

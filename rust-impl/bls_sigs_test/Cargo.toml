@@ -1,9 +1,12 @@
 [package]
 name = "bls_sigs_test"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["kwantam <kwantam@gmail.com>"]
 license = "MIT"
 
 [dependencies]
-bls_sigs_ref-rs = { path = "../" }
-pairing-plus = { version = "0.17.0", git = "https://github.com/algorand/pairing-plus", branch = "release-0.17.0" }
+bls_sigs_ref = { path = "../" }
+#pairing-plus = { version = "0.17.0", git = "https://github.com/algorand/pairing-plus", branch = "release-0.17.0" }
+#pairing-plus = { path = "../../../pairing-plus" }
+pairing-plus = "0.18"
+sha2 = "0.8"

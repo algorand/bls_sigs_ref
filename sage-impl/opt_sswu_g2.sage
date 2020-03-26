@@ -86,10 +86,9 @@ def from_vec(v):
 
 # map from a string
 def map2curve_osswu2(alpha, dst):
-    t1 = from_vec(Hp2(alpha, 0, dst))
-    t2 = from_vec(Hp2(alpha, 1, dst))
-    P = osswu2_help(t1)
-    P2 = osswu2_help(t2)
+    tmp = [ from_vec(u) for u in Hp2(alpha, 2, dst) ]
+    P = osswu2_help(tmp[0])
+    P2 = osswu2_help(tmp[1])
     return clear_h2(iso2(P + P2))
 
 if __name__ == "__main__":

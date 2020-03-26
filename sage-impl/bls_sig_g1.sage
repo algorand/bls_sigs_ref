@@ -4,7 +4,7 @@
 from functools import partial
 import sys
 
-from util import print_iv, get_cmdline_options
+from util import as_bytes, print_iv, get_cmdline_options
 try:
     from __sage__bls_sig_common import g1suite, g2gen, print_test_vector
     from __sage__g1_common import Ell, print_g1_hex, print_iv_g1, xprime_from_sk
@@ -38,7 +38,7 @@ def _sign_aug(x_prime, msg, ciphersuite, pk=None, gen=None, sign_fn=sign):
     if pk is None:
         pk = x_prime * gen
     pk_bytes = serialize(pk, True)  # serialize in compressed form
-    return sign_fn(x_prime, pk_bytes + msg, ciphersuite)
+    return sign_fn(x_prime, pk_bytes + as_bytes(msg), ciphersuite)
 sign_aug = partial(_sign_aug, gen=g2gen, sign_fn=sign)
 
 # signature aggregation

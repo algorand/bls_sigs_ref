@@ -4,27 +4,30 @@
 #![deny(missing_docs)]
 
 /*!
- This crate has utilities to test bls_sigs_ref-rs.
+ This crate has utilities to test bls_sigs_ref
 */
 
-extern crate bls_sigs_ref_rs;
+extern crate bls_sigs_ref;
 extern crate pairing_plus;
+extern crate sha2;
 
 #[cfg(test)]
 mod test;
 mod testvec;
 
-use bls_sigs_ref_rs::{BLSSignatureAug, BLSSignatureBasic, BLSSignaturePop};
+use bls_sigs_ref::{BLSSignatureAug, BLSSignatureBasic, BLSSignaturePop};
 use pairing_plus::hash_to_curve::HashToCurve;
+use pairing_plus::hash_to_field::ExpandMsgXmd;
 use pairing_plus::serdes::SerDes;
 use pairing_plus::CurveProjective;
 use std::io::{Cursor, Result};
+use sha2::Sha256;
 pub use testvec::{get_dflt_vecs, get_vecs, TestVector};
 
 /// Test hash function
 pub fn test_hash<G>(tests: Vec<TestVector>, ciphersuite: &[u8], len: usize) -> Result<()>
 where
-    G: CurveProjective + HashToCurve + SerDes,
+    G: CurveProjective + HashToCurve<ExpandMsgXmd<Sha256>> + SerDes,
 {
     for TestVector { msg, expect, .. } in tests {
         let result = G::hash_to_curve(&msg, ciphersuite);
@@ -49,7 +52,7 @@ where
 /// Test sign functionality for Basic
 pub fn test_sig_basic<G>(tests: Vec<TestVector>, len: usize) -> Result<()>
 where
-    G: BLSSignatureBasic + CurveProjective + SerDes,
+    G: BLSSignatureBasic<ExpandMsgXmd<Sha256>> + CurveProjective + SerDes,
 {
     for TestVector { msg, sk, expect } in tests {
         let (x_prime, pk) = G::keygen(sk);
@@ -76,7 +79,7 @@ where
 /// Test sign functionality for Augmented
 pub fn test_sig_aug<G>(tests: Vec<TestVector>, len: usize) -> Result<()>
 where
-    G: BLSSignatureAug + CurveProjective + SerDes,
+    G: BLSSignatureAug<ExpandMsgXmd<Sha256>> + CurveProjective + SerDes,
 {
     for TestVector { msg, sk, expect } in tests {
         let (x_prime, pk) = G::keygen(sk);
@@ -103,7 +106,7 @@ where
 /// Test sign functionality for Pop
 pub fn test_sig_pop<G>(tests: Vec<TestVector>, len: usize) -> Result<()>
 where
-    G: BLSSignaturePop + CurveProjective + SerDes,
+    G: BLSSignaturePop<ExpandMsgXmd<Sha256>> + CurveProjective + SerDes,
 {
     for TestVector { msg, sk, expect } in tests {
         let (x_prime, pk) = G::keygen(sk);
@@ -130,7 +133,7 @@ where
 /// Test sign functionality for Pop
 pub fn test_pop<G>(tests: Vec<TestVector>, len: usize) -> Result<()>
 where
-    G: BLSSignaturePop + CurveProjective + SerDes,
+    G: BLSSignaturePop<ExpandMsgXmd<Sha256>> + CurveProjective + SerDes,
 {
     for TestVector { sk, expect, .. } in tests {
         let (_, pk) = G::keygen(&sk[..]);
