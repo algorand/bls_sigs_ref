@@ -62,7 +62,7 @@ def expand_message_xmd(msg, DST, len_in_bytes, hash_fn):
     ell = (len_in_bytes + b_in_bytes - 1) // b_in_bytes
     if ell > 255:
         raise ValueError("expand_message_xmd: ell=%d out of range" % ell)
-    DST_prime = I2OSP(len(DST), 1) + DST
+    DST_prime = DST + I2OSP(len(DST), 1)
     Z_pad = I2OSP(0, r_in_bytes)
     l_i_b_str = I2OSP(len_in_bytes, 2)
 
@@ -75,7 +75,7 @@ def expand_message_xmd(msg, DST, len_in_bytes, hash_fn):
     return pseudo_random_bytes[0 : len_in_bytes]
 
 def expand_message_xof(msg, DST, len_in_bytes, hash_fn):
-    DST_prime = I2OSP(len(DST), 1) + DST
+    DST_prime = DST + I2OSP(len(DST), 1)
     msg_prime = msg + I2OSP(len_in_bytes, 2) + DST_prime
     return hash_fn(msg_prime).digest(len_in_bytes)
 
