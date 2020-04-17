@@ -1,6 +1,6 @@
 [package]
 name = "bls_sigs_ref"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["kwantam <kwantam@gmail.com>"]
 license = "MIT"
 
@@ -14,8 +14,8 @@ documentation = "https://docs.rs/bls_sigs_ref"
 #ff-zeroize = { git = "https://github.com/algorand/ff-zeroize"}
 ff-zeroize = "0.6.3"
 hkdf = "0.8.0"
-#pairing-plus = { git = "https://github.com/algorand/pairing-plus", branch = "master" }
-pairing-plus = "0.18"
+pairing-plus = { path = "../../pairing-plus" }
+#pairing-plus = "0.19"
 sha2 = "0.8.0"
 
 [dev-dependencies]
