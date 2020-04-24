@@ -71,7 +71,7 @@ def expand_message_xmd(msg, DST, len_in_bytes, hash_fn):
     # create DST_prime, Z_pad, l_i_b_str
     msg = as_bytes(msg)
     DST = as_bytes(DST)
-    DST_prime = I2OSP(len(DST), 1) + DST
+    DST_prime = DST + I2OSP(len(DST), 1)
     Z_pad = I2OSP(0, r_in_bytes)
     l_i_b_str = I2OSP(len_in_bytes, 2)
 
