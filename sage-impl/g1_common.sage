@@ -22,21 +22,20 @@ assert q == (ell_u**4 - ell_u**2 + 1)
 # convenient and fast way of converting field elements to vectors
 ZZR.<XX> = PolynomialRing(ZZ)
 
-# the lexically greater of x and p-x is negative
+# this is "little endian" signedness as defined in hash-to-curve
+# returns -1 if x is "negative," 1 otherwise
 def sgn0(x):
     xi_values = ZZR(x)
 
     # return sign if sign is nonzero, else return sign_i
     sign = 0
-    def select_sign(sign_i):
-        sign_sq = sign * sign  # 1 if sign is nonzero, else 0
-        return (1 - sign_sq) * sign_i + sign_sq * sign
-
-    # walk through each element of the vector repr of x to find the sign
-    thresh = (x.base_ring().order() - 1) // 2
-    for xi in reversed(list(xi_values)):
-        sign = select_sign(-2 * (xi > thresh) + (xi > 0))
-    return select_sign(1)
+    zero = 1
+    for xi in xi_values:
+        sign_i = xi % 2
+        zero_i = xi == 0
+        sign = sign | (zero & sign_i)
+        zero = zero & zero_i
+    return 1 - 2 * sign
 
 def Hp(msg, count, dst):
     return hash_to_field(msg, count, dst, 64, p, 1, expand_message_xmd, hashlib.sha256)
