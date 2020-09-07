@@ -25,22 +25,24 @@
 #
 # - Metadata (3 MSBs of byte 0 of a serialized point) are defined as follows:
 #
-#  3 MSBs of byte 0  |  meaning                          | length (G1) | length (G2)
-#  -----------------------------------------------------------------------------------
-#       0 0 0        |  uncompressed point               | 96 bytes    | 192 bytes
-#       0 0 1        |  *invalid* -- must reject         | ---         | ---
-#       0 1 0        |  uncompressed point at infinity   | 96 bytes    | 192 bytes
-#       0 1 1        |  *invalid* -- must reject         | ---         | ---
-#       1 0 0        |  compressed point, sgn0(y) = +1   | 48 bytes    | 96 bytes
-#       1 0 1        |  compressed point, sgn0(y) = -1   | 48 bytes    | 96 bytes
-#       1 1 0        |  compressed point at infinity     | 48 bytes    | 96 bytes
-#       1 1 1        |  *invalid* - must reject          | ---         | ---
+#  3 MSBs of byte 0  |  meaning                            | length (G1) | length (G2)
+#  ------------------------------------------------------------------------------------
+#       0 0 0        |  uncompressed point                 | 96 bytes    | 192 bytes
+#       0 0 1        |  *invalid* -- must reject           | ---         | ---
+#       0 1 0        |  uncompressed point at infinity     | 96 bytes    | 192 bytes
+#       0 1 1        |  *invalid* -- must reject           | ---         | ---
+#       1 0 0        |  compressed point, sgn0_be(y) = +1  | 48 bytes    | 96 bytes
+#       1 0 1        |  compressed point, sgn0_be(y) = -1  | 48 bytes    | 96 bytes
+#       1 1 0        |  compressed point at infinity       | 48 bytes    | 96 bytes
+#       1 1 1        |  *invalid* - must reject            | ---         | ---
 #
 # - Points at infinity have the same length as other points of the same type: uncompressed points
 #   at infinity are 96 bytes on G1 and 192 bytes on G2, and compressed points at infinity are
 #   48 bytes on G1 and 96 bytes on G2.
 #
 # - All bits of all points at infinity other than the 3 MSBs of byte 0 *MUST* be 0.
+#
+# - sgn0_be is as defined in g1_common.sage
 #
 
 import struct
@@ -49,7 +51,7 @@ if sys.version_info[0] == 3:
     xrange = range
 
 try:
-    from __sage__g1_common import Ell, F, ZZR, p, sgn0
+    from __sage__g1_common import Ell, F, ZZR, p, sgn0_be
     from __sage__g2_common import Ell2, F2, X, sqrt_F2
 except ImportError:
     sys.exit("Error loading preprocessed sage files. Try running `make clean pyfiles`")
@@ -78,7 +80,7 @@ def _serialize_help(P, compressed, to_bytes, clen):
     if not compressed:
         return struct.pack("=" + "B" * 2 * clen, *(x_str + to_bytes(P[1])))
 
-    y_neg = sgn0(P[1]) < 0
+    y_neg = sgn0_be(P[1]) < 0
     tag_bits = (0b101 << 5) if y_neg else (0b100 << 5)
     x_str[0] = x_str[0] | tag_bits
     return struct.pack("=" + "B" * clen, *x_str)
@@ -130,7 +132,7 @@ def _deserialize_help(sp, from_bytes, clen, g, ell, sqrt_fn):   # pylint: disabl
 
         # fix sign of y
         y_neg = -1 if tag == 0b101 else 1
-        y = y_neg * sgn0(y) * y
+        y = y_neg * sgn0_be(y) * y
         return ell(x, y)
 
     raise DeserError("invalid tag %d" % tag)
@@ -266,6 +268,6 @@ if __name__ == "__main__":
                 else:
                     raise DeserError("expected failed deserialization of %s, got success" % inval[0])
 
-        print
+        print()
 
     main()

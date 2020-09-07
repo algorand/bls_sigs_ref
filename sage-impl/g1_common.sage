@@ -22,6 +22,23 @@ assert q == (ell_u**4 - ell_u**2 + 1)
 # convenient and fast way of converting field elements to vectors
 ZZR.<XX> = PolynomialRing(ZZ)
 
+# "big endian" signedness --- used in ZCash ser/des
+# the lexically greater of x and p-x is negative
+def sgn0_be(x):
+    xi_values = ZZR(x)
+
+    # return sign if sign is nonzero, else return sign_i
+    sign = 0
+    def select_sign(sign_i):
+        sign_sq = sign * sign  # 1 if sign is nonzero, else 0
+        return (1 - sign_sq) * sign_i + sign_sq * sign
+
+    # walk through each element of the vector repr of x to find the sign
+    thresh = (x.base_ring().order() - 1) // 2
+    for xi in reversed(list(xi_values)):
+        sign = select_sign(-2 * (xi > thresh) + (xi > 0))
+    return select_sign(1)
+
 # this is "little endian" signedness as defined in hash-to-curve
 # returns -1 if x is "negative," 1 otherwise
 def sgn0(x):
