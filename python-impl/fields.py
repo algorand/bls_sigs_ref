@@ -16,6 +16,18 @@
 from copy import deepcopy
 from consts import p
 
+# "sign" of x: returns -1 if x is the lexically larger of x and -1 * x, else returns 1
+def sgn0_be(x):
+    thresh = (p - 1) // 2
+    sign = 0
+    for xi in reversed(x):
+        if xi > thresh:
+            sign = -1 if sign == 0 else sign
+        elif xi > 0:
+            sign = 1 if sign == 0 else sign
+    sign = 1 if sign == 0 else sign
+    return sign
+
 # "sign" of x: returns -1 if x is "negative", else returns 1
 # this is a "little-endian" signedness test
 def sgn0(x):

@@ -12,7 +12,7 @@ import struct
 
 from consts import p
 from curve_ops import from_jacobian, point_eq
-from fields import Fq, Fq2, sgn0, sqrt_F2
+from fields import Fq, Fq2, sgn0_be, sqrt_F2
 
 F1_one = Fq.one(p)
 F1_zero = Fq.zero(p)
@@ -47,7 +47,7 @@ def _serialize_help(P, compressed, to_bytes, clen, g):
     if not compressed:
         return struct.pack("=" + "B" * 2 * clen, *(x_str + to_bytes(y)))
 
-    y_neg = sgn0(y) < 0
+    y_neg = sgn0_be(y) < 0
     tag_bits = 0xa0 if y_neg else 0x80
     x_str[0] = x_str[0] | tag_bits
     return struct.pack("=" + "B" * clen, *x_str)
@@ -97,7 +97,7 @@ def _deserialize_help(sp, from_bytes, clen, g, sqrt_fn, zero, one):
 
         # fix sign of y
         y_neg = -1 if tag == 0b101 else 1
-        y = y_neg * sgn0(y) * y
+        y = y_neg * sgn0_be(y) * y
         return (x, y, one)
 
     raise DeserError("invalid tag %d" % tag)
