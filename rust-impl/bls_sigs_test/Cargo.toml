@@ -6,6 +6,6 @@ license = "MIT"
 
 [dependencies]
 bls_sigs_ref = { path = "../" }
-pairing-plus = { path = "../../../pairing-plus" }
-#pairing-plus = "0.20"
+#pairing-plus = { path = "../../../pairing-plus" }
+pairing-plus = "0.20"
 sha2 = "0.8"
