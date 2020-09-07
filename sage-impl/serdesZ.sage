@@ -71,8 +71,8 @@ def _serialize_help(P, compressed, to_bytes, clen):
     # point at infinity
     if P.is_zero():
         if compressed:
-            return chr(0b110 << 5) + "\x00" * (clen - 1)
-        return chr(0b010 << 5) + "\x00" * (2 * clen - 1)
+            return struct.pack("=B", 0b110 << 5) + b"\x00" * (clen - 1)
+        return struct.pack("=B", 0b010 << 5) + b"\x00" * (2 * clen - 1)
 
     x_str = to_bytes(P[0])
     if not compressed:
